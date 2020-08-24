@@ -1,0 +1,23 @@
+{
+  "name": "Uart",
+  "id": "uni-arts",
+  "bootNodes": [
+  ],
+  "telemetryEndpoints": null,
+  "protocolId": "uart",
+  "properties": {
+    "ss58Format": 50,
+    "tokenDecimals": 12,
+    "tokenSymbol": "UART",
+    "uinkDecimals": 12,
+    "uinkSymbol": "UINK"
+  },
+  "consensusEngine": null,
+  "genesis": {
+    "raw": {
+      "top": {
+      },
+      "childrenDefault": {}
+    }
+  }
+}

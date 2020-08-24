@@ -3591,6 +3591,17 @@ dependencies = [
 ]
 
 [[package]]
+name = "pallet-certificate"
+version = "0.1.0"
+dependencies = [
+ "frame-support",
+ "frame-system",
+ "parity-scale-codec",
+ "sp-runtime",
+ "sp-std",
+]
+
+[[package]]
 name = "pallet-finality-tracker"
 version = "2.0.0-rc6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -7362,6 +7373,7 @@ dependencies = [
  "frame-system-rpc-runtime-api",
  "pallet-aura",
  "pallet-balances",
+ "pallet-certificate",
  "pallet-grandpa",
  "pallet-randomness-collective-flip",
  "pallet-sudo",

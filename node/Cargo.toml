@@ -1,0 +1,50 @@
+[package]
+name = "uart"
+version = "2.0.0-rc6"
+authors = ["yxf4559@gmail.com"]
+description = ""
+edition = "2018"
+license = "Unlicense"
+build = "build.rs"
+homepage = "https://github.com/uni-arts-chain/uni-arts-network"
+repository = "https://github.com/uni-arts-chain/uni-arts-network"
+
+[package.metadata.docs.rs]
+targets = ["x86_64-unknown-linux-gnu"]
+
+[[bin]]
+name = "uart"
+
+[dependencies]
+structopt = "0.3.8"
+
+sc-cli = { version = "0.8.0-rc6", features = ["wasmtime"] }
+sp-core = { version = "2.0.0-rc6" }
+sc-executor = { version = "0.8.0-rc6", features = ["wasmtime"] }
+sc-service = { version = "0.8.0-rc6", features = ["wasmtime"] }
+sp-inherents = { version = "2.0.0-rc6" }
+sc-transaction-pool = { version = "2.0.0-rc6" }
+sp-transaction-pool = { version = "2.0.0-rc6"}
+sc-consensus-aura = { version = "0.8.0-rc6" }
+sp-consensus-aura = { version = "0.8.0-rc6" }
+sp-consensus = { version = "0.8.0-rc6" }
+sc-consensus = { version = "0.8.0-rc6" }
+sc-finality-grandpa = { version = "0.8.0-rc6" }
+sp-finality-grandpa = { version = "2.0.0-rc6" }
+sc-client-api = { version = "2.0.0-rc6" }
+sp-runtime = { version = "2.0.0-rc6" }
+
+jsonrpc-core = "14.0.3"
+sc-rpc = { version = "2.0.0-rc6" }
+sp-api = { version = "2.0.0-rc6" }
+sc-rpc-api = { version = "0.8.0-rc6" }
+sp-blockchain = { version = "2.0.0-rc6" }
+sp-block-builder = { version = "2.0.0-rc6" }
+sc-basic-authorship = { version = "0.8.0-rc6" }
+substrate-frame-rpc-system = { version = "2.0.0-rc6" }
+pallet-transaction-payment-rpc = { version = "2.0.0-rc6" }
+
+uart-runtime = { path = "../runtime" }
+
+[build-dependencies]
+substrate-build-script-utils = { version = "2.0.0-rc6" }

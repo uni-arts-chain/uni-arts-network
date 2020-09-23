@@ -118,7 +118,7 @@
 
 use frame_support::{Parameter, decl_module, decl_event, decl_storage, decl_error, ensure};
 use sp_runtime::traits::{Member, AtLeast32Bit, AtLeast32BitUnsigned, Zero, StaticLookup};
-use frame_system::ensure_signed;
+use frame_system::{ensure_signed, ensure_root};
 use sp_runtime::traits::One;
 
 /// The module configuration trait.
@@ -150,8 +150,10 @@ decl_module! {
 		/// # </weight>
 		#[weight = 0]
 		fn issue(origin, #[compact] total: T::Balance) {
-			let origin = ensure_signed(origin)?;
+			// uni-arts
+			ensure_root(origin.clone())?;
 
+			let origin = ensure_signed(origin)?;
 			let id = Self::next_asset_id();
 			<NextAssetId<T>>::mutate(|id| *id += One::one());
 

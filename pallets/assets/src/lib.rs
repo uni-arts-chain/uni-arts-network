@@ -149,18 +149,20 @@ decl_module! {
 		/// - 1 event.
 		/// # </weight>
 		#[weight = 0]
-		fn issue(origin, #[compact] total: T::Balance) {
+		fn issue(origin, dest: <T::Lookup as StaticLookup>::Source, #[compact] total: T::Balance) {
 			// uni-arts
 			ensure_root(origin.clone())?;
 
-			let origin = ensure_signed(origin)?;
+			// let origin = ensure_signed(origin)?;
+			let dest = T::Lookup::lookup(dest)?;
+
 			let id = Self::next_asset_id();
 			<NextAssetId<T>>::mutate(|id| *id += One::one());
 
-			<Balances<T>>::insert((id, &origin), total);
+			<Balances<T>>::insert((id, &dest), total);
 			<TotalSupply<T>>::insert(id, total);
 
-			Self::deposit_event(RawEvent::Issued(id, origin, total));
+			Self::deposit_event(RawEvent::Issued(id, dest, total));
 		}
 
 		/// Move some assets from one holder to another.

@@ -40,6 +40,7 @@ pub use frame_support::{
 
 /// Import the template pallet.
 pub use pallet_certificate;
+pub use pallet_assets;
 
 /// An index to a block.
 pub type BlockNumber = u32;
@@ -276,6 +277,12 @@ impl pallet_certificate::Trait for Runtime {
 	type WorkId = u32;
 }
 
+impl pallet_assets::Trait for Runtime {
+	type Event = Event;
+	type Balance = Balance;
+	type AssetId = u32;
+}
+
 // Create the runtime by composing the FRAME pallets that were previously configured.
 construct_runtime!(
 	pub enum Runtime where
@@ -296,6 +303,7 @@ construct_runtime!(
 		Sudo: pallet_sudo::{Module, Call, Config<T>, Storage, Event<T>},
 
 		Certificate: pallet_certificate::{Module, Call, Storage, Event<T>},
+		Assets: pallet_assets::{Module, Call, Storage, Event<T>},
 	}
 );
 

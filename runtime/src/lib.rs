@@ -31,7 +31,7 @@ pub use pallet_balances::Call as BalancesCall;
 pub use sp_runtime::{Permill, Perbill};
 pub use frame_support::{
 	construct_runtime, parameter_types, StorageValue,
-	traits::{KeyOwnerProofSystem, Randomness},
+	traits::{KeyOwnerProofSystem, Randomness, StorageMapShim},
 	weights::{
 		Weight, IdentityFee,
 		constants::{BlockExecutionWeight, ExtrinsicBaseWeight, RocksDbWeight, WEIGHT_PER_SECOND},
@@ -251,7 +251,13 @@ impl pallet_balances::Trait<UinkInstance> for Runtime {
 	type Event = Event;
 	type DustRemoval = ();
 	type ExistentialDeposit = ExistentialDeposit;
-	type AccountStore = System;
+	type AccountStore = StorageMapShim<
+		pallet_balances::Account<UinkInstance>,
+		frame_system::CallOnCreatedAccount<UinkInstance>,
+		frame_system::CallKillAccount<UinkInstance>,
+		u64,
+		pallet_balances::AccountData<u64>
+	>;
 	type WeightInfo = ();
 }
 

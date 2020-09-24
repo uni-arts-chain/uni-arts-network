@@ -244,6 +244,14 @@ impl pallet_balances::Trait<UartInstance> for Runtime {
 	type WeightInfo = ();
 }
 
+type UinkAccountStore = StorageMapShim<
+		pallet_balances::Account<Runtime, UartInstance>,
+		frame_system::CallOnCreatedAccount<Runtime>,
+		frame_system::CallKillAccount<Runtime>,
+		AccountId,
+		pallet_balances::AccountData<Balance>
+	>;
+
 impl pallet_balances::Trait<UinkInstance> for Runtime {
 	/// The type for recording an account's balance.
 	type Balance = Balance;
@@ -251,13 +259,7 @@ impl pallet_balances::Trait<UinkInstance> for Runtime {
 	type Event = Event;
 	type DustRemoval = ();
 	type ExistentialDeposit = ExistentialDeposit;
-	type AccountStore = StorageMapShim<
-		pallet_balances::Account<UinkInstance>,
-		frame_system::CallOnCreatedAccount<UinkInstance>,
-		frame_system::CallKillAccount<UinkInstance>,
-		u64,
-		pallet_balances::AccountData<u64>
-	>;
+	type AccountStore = UinkAccountStore;
 	type WeightInfo = ();
 }
 

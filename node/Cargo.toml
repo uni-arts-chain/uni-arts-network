@@ -18,6 +18,7 @@ name = "uart"
 [dependencies]
 structopt = "0.3.8"
 
+log = { version = "0.4.11" }
 sc-cli = { version = "0.8.0-rc6", features = ["wasmtime"] }
 sp-core = { version = "2.0.0-rc6" }
 sc-executor = { version = "0.8.0-rc6", features = ["wasmtime"] }

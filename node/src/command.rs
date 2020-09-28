@@ -18,13 +18,14 @@
 use crate::chain_spec;
 use crate::cli::Cli;
 use crate::service;
+use log::info;
 use sc_cli::{SubstrateCli, RuntimeVersion, Role, ChainSpec};
 use sc_service::PartialComponents;
 use crate::service::new_partial;
 
 impl SubstrateCli for Cli {
 	fn impl_name() -> String {
-		"Uart Node".into()
+		"Uni-arts Node".into()
 	}
 
 	fn impl_version() -> String {
@@ -67,6 +68,7 @@ pub fn run() -> sc_cli::Result<()> {
 	let cli = Cli::from_args();
 
 	match cli.subcommand {
+
 		Some(ref subcommand) => {
 			let runner = cli.create_runner(subcommand)?;
 			runner.run_subcommand(subcommand, |config| {
@@ -75,8 +77,19 @@ pub fn run() -> sc_cli::Result<()> {
 				Ok((client, backend, import_queue, task_manager))
 			})
 		}
+
 		None => {
 			let runner = cli.create_runner(&cli.run)?;
+
+			info!("  _    _       _                    _          _____ _           _       ");
+			info!(" | |  | |     (_)        /\\        | |        / ____| |         (_)      ");
+			info!(" | |  | |_ __  _ ______ /  \\   _ __| |_ ___  | |    | |__   __ _ _ _ __  ");
+			info!(" | |  | | '_ \\| |______/ /\\ \\ | '__| __/ __| | |    | '_ \\ / _` | | '_ \\ ");
+			info!(" | |__| | | | | |     / ____ \\| |  | |_\\__ \\ | |____| | | | (_| | | | | |");
+			info!(" \\____/|_| |_|_|    /_/    \\_\\_|   \\__|___/  \\_____|_| |_|\\__,_|_|_| |_|");
+			info!("                                                                         ");
+			info!("                                                                         ");
+
 			runner.run_node_until_exit(|config| match config.role {
 				Role::Light => service::new_light(config),
 				_ => service::new_full(config),

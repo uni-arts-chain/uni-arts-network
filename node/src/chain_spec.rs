@@ -1,6 +1,6 @@
 use sp_core::{Pair, Public, sr25519};
 use uart_runtime::{
-	AccountId, AuraConfig, BalancesConfig, UinkConfig, GenesisConfig, GrandpaConfig,
+	AccountId, AuraConfig, BalancesConfig, UartConfig, UinkConfig, GenesisConfig, GrandpaConfig,
 	SudoConfig, SystemConfig, WASM_BINARY, Signature
 };
 use sp_consensus_aura::sr25519::AuthorityId as AuraId;
@@ -139,7 +139,8 @@ fn testnet_genesis(
 			code: wasm_binary.to_vec(),
 			changes_trie_config: Default::default(),
 		}),
-		pallet_balances_Instance0: Some(BalancesConfig {
+		pallet_balances: None,
+		pallet_balances_Instance0: Some(UartConfig {
 			// Configure endowed accounts with initial balance of 1 << 60.
 			balances: endowed_accounts.iter().cloned().map(|k|(k, 1 << 60)).collect(),
 		}),

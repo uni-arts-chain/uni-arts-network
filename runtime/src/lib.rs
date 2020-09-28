@@ -31,7 +31,7 @@ pub use pallet_balances::Call as BalancesCall;
 pub use sp_runtime::{Permill, Perbill};
 pub use frame_support::{
 	construct_runtime, parameter_types, StorageValue,
-	traits::{KeyOwnerProofSystem, Randomness, StorageMapShim},
+	traits::{KeyOwnerProofSystem, Randomness, StorageMapShim, Currency},
 	weights::{
 		Weight, IdentityFee,
 		constants::{BlockExecutionWeight, ExtrinsicBaseWeight, RocksDbWeight, WEIGHT_PER_SECOND},
@@ -233,6 +233,17 @@ parameter_types! {
 type UartInstance = pallet_balances::Instance0;
 type UinkInstance = pallet_balances::Instance1;
 
+impl pallet_balances::Trait for Runtime {
+	/// The type for recording an account's balance.
+	type Balance = Balance;
+	/// The ubiquitous event type.
+	type Event = Event;
+	type DustRemoval = ();
+	type ExistentialDeposit = ExistentialDeposit;
+	type AccountStore = System;
+	type WeightInfo = ();
+}
+
 impl pallet_balances::Trait<UartInstance> for Runtime {
 	/// The type for recording an account's balance.
 	type Balance = Balance;
@@ -291,6 +302,41 @@ impl pallet_assets::Trait for Runtime {
 	type AssetId = u32;
 }
 
+impl pallet_names::Trait for Runtime {
+	type Name = Vec<u8>;
+	type Value = Vec<u8>;
+	type Currency = pallet_balances::Module<Self>;
+	type Event = Event;
+
+	fn get_name_fee(op: &pallet_names::Operation<Self>) -> Option<Balance> {
+		/* Single-letter names are not allowed (nor the empty name).  Everything
+           else is fine.  */
+		if op.name.len() < 2 {
+			return None
+		}
+
+		Some(match op.operation {
+			pallet_names::OperationType::Registration => 1000,
+			pallet_names::OperationType::Update => 100,
+		})
+	}
+
+	fn get_expiration(op: &pallet_names::Operation<Self>) -> Option<BlockNumber> {
+		/* Short names (up to three characters) will expire after 10 blocks.
+           Longer names will stick around forever.  */
+		if op.name.len() <= 3 {
+			Some(10)
+		} else {
+			None
+		}
+	}
+
+	fn deposit_fee(_b: <Self::Currency as Currency<AccountId>>::NegativeImbalance) {
+		/* Just burn the name fee by dropping the imbalance.  */
+	}
+
+}
+
 // Create the runtime by composing the FRAME pallets that were previously configured.
 construct_runtime!(
 	pub enum Runtime where
@@ -304,7 +350,8 @@ construct_runtime!(
 		Aura: pallet_aura::{Module, Config<T>, Inherent},
 		Grandpa: pallet_grandpa::{Module, Call, Storage, Config, Event},
 
-		Balances: pallet_balances::<Instance0>::{Module, Call, Storage, Config<T>, Event<T>},
+		Balances: pallet_balances::{Module, Call, Storage, Config<T>, Event<T>},
+		Uart: pallet_balances::<Instance0>::{Module, Call, Storage, Config<T>, Event<T>},
 		Uink: pallet_balances::<Instance1>::{Module, Call, Storage, Config<T>, Event<T>},
 
 		TransactionPayment: pallet_transaction_payment::{Module, Storage},
@@ -312,6 +359,7 @@ construct_runtime!(
 
 		Certificate: pallet_certificate::{Module, Call, Storage, Event<T>},
 		Assets: pallet_assets::{Module, Call, Storage, Event<T>},
+		Names: pallet_names::{Module, Call, Storage, Event<T>},
 	}
 );
 

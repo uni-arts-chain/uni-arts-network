@@ -42,6 +42,7 @@ pallet-transaction-payment-rpc-runtime-api = { version = "2.0.0-rc6", default-fe
 
 pallet-certificate = { path = "../pallets/certificate", default-features = false }
 pallet-assets = { path = "../pallets/assets", default-features = false }
+pallet-names = { path = "../pallets/names", default-features = false }
 
 [build-dependencies]
 wasm-builder-runner = { version = "1.0.5", package = "substrate-wasm-builder-runner" }
@@ -59,7 +60,8 @@ std = [
 	"pallet-sudo/std",
 	"pallet-timestamp/std",
 	"pallet-transaction-payment/std",
-  "pallet-transaction-payment-rpc-runtime-api/std",
+  	"pallet-transaction-payment-rpc-runtime-api/std",
+	"pallet-names/std",
 	"serde",
 	"sp-api/std",
 	"sp-block-builder/std",
@@ -73,5 +75,5 @@ std = [
 	"sp-transaction-pool/std",
 	"sp-version/std",
 	"frame-system/std",
-  "frame-system-rpc-runtime-api/std"
+  	"frame-system-rpc-runtime-api/std"
 ]

@@ -68,6 +68,20 @@ pub type Hash = sp_core::H256;
 /// Digest item type.
 pub type DigestItem = generic::DigestItem<Hash>;
 
+pub mod currency {
+	use super::Balance;
+
+	pub const UART: Balance = 1_000_000_000_000;
+	pub const DOLLARS: Balance = UART / 6;
+	pub const CENTS: Balance = UART / 100;
+	pub const MILLICENTS: Balance = UART / 1_000;
+
+	pub const fn deposit(items: u32, bytes: u32) -> Balance {
+		items as Balance * 20 * DOLLARS + (bytes as Balance) * 100 * MILLICENTS
+	}
+}
+
+
 /// Opaque types. These are used by the CLI to instantiate machinery that don't need to know
 /// the specifics of the runtime. They can then be made to be agnostic over specific formats
 /// of data like extrinsics, allowing for them to continue syncing the network through upgrades

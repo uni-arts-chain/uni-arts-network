@@ -1,12 +1,20 @@
-use sp_core::{Pair, Public, sr25519};
+use sp_core::{Pair, Public, crypto::UncheckedInto, sr25519};
+
 use uart_runtime::{
 	AccountId, AuraConfig, BalancesConfig, UartConfig, UinkConfig, GenesisConfig, GrandpaConfig,
-	SudoConfig, SystemConfig, WASM_BINARY, Signature
+	SudoConfig, SystemConfig, WASM_BINARY, Signature, Balance, currency::*
 };
 use sp_consensus_aura::sr25519::AuthorityId as AuraId;
 use sp_finality_grandpa::AuthorityId as GrandpaId;
 use sp_runtime::traits::{Verify, IdentifyAccount};
 use sc_service::ChainType;
+use hex_literal::hex;
+use sc_telemetry::TelemetryEndpoints;
+
+
+const DEFAULT_PROTOCOL_ID: &str = "uart";
+const TELEMETRY_URL: &str = "wss://telemetry.polkadot.io/submit/";
+
 
 // The URL for the telemetry server.
 // const STAGING_TELEMETRY_URL: &str = "wss://telemetry.polkadot.io/submit/";
@@ -38,6 +46,74 @@ pub fn authority_keys_from_seed(s: &str) -> (AuraId, GrandpaId) {
 	)
 }
 
+pub fn pangu_config() -> Result<ChainSpec, String> {
+	ChainSpec::from_json_bytes(&include_bytes!("../res/pangu.json")[..])
+}
+
+pub fn staging_config() -> Result<ChainSpec, String> {
+	let wasm_binary = WASM_BINARY.ok_or("Staging wasm binary not available".to_string())?;
+
+	let properties = serde_json::json!({
+		"ss58Format": 2,
+    "tokenDecimals": 12,
+    "tokenSymbol": "UART",
+    "uinkDecimals": 12,
+    "uinkSymbol": "UINK",
+	});
+
+	let initial_authorities: Vec<(
+		AuraId,
+		GrandpaId
+	)> = vec![
+		(
+			hex!("80c0f5ff1e76e3980007c9ba6ce5e89a9ad5d36b0ae2afae3ade6fc63a86c952").unchecked_into(),
+			hex!("15c718855b2f23f138a4d9d3182a044dc90810887590a3903fc37c49310c6712").unchecked_into()
+		),
+
+		(
+			hex!("40b5ec6f41d005be33fee25b2bd069d4d149c977ef11c498384da758703d5b43").unchecked_into(),
+			hex!("294cb58f14d656556ccab68af696b5f29ec92713cab60a03ad0c76ef3fccf3e9").unchecked_into()
+		),
+	];
+
+	let endowed_accounts: Vec<(AccountId, Balance)> = vec![
+		(hex!("80c0f5ff1e76e3980007c9ba6ce5e89a9ad5d36b0ae2afae3ade6fc63a86c952").into(), 100_000_000 * UART)
+	];
+
+	let sudo_key: AccountId = hex!("80c0f5ff1e76e3980007c9ba6ce5e89a9ad5d36b0ae2afae3ade6fc63a86c952").into();
+
+	Ok(ChainSpec::from_genesis(
+		// Name
+		"Uni-Arts Staging network",
+		// ID
+		"uart",
+		ChainType::Live,
+		move || testnet_genesis(
+			wasm_binary,
+			// Initial PoA authorities
+			initial_authorities.clone(),
+			// Sudo account
+			sudo_key.clone(),
+			// Pre-funded accounts
+			endowed_accounts.clone(),
+			true,
+		),
+		// Bootnodes
+		vec![],
+		// Telemetry
+		Some(
+			TelemetryEndpoints::new(vec![(TELEMETRY_URL.to_string(), 0)])
+				.expect("telemetry url is valid; qed"),
+		),
+		// Protocol ID
+		Some(DEFAULT_PROTOCOL_ID),
+		// Properties
+		serde_json::from_value(properties).ok(),
+		// Extensions
+		None,
+	))
+}
+
 pub fn development_config() -> Result<ChainSpec, String> {
 	let wasm_binary = WASM_BINARY.ok_or("Development wasm binary not available".to_string())?;
 
@@ -61,7 +137,7 @@ pub fn development_config() -> Result<ChainSpec, String> {
 				get_account_id_from_seed::<sr25519::Public>("Bob"),
 				get_account_id_from_seed::<sr25519::Public>("Alice//stash"),
 				get_account_id_from_seed::<sr25519::Public>("Bob//stash"),
-			],
+			].iter().map(|k| (k.clone(), 100_000 * UART )).collect::<Vec<_>>(),
 			true,
 		),
 		// Bootnodes
@@ -109,7 +185,7 @@ pub fn local_testnet_config() -> Result<ChainSpec, String> {
 				get_account_id_from_seed::<sr25519::Public>("Dave//stash"),
 				get_account_id_from_seed::<sr25519::Public>("Eve//stash"),
 				get_account_id_from_seed::<sr25519::Public>("Ferdie//stash"),
-			],
+			].iter().map(|k| (k.clone(), 100_000 * UART )).collect::<Vec<_>>(),
 			true,
 		),
 		// Bootnodes
@@ -130,7 +206,7 @@ fn testnet_genesis(
 	wasm_binary: &[u8],
 	initial_authorities: Vec<(AuraId, GrandpaId)>,
 	root_key: AccountId,
-	endowed_accounts: Vec<AccountId>,
+	endowed_accounts: Vec<(AccountId, Balance)>,
 	_enable_println: bool,
 ) -> GenesisConfig {
 	GenesisConfig {
@@ -141,13 +217,9 @@ fn testnet_genesis(
 		}),
 		pallet_balances: None,
 		pallet_balances_Instance0: Some(UartConfig {
-			// Configure endowed accounts with initial balance of 1 << 60.
-			balances: endowed_accounts.iter().cloned().map(|k|(k, 1 << 60)).collect(),
+			balances: endowed_accounts
 		}),
-		pallet_balances_Instance1: Some(UinkConfig {
-			// Configure endowed accounts with initial balance of 1 << 60.
-			balances: endowed_accounts.iter().cloned().map(|k|(k, 1 << 60)).collect(),
-		}),
+		pallet_balances_Instance1: None,
 		pallet_aura: Some(AuraConfig {
 			authorities: initial_authorities.iter().map(|x| (x.0.clone())).collect(),
 		}),

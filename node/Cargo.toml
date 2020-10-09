@@ -17,6 +17,8 @@ name = "uart"
 
 [dependencies]
 structopt = "0.3.8"
+serde_json = { version = "1.0.41" }
+hex-literal = "0.2.1"
 
 log = { version = "0.4.11" }
 sc-cli = { version = "0.8.0-rc6", features = ["wasmtime"] }
@@ -44,6 +46,8 @@ sp-block-builder = { version = "2.0.0-rc6" }
 sc-basic-authorship = { version = "0.8.0-rc6" }
 substrate-frame-rpc-system = { version = "2.0.0-rc6" }
 pallet-transaction-payment-rpc = { version = "2.0.0-rc6" }
+sc-telemetry = { version = "2.0.0-rc6" }
+
 
 uart-runtime = { path = "../runtime" }
 

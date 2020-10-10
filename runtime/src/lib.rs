@@ -41,6 +41,7 @@ pub use frame_support::{
 /// Import the template pallet.
 pub use pallet_certificate;
 pub use pallet_assets;
+pub use pallet_nft;
 
 /// An index to a block.
 pub type BlockNumber = u32;
@@ -351,6 +352,11 @@ impl pallet_names::Trait for Runtime {
 
 }
 
+/// Used for the module nft in `./nft.rs`
+impl pallet_nft::Trait for Runtime {
+	type Event = Event;
+}
+
 // Create the runtime by composing the FRAME pallets that were previously configured.
 construct_runtime!(
 	pub enum Runtime where
@@ -374,6 +380,7 @@ construct_runtime!(
 		Certificate: pallet_certificate::{Module, Call, Storage, Event<T>},
 		Assets: pallet_assets::{Module, Call, Storage, Event<T>},
 		Names: pallet_names::{Module, Call, Storage, Event<T>},
+		Nft: pallet_nft::{Module, Call, Storage, Event<T>},
 	}
 );
 

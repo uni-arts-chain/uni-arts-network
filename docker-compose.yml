@@ -1,0 +1,19 @@
+version: "3.5"
+
+services:
+  node:
+    image: uniarts_chain
+    ports:
+      - 9944:9944
+    build:
+      context: ./
+      dockerfile: Dockerfile
+    volumes:
+      - ./chain-data:/chain-data
+    networks: 
+      - substrate_network
+
+networks: 
+  substrate_network:
+    driver: bridge
+    name: substrate_network

@@ -66,14 +66,13 @@ pub fn staging_config() -> Result<ChainSpec, String> {
 		GrandpaId
 	)> = vec![
 		(
-			hex!("80c0f5ff1e76e3980007c9ba6ce5e89a9ad5d36b0ae2afae3ade6fc63a86c952").unchecked_into(),
-			hex!("15c718855b2f23f138a4d9d3182a044dc90810887590a3903fc37c49310c6712").unchecked_into()
+			hex!("5a185b3c60676cf602eb4bf0dab183d8eb6f9f33bf8994c248d9572dcf09de5b").unchecked_into(),
+			hex!("7c8c270600a0535b6aed2abfe13e08db6830d69a713e9d6d15403814fc3cde66").unchecked_into()
 		),
-
 		(
-			hex!("40b5ec6f41d005be33fee25b2bd069d4d149c977ef11c498384da758703d5b43").unchecked_into(),
-			hex!("294cb58f14d656556ccab68af696b5f29ec92713cab60a03ad0c76ef3fccf3e9").unchecked_into()
-		),
+			hex!("72238566d0f221dc5389f933837e611e6d95863936d926c33b0c69f317da2843").unchecked_into(),
+			hex!("3ea0940442dae4931975a9f85068e212dd18b1437381b4cbf72cd56b0761c8b4").unchecked_into()
+		)
 	];
 
 	let endowed_accounts: Vec<(AccountId, Balance)> = vec![

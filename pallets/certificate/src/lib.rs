@@ -14,7 +14,7 @@ use frame_system::ensure_signed;
 
 use codec::{Encode, Decode};
 
-use sp_runtime::traits::{Zero, One, Saturating};
+// use sp_runtime::traits::{Zero, One, Saturating};
 use sp_std::{prelude::*};
 
 
@@ -69,7 +69,7 @@ decl_module! {
 
 		#[weight = 10_000 + T::DbWeight::get().writes(1)]
 		pub fn create(origin, work_id: T::WorkId) -> dispatch::DispatchResult {
-			let who = ensure_signed(origin)?;
+			let _who = ensure_signed(origin)?;
 
 			Ok(())
 		}
@@ -92,7 +92,7 @@ decl_module! {
 			let who = ensure_signed(origin)?;
 			ensure!(<Works<T>>::contains_key(work_id), Error::<T>::NoneExistWork);
 
-			let work = Self::works(work_id);
+			let _work = Self::works(work_id);
 			<Works<T>>::mutate(work_id, |work| work.owner = dest);
 			<MyWorks<T>>::mutate(who, |works| works.retain(|id| *id != work_id));
 

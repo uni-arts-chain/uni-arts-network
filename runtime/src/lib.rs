@@ -226,8 +226,8 @@ impl pallet_session::Trait for Runtime {
 	type Event = Event;
 	type ValidatorId = AccountId;
 	type ValidatorIdOf = ValidatorIdOf;
-	type ShouldEndSession = pallet_session::PeriodicSessions<Offset, Period>;
-	type NextSessionRotation = pallet_session::PeriodicSessions<Offset, Period>;
+	type ShouldEndSession = pallet_session::PeriodicSessions<Period, Offset>;
+	type NextSessionRotation = pallet_session::PeriodicSessions<Period, Offset>;
 	type SessionManager = ();
 	type SessionHandler = <opaque::SessionKeys as OpaqueKeys>::KeyTypeIdProviders;
 	type Keys = opaque::SessionKeys;

@@ -1,8 +1,9 @@
 use sp_core::{Pair, Public, crypto::UncheckedInto, sr25519};
 
 use uart_runtime::{
-	AccountId, AuraConfig, UartConfig, GenesisConfig, GrandpaConfig,
-	SudoConfig, SystemConfig, WASM_BINARY, Signature, Balance, currency::*
+	AccountId, UartConfig, GenesisConfig, SessionConfig,
+	SudoConfig, SystemConfig, WASM_BINARY, Signature, Balance, currency::*,
+	opaque::SessionKeys
 };
 use sp_consensus_aura::sr25519::AuthorityId as AuraId;
 use sp_finality_grandpa::AuthorityId as GrandpaId;
@@ -39,11 +40,21 @@ pub fn get_account_id_from_seed<TPublic: Public>(seed: &str) -> AccountId where
 }
 
 /// Generate an Aura authority key.
-pub fn authority_keys_from_seed(s: &str) -> (AuraId, GrandpaId) {
+pub fn authority_keys_from_seed(s: &str) -> (AccountId, AccountId, AuraId, GrandpaId) {
 	(
+		get_account_id_from_seed::<sr25519::Public>(s),
+		get_account_id_from_seed::<sr25519::Public>(s),
 		get_from_seed::<AuraId>(s),
 		get_from_seed::<GrandpaId>(s),
 	)
+}
+
+
+pub fn session_keys(
+	aura: AuraId,
+	grandpa: GrandpaId
+) -> SessionKeys {
+	SessionKeys { aura, grandpa }
 }
 
 pub fn pangu_config() -> Result<ChainSpec, String> {
@@ -61,25 +72,26 @@ pub fn staging_config() -> Result<ChainSpec, String> {
     "uinkSymbol": "UINK",
 	});
 
-	let initial_authorities: Vec<(
-		AuraId,
-		GrandpaId
-	)> = vec![
+	let initial_authorities: Vec<(AccountId, AccountId, AuraId,GrandpaId)> = vec![
 		(
+			hex!("5a185b3c60676cf602eb4bf0dab183d8eb6f9f33bf8994c248d9572dcf09de5b").into(),
+			hex!("5a185b3c60676cf602eb4bf0dab183d8eb6f9f33bf8994c248d9572dcf09de5b").into(),
 			hex!("5a185b3c60676cf602eb4bf0dab183d8eb6f9f33bf8994c248d9572dcf09de5b").unchecked_into(),
 			hex!("7c8c270600a0535b6aed2abfe13e08db6830d69a713e9d6d15403814fc3cde66").unchecked_into()
 		),
 		(
+			hex!("72238566d0f221dc5389f933837e611e6d95863936d926c33b0c69f317da2843").into(),
+			hex!("72238566d0f221dc5389f933837e611e6d95863936d926c33b0c69f317da2843").into(),
 			hex!("72238566d0f221dc5389f933837e611e6d95863936d926c33b0c69f317da2843").unchecked_into(),
 			hex!("3ea0940442dae4931975a9f85068e212dd18b1437381b4cbf72cd56b0761c8b4").unchecked_into()
 		)
 	];
 
 	let endowed_accounts: Vec<(AccountId, Balance)> = vec![
-		(hex!("80c0f5ff1e76e3980007c9ba6ce5e89a9ad5d36b0ae2afae3ade6fc63a86c952").into(), 100_000_000 * UART)
+		(hex!("5a185b3c60676cf602eb4bf0dab183d8eb6f9f33bf8994c248d9572dcf09de5b").into(), 100_000_000 * UART)
 	];
 
-	let sudo_key: AccountId = hex!("80c0f5ff1e76e3980007c9ba6ce5e89a9ad5d36b0ae2afae3ade6fc63a86c952").into();
+	let sudo_key: AccountId = hex!("5a185b3c60676cf602eb4bf0dab183d8eb6f9f33bf8994c248d9572dcf09de5b").into();
 
 	Ok(ChainSpec::from_genesis(
 		// Name
@@ -203,7 +215,7 @@ pub fn local_testnet_config() -> Result<ChainSpec, String> {
 /// Configure initial storage state for FRAME modules.
 fn testnet_genesis(
 	wasm_binary: &[u8],
-	initial_authorities: Vec<(AuraId, GrandpaId)>,
+	initial_authorities: Vec<(AccountId, AccountId, AuraId, GrandpaId)>,
 	root_key: AccountId,
 	endowed_accounts: Vec<(AccountId, Balance)>,
 	_enable_println: bool,
@@ -219,12 +231,15 @@ fn testnet_genesis(
 			balances: endowed_accounts
 		}),
 		pallet_balances_Instance1: None,
-		pallet_aura: Some(AuraConfig {
-			authorities: initial_authorities.iter().map(|x| (x.0.clone())).collect(),
+		pallet_session: Some(SessionConfig {
+			keys: initial_authorities.iter().map(|x| (
+				x.0.clone(),
+				x.1.clone(),
+				session_keys(x.2.clone(), x.3.clone()),
+			)).collect::<Vec<_>>(),
 		}),
-		pallet_grandpa: Some(GrandpaConfig {
-			authorities: initial_authorities.iter().map(|x| (x.1.clone(), 1)).collect(),
-		}),
+		pallet_aura: None,
+		pallet_grandpa: None,
 		pallet_sudo: Some(SudoConfig {
 			// Assign network admin rights.
 			key: root_key,

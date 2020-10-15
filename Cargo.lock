@@ -7448,6 +7448,7 @@ dependencies = [
  "pallet-names",
  "pallet-nft",
  "pallet-randomness-collective-flip",
+ "pallet-session",
  "pallet-sudo",
  "pallet-timestamp",
  "pallet-transaction-payment",

@@ -43,6 +43,7 @@ pub use frame_support::{
 pub use pallet_certificate;
 pub use pallet_assets;
 pub use pallet_nft;
+pub use pallet_nicks;
 
 /// An index to a block.
 pub type BlockNumber = u32;
@@ -328,6 +329,31 @@ impl pallet_transaction_payment::Trait for Runtime {
 	type FeeMultiplierUpdate = ();
 }
 
+parameter_types! {
+    // Choose a fee that incentivizes desireable behavior.
+    pub const NickReservationFee: u128 = 100;
+    pub const MinNickLength: usize = 6;
+    // Maximum bounds on storage are important to secure your chain.
+    pub const MaxNickLength: usize = 32;
+}
+
+impl pallet_nicks::Trait for Runtime {
+	/// The Balances pallet implements the ReservableCurrency trait.
+	type Currency = pallet_balances::Module<Runtime>;
+	/// Use the NickReservationFee from the parameter_types block.
+	type ReservationFee = NickReservationFee;
+	/// No action is taken when deposits are forfeited.
+	type Slashed = ();
+	/// Configure the FRAME System Root origin as the Nick pallet admin.
+	type ForceOrigin = frame_system::EnsureRoot<AccountId>;
+	/// Use the MinNickLength from the parameter_types block.
+	type MinLength = MinNickLength;
+	/// Use the MaxNickLength from the parameter_types block.
+	type MaxLength = MaxNickLength;
+	/// The ubiquitous event type.
+	type Event = Event;
+}
+
 impl pallet_sudo::Trait for Runtime {
 	type Event = Event;
 	type Call = Call;
@@ -398,6 +424,7 @@ construct_runtime!(
 		Aura: pallet_aura::{Module, Config<T>, Inherent},
 		Grandpa: pallet_grandpa::{Module, Call, Storage, Config, Event},
 		Session: pallet_session::{Module, Call, Storage, Event, Config<T>},
+		Nicks: pallet_nicks::{Module, Call, Storage, Event<T>},
 
 		Balances: pallet_balances::{Module, Call, Storage, Config<T>, Event<T>},
 		Uart: pallet_balances::<Instance0>::{Module, Call, Storage, Config<T>, Event<T>},

@@ -3707,6 +3707,21 @@ dependencies = [
 ]
 
 [[package]]
+name = "pallet-nicks"
+version = "2.0.0-rc6"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "1a6ddffa81f07a7a254bade82a7b46554e8c0989dd07d62b9f955e5af714ddbb"
+dependencies = [
+ "frame-support",
+ "frame-system",
+ "parity-scale-codec",
+ "serde",
+ "sp-io",
+ "sp-runtime",
+ "sp-std",
+]
+
+[[package]]
 name = "pallet-randomness-collective-flip"
 version = "2.0.0-rc6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -7447,6 +7462,7 @@ dependencies = [
  "pallet-grandpa",
  "pallet-names",
  "pallet-nft",
+ "pallet-nicks",
  "pallet-randomness-collective-flip",
  "pallet-session",
  "pallet-sudo",

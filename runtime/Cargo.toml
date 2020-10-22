@@ -46,6 +46,7 @@ pallet-certificate = { path = "../pallets/certificate", default-features = false
 pallet-assets = { path = "../pallets/assets", default-features = false }
 pallet-names = { path = "../pallets/names", default-features = false }
 pallet-nft = { path = "../pallets/nft", default-features = false }
+primitives = { package = "uniart-primitives", path = "../primitives", default-features = false }
 
 [build-dependencies]
 wasm-builder-runner = { version = "1.0.5", package = "substrate-wasm-builder-runner" }
@@ -80,5 +81,6 @@ std = [
 	"sp-transaction-pool/std",
 	"sp-version/std",
 	"frame-system/std",
-  	"frame-system-rpc-runtime-api/std"
+  	"frame-system-rpc-runtime-api/std",
+	"primitives/std",
 ]

@@ -29,7 +29,7 @@ services:
     networks:
       - uniarts_network
     restart: always
-    command: ['uart', '--chain', 'staging', '--base-path', '/chain-data',  '--port', '30333',  '--ws-port', '9944', '--rpc-port', '9933', '--validator', '--rpc-cors=all', '--ws-external', '--rpc-external', '--rpc-methods=Unsafe', '--telemetry-url', "wss://telemetry.polkadot.io/submit/ 0" ]
+    command: ['uart', '--chain', 'staging', '--base-path', '/chain-data', '--port', '30333', '--ws-port', '9944', '--rpc-port', '9933', '--validator', '--rpc-cors=all', '--ws-external', '--rpc-external', '--rpc-methods=Unsafe', '--telemetry-url', "wss://telemetry.polkadot.io/submit/ 0" ]
 
   node_3:
     image: uniart/uni-arts-network
@@ -45,7 +45,7 @@ services:
     networks:
       - uniarts_network
     restart: always
-    command: ['uart', '--chain', 'staging', '--base-path', '/chain-data',  '--port', '30333',  '--ws-port', '9944', '--rpc-port', '9933', '--rpc-cors=all', '--ws-external', '--rpc-external', '--rpc-methods=Unsafe', '--telemetry-url', "wss://telemetry.polkadot.io/submit/ 0" ]
+    command: ['uart', '--chain', 'staging', '--base-path', '/chain-data', '--port', '30333', '--ws-port', '9944', '--rpc-port', '9933', '--rpc-cors=all', '--ws-external', '--rpc-external', '--rpc-methods=Unsafe', '--telemetry-url', "wss://telemetry.polkadot.io/submit/ 0" ]
 
 networks:
   uniarts_network:

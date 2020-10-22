@@ -2,13 +2,14 @@
 
 FROM phusion/baseimage:0.11 as builder
 
-ENV WASM_TOOLCHAIN=nightly-2020-08-23
+ENV DEBIAN_FRONTEND=noninteractive
+ENV RUST_TOOLCHAIN=nightly-2020-09-30
 
 ARG PROFILE=release
 
 RUN apt-get update && \
 	apt-get dist-upgrade -y -o Dpkg::Options::="--force-confold" && \
-	apt-get install -y cmake pkg-config libssl-dev git clang-3.9 llvm
+	apt-get install -y cmake pkg-config libssl-dev git clang llvm build-essential libclang-dev libc6-dev
 
 # Get project and run it
 #RUN git clone https://github.com/uni-arts-chain/uni-arts-network.git /uniarts_chain
@@ -18,13 +19,13 @@ COPY . .
 
 RUN curl https://sh.rustup.rs -sSf | sh -s -- -y && \
 	export PATH="$PATH:$HOME/.cargo/bin" && \
-	rustup toolchain uninstall $(rustup toolchain list) && \
-	rustup default 1.47.0 && \
-	rustup toolchain install $WASM_TOOLCHAIN && \
-	rustup target add wasm32-unknown-unknown --toolchain $WASM_TOOLCHAIN && \
-    rustup target list --installed && \
-    rustup show && \
-	cargo +nightly-2020-08-23 build "--$PROFILE"
+	rustup uninstall stable && \
+    rustup install 1.46.0 && \
+    rustup default 1.46.0-x86_64-unknown-linux-gnu && \
+	rustup toolchain install $RUST_TOOLCHAIN && \
+	rustup target add wasm32-unknown-unknown --toolchain $RUST_TOOLCHAIN && \
+	rustup default $RUST_TOOLCHAIN && \
+	cargo +nightly-2020-09-30 build "--$PROFILE"
 	# && \
 	# cargo test
 
@@ -37,7 +38,7 @@ ARG PROFILE=release
 
 COPY --from=builder /uniarts_chain/target/$PROFILE/uart /usr/local/bin
 
-EXPOSE 9944
+EXPOSE 30333 9933 9944
 VOLUME ["/chain-data"]
 
 # Copy and run start script

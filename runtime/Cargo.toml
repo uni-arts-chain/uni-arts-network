@@ -45,6 +45,7 @@ pallet-certificate = { path = "../pallets/certificate", default-features = false
 pallet-assets = { path = "../pallets/assets", default-features = false }
 pallet-names = { path = "../pallets/names", default-features = false }
 pallet-nft = { path = "../pallets/nft", default-features = false }
+pallet-rewards = { path = "../pallets/rewards", default-features = false }
 
 [build-dependencies]
 wasm-builder-runner = { version = "1.0.5", package = "substrate-wasm-builder-runner" }

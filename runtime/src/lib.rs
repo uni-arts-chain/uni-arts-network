@@ -43,6 +43,7 @@ pub use frame_support::{
 pub use pallet_certificate;
 pub use pallet_assets;
 pub use pallet_nft;
+pub use pallet_rewards;
 
 /// An index to a block.
 pub type BlockNumber = u32;
@@ -82,6 +83,8 @@ pub mod currency {
 		items as Balance * 20 * DOLLARS + (bytes as Balance) * 100 * MILLICENTS
 	}
 }
+
+use currency::*;
 
 
 /// Opaque types. These are used by the CLI to instantiate machinery that don't need to know
@@ -257,6 +260,24 @@ impl pallet_grandpa::Trait for Runtime {
 }
 
 parameter_types! {
+	pub const RewardPerBlock: Balance = 1 * UART;
+}
+
+pub struct AccoundIdOf;
+impl<T> Convert<T, Option<T>> for AccoundIdOf {
+	fn convert(a: T) -> Option<T> { 
+		Some(a)
+	}
+}
+
+impl pallet_rewards::Trait for Runtime {
+	type AccoundIdOf = AccoundIdOf;
+	type Balance = Balance;
+	type Currency = Uart;
+	type RewardPerBlock = RewardPerBlock;
+}
+
+parameter_types! {
 	pub const MinimumPeriod: u64 = SLOT_DURATION / 2;
 }
 
@@ -398,6 +419,7 @@ construct_runtime!(
 		Aura: pallet_aura::{Module, Config<T>, Inherent},
 		Grandpa: pallet_grandpa::{Module, Call, Storage, Config, Event},
 		Session: pallet_session::{Module, Call, Storage, Event, Config<T>},
+		Rewards: pallet_rewards::{Module, Storage},
 
 		Balances: pallet_balances::{Module, Call, Storage, Config<T>, Event<T>},
 		Uart: pallet_balances::<Instance0>::{Module, Call, Storage, Config<T>, Event<T>},

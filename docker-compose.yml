@@ -1,7 +1,7 @@
 version: "3.5"
 
 services:
-  node:
+  node_1:
     image: uniarts_chain
     ports:
       - 9944:9944
@@ -9,11 +9,57 @@ services:
       context: ./
       dockerfile: Dockerfile
     volumes:
-      - ./chain-data:/chain-data
-    networks: 
-      - substrate_network
+      - ./chain-data-1:/chain-data
+    networks:
+      - uniarts_network
+    restart: always
+    environment:
+      - NODE=uniart1
+      - P2PPORT=30333
+      - WSPORT=9944
+      - RPCPORT=9933
+      - VALIDATOR=True
 
-networks: 
-  substrate_network:
+    node_2:
+      image: nft-parachain
+      ports:
+        - 9945:9944
+      build:
+        context: ./
+        dockerfile: Dockerfile
+      volumes:
+        - ./chain-data-2:/chain-data
+      networks:
+        - uniarts_network
+      restart: always
+      environment:
+        - NODE=uniart2
+        - P2PPORT=30333
+        - WSPORT=9944
+        - RPCPORT=9933
+        - VALIDATOR=True
+
+    node_3:
+      image: nft-parachain
+      ports:
+        - 9944:9944
+        - 30333:30333
+      build:
+        context: ./
+        dockerfile: Dockerfile
+      volumes:
+        - ./chain-data-3:/chain-data
+      networks:
+        - uniarts_network
+      restart: always
+      environment:
+        - NODE=uniart3
+        - P2PPORT=30333
+        - WSPORT=9944
+        - RPCPORT=9933
+        - VALIDATOR=False
+
+networks:
+  uniarts_network:
     driver: bridge
-    name: substrate_network
+    name: uniarts_network

@@ -2,7 +2,7 @@ version: "3.5"
 
 services:
   node_1:
-    image: uniarts_chain
+    image: uniart/uni-arts-network
     ports:
       - 9944:9944
     build:
@@ -21,7 +21,7 @@ services:
       - VALIDATOR=True
 
     node_2:
-      image: nft-parachain
+      image: uniart/uni-arts-network
       ports:
         - 9945:9944
       build:
@@ -40,7 +40,7 @@ services:
         - VALIDATOR=True
 
     node_3:
-      image: nft-parachain
+      image: uniart/uni-arts-network
       ports:
         - 9944:9944
         - 30333:30333

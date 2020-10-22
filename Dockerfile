@@ -26,11 +26,15 @@ RUN	rustup uninstall stable && \
 
 RUN mkdir uniarts_chain
 WORKDIR /uniarts_chain
-COPY . .
+COPY node  ./node/
+COPY pallets ./pallets/
+COPY runtime ./runtime/
+COPY scripts ./scripts/
+COPY README.md README.md
+COPY Cargo* ./
 
 RUN	cargo +nightly-2020-09-30 build "--$PROFILE"
 
-RUN cd target/release && ls -la
 
 # ===== RUN ======
 
@@ -40,9 +44,12 @@ ARG PROFILE=release
 COPY --from=builder /uniarts_chain/target/$PROFILE/uart /usr/local/bin
 
 EXPOSE 30333 9933 9944
+
 VOLUME ["/chain-data"]
+WORKDIR /chain-data
 
 # Copy and run start script
-COPY ["./run.sh", "./run.sh"]
-RUN chmod +x ./run.sh
-CMD ["bash", "-c", "./run.sh"]
+COPY docker-entrypoint.sh /usr/local/bin/
+RUN chmod +x /usr/local/bin/docker-entrypoint.sh && ln -s /usr/local/bin/docker-entrypoint.sh / 
+ENTRYPOINT ["docker-entrypoint.sh"]
+CMD ["uart"]

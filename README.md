@@ -89,5 +89,62 @@ cargo run -- \
 Execute `cargo run -- --help` to learn more about the node's CLI options.
 
 
+## add key
+```bash
+curl --location --request POST 'http://localhost:9933' \
+--header 'Content-Type: application/json' \
+--data-raw '[
+    {
+        "jsonrpc":"2.0",
+        "id":1,
+        "method":"author_insertKey",
+        "params": [
+            "aura",
+            "injury kiss fox obscure bone mango mammal reject very venue lawn depth",
+            "0x5a185b3c60676cf602eb4bf0dab183d8eb6f9f33bf8994c248d9572dcf09de5b"
+        ]
+    },
+    {
+        "jsonrpc":"2.0",
+        "id":2,
+        "method":"author_insertKey",
+        "params": [
+            "gran",
+            "space easy attend shoulder funny drop humble smooth diamond skill kite grant",
+            "0x7c8c270600a0535b6aed2abfe13e08db6830d69a713e9d6d15403814fc3cde66"
+        ]
+    }
+
+]'
+```
+
+```bash
+curl --location --request POST 'http://localhost:9934' \
+--header 'Content-Type: application/json' \
+--data-raw '[
+    {
+        "jsonrpc":"2.0",
+        "id":1,
+        "method":"author_insertKey",
+        "params": [
+            "aura",
+            "cancel bunker enemy toy order finger crime clay want acid pizza crash",
+            "0x72238566d0f221dc5389f933837e611e6d95863936d926c33b0c69f317da2843"
+        ]
+    },
+    {
+        "jsonrpc":"2.0",
+        "id":2,
+        "method":"author_insertKey",
+        "params": [
+            "gran",
+            "copper high monitor gesture avocado quick sponsor leaf cargo elbow heavy nice",
+            "0x3ea0940442dae4931975a9f85068e212dd18b1437381b4cbf72cd56b0761c8b4"
+        ]
+    }
+
+]'
+```
+
 ## License
 [LICENSE](./LICENSE)

@@ -9,11 +9,11 @@ include!(concat!(env!("OUT_DIR"), "/wasm_binary.rs"));
 use sp_std::prelude::*;
 use sp_core::{crypto::KeyTypeId, OpaqueMetadata};
 use sp_runtime::{
-	ApplyExtrinsicResult, generic, create_runtime_str, impl_opaque_keys, MultiSignature,
+	ApplyExtrinsicResult, generic, create_runtime_str, impl_opaque_keys,
 	transaction_validity::{TransactionValidity, TransactionSource}
 };
 use sp_runtime::traits::{
-	BlakeTwo256, Block as BlockT, IdentityLookup, Verify, IdentifyAccount, NumberFor, Saturating, 
+	BlakeTwo256, Block as BlockT, IdentityLookup, NumberFor, Saturating, 
 	Convert, OpaqueKeys
 };
 use sp_api::impl_runtime_apis;
@@ -39,37 +39,15 @@ pub use frame_support::{
 	},
 };
 
-/// Import the template pallet.
+pub use primitives::{BlockNumber, Signature, AccountId, AccountIndex, Balance, Index, Hash, DigestItem, TokenSymbol, CurrencyId };
+
+/// Import pallets.
 pub use pallet_certificate;
 pub use pallet_assets;
 pub use pallet_nft;
+pub use pallet_nicks;
 pub use pallet_rewards;
 
-/// An index to a block.
-pub type BlockNumber = u32;
-
-/// Alias to 512-bit hash when used in the context of a transaction signature on the chain.
-pub type Signature = MultiSignature;
-
-/// Some way of identifying an account on the chain. We intentionally make it equivalent
-/// to the public key of our transaction signing scheme.
-pub type AccountId = <<Signature as Verify>::Signer as IdentifyAccount>::AccountId;
-
-/// The type for looking up accounts. We don't expect more than 4 billion of them, but you
-/// never know...
-pub type AccountIndex = u32;
-
-/// Balance of an account.
-pub type Balance = u128;
-
-/// Index of a transaction in the chain.
-pub type Index = u32;
-
-/// A hash of some data used by the chain.
-pub type Hash = sp_core::H256;
-
-/// Digest item type.
-pub type DigestItem = generic::DigestItem<Hash>;
 
 pub mod currency {
 	use super::Balance;
@@ -349,6 +327,31 @@ impl pallet_transaction_payment::Trait for Runtime {
 	type FeeMultiplierUpdate = ();
 }
 
+parameter_types! {
+    // Choose a fee that incentivizes desireable behavior.
+    pub const NickReservationFee: u128 = 100;
+    pub const MinNickLength: usize = 6;
+    // Maximum bounds on storage are important to secure your chain.
+    pub const MaxNickLength: usize = 32;
+}
+
+impl pallet_nicks::Trait for Runtime {
+	/// The Balances pallet implements the ReservableCurrency trait.
+	type Currency = pallet_balances::Module<Runtime>;
+	/// Use the NickReservationFee from the parameter_types block.
+	type ReservationFee = NickReservationFee;
+	/// No action is taken when deposits are forfeited.
+	type Slashed = ();
+	/// Configure the FRAME System Root origin as the Nick pallet admin.
+	type ForceOrigin = frame_system::EnsureRoot<AccountId>;
+	/// Use the MinNickLength from the parameter_types block.
+	type MinLength = MinNickLength;
+	/// Use the MaxNickLength from the parameter_types block.
+	type MaxLength = MaxNickLength;
+	/// The ubiquitous event type.
+	type Event = Event;
+}
+
 impl pallet_sudo::Trait for Runtime {
 	type Event = Event;
 	type Call = Call;
@@ -421,6 +424,7 @@ construct_runtime!(
 		Session: pallet_session::{Module, Call, Storage, Event, Config<T>},
 		Rewards: pallet_rewards::{Module, Storage},
 
+		Nicks: pallet_nicks::{Module, Call, Storage, Event<T>},
 		Balances: pallet_balances::{Module, Call, Storage, Config<T>, Event<T>},
 		Uart: pallet_balances::<Instance0>::{Module, Call, Storage, Config<T>, Event<T>},
 		Uink: pallet_balances::<Instance1>::{Module, Call, Storage, Config<T>, Event<T>},

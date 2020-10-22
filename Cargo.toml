@@ -6,6 +6,7 @@ panic = 'unwind'
 members = [
     'runtime',
     'node',
+    'primitives',
     'pallets/assets',
     'pallets/nft'
 ]

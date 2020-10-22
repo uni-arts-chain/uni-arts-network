@@ -35,7 +35,8 @@ sp-session = { version = "2.0.0-rc6", default-features = false }
 sp-std = { version = "2.0.0-rc6", default-features = false }
 sp-transaction-pool = { version = "2.0.0-rc6", default-features = false  }
 sp-version = { version = "2.0.0-rc6", default-features = false }
-pallet-session = { version = "2.0.0-rc6", default-features = false }
+pallet-session = { version = "2.0.0-rc6", default-features = false, features = ["historical"] }
+pallet-nicks = { version = "2.0.0-rc6", default-features = false }
 
 # Used for the node template's RPCs
 frame-system-rpc-runtime-api = { version = "2.0.0-rc6", default-features = false }
@@ -46,6 +47,7 @@ pallet-assets = { path = "../pallets/assets", default-features = false }
 pallet-names = { path = "../pallets/names", default-features = false }
 pallet-nft = { path = "../pallets/nft", default-features = false }
 pallet-rewards = { path = "../pallets/rewards", default-features = false }
+primitives = { package = "uniart-primitives", path = "../primitives", default-features = false }
 
 [build-dependencies]
 wasm-builder-runner = { version = "1.0.5", package = "substrate-wasm-builder-runner" }
@@ -75,9 +77,11 @@ std = [
 	"sp-offchain/std",
 	"sp-runtime/std",
 	"sp-session/std",
+    "pallet-nicks/std",
 	"sp-std/std",
 	"sp-transaction-pool/std",
 	"sp-version/std",
 	"frame-system/std",
-  	"frame-system-rpc-runtime-api/std"
+  	"frame-system-rpc-runtime-api/std",
+	"primitives/std",
 ]

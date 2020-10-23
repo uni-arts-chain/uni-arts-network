@@ -25,6 +25,13 @@ curl https://sh.rustup.rs -sSf | sh
 cargo build --release
 ```
 
+## cross-chain
+To enable cross-chain functionality, the Uni-Arts Network will connect to the Polkadot in one of the three ways:
+
+- as parathread - pay-as-you-go connection to Polkadot
+- as parachain - permanent connection for a given period
+- as an solo chain with a bridge back to Polkadot
+
 ## Run
 
 ### Single Node Development Chain
@@ -119,7 +126,7 @@ curl --location --request POST 'http://localhost:9933' \
 ```
 
 ```bash
-curl --location --request POST 'http://localhost:9934' \
+curl --location --request POST 'http://localhost:9935' \
 --header 'Content-Type: application/json' \
 --data-raw '[
     {

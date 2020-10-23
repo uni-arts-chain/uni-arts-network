@@ -47,6 +47,7 @@ pub use pallet_assets;
 pub use pallet_nft;
 pub use pallet_nicks;
 pub use pallet_rewards;
+pub use pallet_validator_set;
 
 
 pub mod currency {
@@ -196,6 +197,10 @@ parameter_types! {
 	pub const Period: BlockNumber = 5;
 }
 
+impl pallet_validator_set::Trait for Runtime {
+	type Event = Event;
+}
+
 pub struct ValidatorIdOf;
 impl<T> Convert<T, Option<T>> for ValidatorIdOf {
 	fn convert(a: T) -> Option<T> { 
@@ -209,7 +214,7 @@ impl pallet_session::Trait for Runtime {
 	type ValidatorIdOf = ValidatorIdOf;
 	type ShouldEndSession = pallet_session::PeriodicSessions<Period, Offset>;
 	type NextSessionRotation = pallet_session::PeriodicSessions<Period, Offset>;
-	type SessionManager = ();
+	type SessionManager = ValidatorSet;
 	type SessionHandler = <opaque::SessionKeys as OpaqueKeys>::KeyTypeIdProviders;
 	type Keys = opaque::SessionKeys;
 	type DisabledValidatorsThreshold = DisabledValidatorsThreshold;
@@ -423,6 +428,7 @@ construct_runtime!(
 		Grandpa: pallet_grandpa::{Module, Call, Storage, Config, Event},
 		Session: pallet_session::{Module, Call, Storage, Event, Config<T>},
 		Rewards: pallet_rewards::{Module, Storage},
+		ValidatorSet: pallet_validator_set::{Module, Call, Storage, Event<T>, Config<T>},
 
 		Nicks: pallet_nicks::{Module, Call, Storage, Event<T>},
 		Balances: pallet_balances::{Module, Call, Storage, Config<T>, Event<T>},

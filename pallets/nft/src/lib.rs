@@ -184,7 +184,7 @@ decl_storage! {
         /// Index list
         pub AddressTokens get(fn address_tokens): double_map hasher(blake2_128_concat) u64, hasher(blake2_128_concat) T::AccountId => Vec<u64>;
 
-        // Sponsorship
+        /// Sponsorship
         pub ContractSponsor get(fn contract_sponsor): map hasher(identity) T::AccountId => T::AccountId;
         pub UnconfirmedContractSponsor get(fn unconfirmed_contract_sponsor): map hasher(identity) T::AccountId => T::AccountId;
     }

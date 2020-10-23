@@ -8,5 +8,6 @@ members = [
     'node',
     'primitives',
     'pallets/assets',
-    'pallets/nft'
+    'pallets/nft',
+    'pallets/validator-set'
 ]

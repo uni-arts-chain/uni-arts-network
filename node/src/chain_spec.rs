@@ -72,7 +72,7 @@ pub fn staging_config() -> Result<ChainSpec, String> {
     "uinkSymbol": "UINK",
 	});
 
-	let initial_authorities: Vec<(AccountId, AccountId, AuraId,GrandpaId)> = vec![
+	let initial_authorities: Vec<(AccountId, AccountId, AuraId, GrandpaId)> = vec![
 		(
 			hex!("5a185b3c60676cf602eb4bf0dab183d8eb6f9f33bf8994c248d9572dcf09de5b").into(),
 			hex!("5a185b3c60676cf602eb4bf0dab183d8eb6f9f33bf8994c248d9572dcf09de5b").into(),

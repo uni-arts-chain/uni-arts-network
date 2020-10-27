@@ -212,8 +212,8 @@ impl pallet_session::Trait for Runtime {
 	type Event = Event;
 	type ValidatorId = AccountId;
 	type ValidatorIdOf = ValidatorIdOf;
-	type ShouldEndSession = pallet_session::PeriodicSessions<Period, Offset>;
-	type NextSessionRotation = pallet_session::PeriodicSessions<Period, Offset>;
+	type ShouldEndSession = ValidatorSet;
+	type NextSessionRotation = ValidatorSet;
 	type SessionManager = ValidatorSet;
 	type SessionHandler = <opaque::SessionKeys as OpaqueKeys>::KeyTypeIdProviders;
 	type Keys = opaque::SessionKeys;
@@ -325,7 +325,7 @@ parameter_types! {
 }
 
 impl pallet_transaction_payment::Trait for Runtime {
-	type Currency = Balances;
+	type Currency = Uart;
 	type OnTransactionPayment = ();
 	type TransactionByteFee = TransactionByteFee;
 	type WeightToFee = IdentityFee<Balance>;
@@ -342,7 +342,7 @@ parameter_types! {
 
 impl pallet_nicks::Trait for Runtime {
 	/// The Balances pallet implements the ReservableCurrency trait.
-	type Currency = pallet_balances::Module<Runtime>;
+	type Currency = Uart;
 	/// Use the NickReservationFee from the parameter_types block.
 	type ReservationFee = NickReservationFee;
 	/// No action is taken when deposits are forfeited.
@@ -376,7 +376,7 @@ impl pallet_assets::Trait for Runtime {
 impl pallet_names::Trait for Runtime {
 	type Name = Vec<u8>;
 	type Value = Vec<u8>;
-	type Currency = pallet_balances::Module<Self>;
+	type Currency = Uart;
 	type Event = Event;
 
 	fn get_name_fee(op: &pallet_names::Operation<Self>) -> Option<Balance> {
@@ -423,12 +423,12 @@ construct_runtime!(
 		System: frame_system::{Module, Call, Config, Storage, Event<T>},
 		RandomnessCollectiveFlip: pallet_randomness_collective_flip::{Module, Call, Storage},
 		Timestamp: pallet_timestamp::{Module, Call, Storage, Inherent},
-		
+
+		Session: pallet_session::{Module, Call, Storage, Event, Config<T>},
+		ValidatorSet: pallet_validator_set::{Module, Call, Storage, Event<T>, Config<T>},
 		Aura: pallet_aura::{Module, Config<T>, Inherent},
 		Grandpa: pallet_grandpa::{Module, Call, Storage, Config, Event},
-		Session: pallet_session::{Module, Call, Storage, Event, Config<T>},
 		Rewards: pallet_rewards::{Module, Storage},
-		ValidatorSet: pallet_validator_set::{Module, Call, Storage, Event<T>, Config<T>},
 
 		Nicks: pallet_nicks::{Module, Call, Storage, Event<T>},
 		Balances: pallet_balances::{Module, Call, Storage, Config<T>, Event<T>},

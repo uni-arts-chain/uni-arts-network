@@ -30,6 +30,7 @@ COPY node  ./node/
 COPY pallets ./pallets/
 COPY runtime ./runtime/
 COPY scripts ./scripts/
+COPY primitives ./primitives/
 COPY README.md README.md
 COPY Cargo* ./
 

@@ -66,10 +66,10 @@ pub fn staging_config() -> Result<ChainSpec, String> {
 
 	let properties = serde_json::json!({
 		"ss58Format": 2,
-    "tokenDecimals": 12,
-    "tokenSymbol": "UART",
-    "uinkDecimals": 12,
-    "uinkSymbol": "UINK",
+		"tokenDecimals": 12,
+		"tokenSymbol": "UART",
+		"uinkDecimals": 12,
+		"uinkSymbol": "UINK",
 	});
 
 	let initial_authorities: Vec<(AccountId, AccountId, AuraId, GrandpaId)> = vec![
@@ -128,6 +128,14 @@ pub fn staging_config() -> Result<ChainSpec, String> {
 pub fn development_config() -> Result<ChainSpec, String> {
 	let wasm_binary = WASM_BINARY.ok_or("Development wasm binary not available".to_string())?;
 
+	let properties = serde_json::json!({
+		"ss58Format": 2,
+		"tokenDecimals": 12,
+		"tokenSymbol": "UART",
+		"uinkDecimals": 12,
+		"uinkSymbol": "UINK",
+	});
+
 	Ok(ChainSpec::from_genesis(
 		// Name
 		"Development",
@@ -158,7 +166,7 @@ pub fn development_config() -> Result<ChainSpec, String> {
 		// Protocol ID
 		None,
 		// Properties
-		None,
+		serde_json::from_value(properties).ok(),
 		// Extensions
 		None,
 	))
@@ -166,6 +174,14 @@ pub fn development_config() -> Result<ChainSpec, String> {
 
 pub fn local_testnet_config() -> Result<ChainSpec, String> {
 	let wasm_binary = WASM_BINARY.ok_or("Development wasm binary not available".to_string())?;
+
+	let properties = serde_json::json!({
+		"ss58Format": 2,
+		"tokenDecimals": 12,
+		"tokenSymbol": "UART",
+		"uinkDecimals": 12,
+		"uinkSymbol": "UINK",
+	});
 
 	Ok(ChainSpec::from_genesis(
 		// Name
@@ -206,7 +222,7 @@ pub fn local_testnet_config() -> Result<ChainSpec, String> {
 		// Protocol ID
 		None,
 		// Properties
-		None,
+		serde_json::from_value(properties).ok(),
 		// Extensions
 		None,
 	))

@@ -1,7 +1,7 @@
 use sp_core::{Pair, Public, crypto::UncheckedInto, sr25519};
 
 use uart_runtime::{
-	AccountId, UartConfig, GenesisConfig, SessionConfig, ValidatorSetConfig,
+	AccountId, UartConfig, GenesisConfig, SessionConfig, ValidatorSetConfig, VestingConfig,
 	SudoConfig, SystemConfig, WASM_BINARY, Signature, Balance, currency::*,
 	opaque::SessionKeys
 };
@@ -247,5 +247,6 @@ fn testnet_genesis(
 			// Assign network admin rights.
 			key: root_key,
 		}),
+		pallet_vesting: Some(VestingConfig { vesting: vec![] }),
 	}
 }

@@ -3872,6 +3872,21 @@ dependencies = [
 ]
 
 [[package]]
+name = "pallet-vesting"
+version = "2.0.0-rc6"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "2aa7dbb145b24a0995e10298e5962dea31d2256b946b7a464a3fd6ec90473990"
+dependencies = [
+ "enumflags2",
+ "frame-support",
+ "frame-system",
+ "parity-scale-codec",
+ "serde",
+ "sp-runtime",
+ "sp-std",
+]
+
+[[package]]
 name = "parity-db"
 version = "0.1.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -7502,6 +7517,7 @@ dependencies = [
  "pallet-transaction-payment",
  "pallet-transaction-payment-rpc-runtime-api",
  "pallet-validator-set",
+ "pallet-vesting",
  "parity-scale-codec",
  "serde",
  "sp-api",

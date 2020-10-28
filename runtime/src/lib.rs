@@ -13,7 +13,7 @@ use sp_runtime::{
 	transaction_validity::{TransactionValidity, TransactionSource}
 };
 use sp_runtime::traits::{
-	BlakeTwo256, Block as BlockT, IdentityLookup, NumberFor, Saturating, 
+	BlakeTwo256, Block as BlockT, IdentityLookup, NumberFor, Saturating, ConvertInto,
 	Convert, OpaqueKeys
 };
 use sp_api::impl_runtime_apis;
@@ -261,6 +261,18 @@ impl pallet_rewards::Trait for Runtime {
 }
 
 parameter_types! {
+	pub const MinVestedTransfer: Balance = 100 * DOLLARS;
+}
+
+impl pallet_vesting::Trait for Runtime {
+	type Event = Event;
+	type Currency = Uart;
+	type BlockNumberToBalance = ConvertInto;
+	type MinVestedTransfer = MinVestedTransfer;
+	type WeightInfo = ();
+}
+
+parameter_types! {
 	pub const MinimumPeriod: u64 = SLOT_DURATION / 2;
 }
 
@@ -429,6 +441,7 @@ construct_runtime!(
 		Aura: pallet_aura::{Module, Config<T>, Inherent},
 		Grandpa: pallet_grandpa::{Module, Call, Storage, Config, Event},
 		Rewards: pallet_rewards::{Module, Storage},
+		Vesting: pallet_vesting::{Module, Call, Storage, Event<T>, Config<T>},
 
 		Nicks: pallet_nicks::{Module, Call, Storage, Event<T>},
 		Balances: pallet_balances::{Module, Call, Storage, Config<T>, Event<T>},

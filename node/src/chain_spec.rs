@@ -1,7 +1,8 @@
 use sp_core::{Pair, Public, crypto::UncheckedInto, sr25519};
 
 use uart_runtime::{
-	AccountId, UartConfig, GenesisConfig, SessionConfig,
+	get_all_module_accounts,
+	AccountId, UartConfig, GenesisConfig, SessionConfig, ValidatorSetConfig, VestingConfig,
 	SudoConfig, SystemConfig, WASM_BINARY, Signature, Balance, currency::*,
 	opaque::SessionKeys
 };
@@ -66,13 +67,13 @@ pub fn staging_config() -> Result<ChainSpec, String> {
 
 	let properties = serde_json::json!({
 		"ss58Format": 2,
-    "tokenDecimals": 12,
-    "tokenSymbol": "UART",
-    "uinkDecimals": 12,
-    "uinkSymbol": "UINK",
+		"tokenDecimals": 12,
+		"tokenSymbol": "UART",
+		"uinkDecimals": 12,
+		"uinkSymbol": "UINK",
 	});
 
-	let initial_authorities: Vec<(AccountId, AccountId, AuraId,GrandpaId)> = vec![
+	let initial_authorities: Vec<(AccountId, AccountId, AuraId, GrandpaId)> = vec![
 		(
 			hex!("5a185b3c60676cf602eb4bf0dab183d8eb6f9f33bf8994c248d9572dcf09de5b").into(),
 			hex!("5a185b3c60676cf602eb4bf0dab183d8eb6f9f33bf8994c248d9572dcf09de5b").into(),
@@ -128,6 +129,14 @@ pub fn staging_config() -> Result<ChainSpec, String> {
 pub fn development_config() -> Result<ChainSpec, String> {
 	let wasm_binary = WASM_BINARY.ok_or("Development wasm binary not available".to_string())?;
 
+	let properties = serde_json::json!({
+		"ss58Format": 2,
+		"tokenDecimals": 12,
+		"tokenSymbol": "UART",
+		"uinkDecimals": 12,
+		"uinkSymbol": "UINK",
+	});
+
 	Ok(ChainSpec::from_genesis(
 		// Name
 		"Development",
@@ -158,7 +167,7 @@ pub fn development_config() -> Result<ChainSpec, String> {
 		// Protocol ID
 		None,
 		// Properties
-		None,
+		serde_json::from_value(properties).ok(),
 		// Extensions
 		None,
 	))
@@ -166,6 +175,14 @@ pub fn development_config() -> Result<ChainSpec, String> {
 
 pub fn local_testnet_config() -> Result<ChainSpec, String> {
 	let wasm_binary = WASM_BINARY.ok_or("Development wasm binary not available".to_string())?;
+
+	let properties = serde_json::json!({
+		"ss58Format": 2,
+		"tokenDecimals": 12,
+		"tokenSymbol": "UART",
+		"uinkDecimals": 12,
+		"uinkSymbol": "UINK",
+	});
 
 	Ok(ChainSpec::from_genesis(
 		// Name
@@ -206,7 +223,7 @@ pub fn local_testnet_config() -> Result<ChainSpec, String> {
 		// Protocol ID
 		None,
 		// Properties
-		None,
+		serde_json::from_value(properties).ok(),
 		// Extensions
 		None,
 	))
@@ -228,7 +245,17 @@ fn testnet_genesis(
 		}),
 		pallet_balances: None,
 		pallet_balances_Instance0: Some(UartConfig {
-			balances: endowed_accounts
+			balances: endowed_accounts.iter()
+				.map(|x| (x.0.clone(), x.1.clone()))
+				.chain(
+					get_all_module_accounts()
+						.iter()
+						.map(|x| (x.clone(), 100_000_000 * UART)),
+				)
+				.collect(),
+		}),
+		pallet_validator_set: Some(ValidatorSetConfig {
+			validators: initial_authorities.iter().map(|x| x.0.clone()).collect::<Vec<_>>(),
 		}),
 		pallet_balances_Instance1: None,
 		pallet_session: Some(SessionConfig {
@@ -244,5 +271,8 @@ fn testnet_genesis(
 			// Assign network admin rights.
 			key: root_key,
 		}),
+		pallet_vesting: Some(VestingConfig { vesting: vec![] }),
+		pallet_collective_Instance1: Some(Default::default()),
+		pallet_treasury: Some(Default::default()),
 	}
 }

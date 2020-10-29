@@ -9,12 +9,11 @@ include!(concat!(env!("OUT_DIR"), "/wasm_binary.rs"));
 use sp_std::prelude::*;
 use sp_core::{crypto::KeyTypeId, OpaqueMetadata};
 use sp_runtime::{
-	ModuleId,
 	ApplyExtrinsicResult, generic, create_runtime_str, impl_opaque_keys,
 	transaction_validity::{TransactionValidity, TransactionSource}
 };
 use sp_runtime::traits::{
-	BlakeTwo256, Block as BlockT, IdentityLookup, NumberFor, Saturating, 
+	BlakeTwo256, Block as BlockT, IdentityLookup, NumberFor, Saturating, ConvertInto, AccountIdConversion,
 	Convert, OpaqueKeys, SaturatedConversion, Bounded
 };
 
@@ -29,12 +28,12 @@ use sp_version::NativeVersion;
 // A few exports that help ease life for downstream crates.
 #[cfg(any(feature = "std", test))]
 pub use sp_runtime::BuildStorage;
+pub use sp_runtime::{Permill, Perbill, Percent, traits::{Identity}, ModuleId};
 pub use pallet_timestamp::Call as TimestampCall;
 pub use pallet_balances::Call as BalancesCall;
-pub use sp_runtime::{Permill, Perbill, traits::{Identity}};
 pub use frame_support::{
 	construct_runtime, parameter_types, StorageValue,
-	traits::{KeyOwnerProofSystem, Randomness, StorageMapShim, Currency},
+	traits::{KeyOwnerProofSystem, Randomness, StorageMapShim, Currency, Contains, ContainsLengthBound},
 	weights::{
 		Weight, IdentityFee,
 		constants::{BlockExecutionWeight, ExtrinsicBaseWeight, RocksDbWeight, WEIGHT_PER_SECOND},
@@ -53,6 +52,7 @@ pub use pallet_nft;
 pub use pallet_nicks;
 pub use pallet_rewards;
 pub use pallet_staking;
+pub use pallet_validator_set;
 
 
 pub mod currency {
@@ -121,6 +121,19 @@ pub fn native_version() -> NativeVersion {
 		runtime_version: VERSION,
 		can_author_with: Default::default(),
 	}
+}
+
+// Module accounts of runtime
+parameter_types! {
+	pub const UniArtsTreasuryModuleId: ModuleId = ModuleId(*b"art/trsy");
+	pub ZeroAccountId: AccountId = AccountId::from([0u8; 32]);
+}
+
+pub fn get_all_module_accounts() -> Vec<AccountId> {
+	vec![
+		UniArtsTreasuryModuleId::get().into_account(),
+		ZeroAccountId::get(),
+	]
 }
 
 parameter_types! {
@@ -202,6 +215,10 @@ parameter_types! {
 	pub const Period: BlockNumber = 5;
 }
 
+impl pallet_validator_set::Trait for Runtime {
+	type Event = Event;
+}
+
 pub struct ValidatorIdOf;
 impl<T> Convert<T, Option<T>> for ValidatorIdOf {
 	fn convert(a: T) -> Option<T> { 
@@ -213,9 +230,9 @@ impl pallet_session::Trait for Runtime {
 	type Event = Event;
 	type ValidatorId = AccountId;
 	type ValidatorIdOf = ValidatorIdOf;
-	type ShouldEndSession = pallet_session::PeriodicSessions<Period, Offset>;
-	type NextSessionRotation = pallet_session::PeriodicSessions<Period, Offset>;
-	type SessionManager = ();
+	type ShouldEndSession = ValidatorSet;
+	type NextSessionRotation = ValidatorSet;
+	type SessionManager = ValidatorSet;
 	type SessionHandler = <opaque::SessionKeys as OpaqueKeys>::KeyTypeIdProviders;
 	type Keys = opaque::SessionKeys;
 	type DisabledValidatorsThreshold = DisabledValidatorsThreshold;
@@ -283,6 +300,18 @@ impl pallet_staking::Trait for Runtime {
 }
 
 parameter_types! {
+	pub const MinVestedTransfer: Balance = 100 * DOLLARS;
+}
+
+impl pallet_vesting::Trait for Runtime {
+	type Event = Event;
+	type Currency = Uart;
+	type BlockNumberToBalance = ConvertInto;
+	type MinVestedTransfer = MinVestedTransfer;
+	type WeightInfo = ();
+}
+
+parameter_types! {
 	pub const MinimumPeriod: u64 = SLOT_DURATION / 2;
 }
 
@@ -347,7 +376,7 @@ parameter_types! {
 }
 
 impl pallet_transaction_payment::Trait for Runtime {
-	type Currency = Balances;
+	type Currency = Uart;
 	type OnTransactionPayment = ();
 	type TransactionByteFee = TransactionByteFee;
 	type WeightToFee = IdentityFee<Balance>;
@@ -364,7 +393,7 @@ parameter_types! {
 
 impl pallet_nicks::Trait for Runtime {
 	/// The Balances pallet implements the ReservableCurrency trait.
-	type Currency = pallet_balances::Module<Runtime>;
+	type Currency = Uart;
 	/// Use the NickReservationFee from the parameter_types block.
 	type ReservationFee = NickReservationFee;
 	/// No action is taken when deposits are forfeited.
@@ -398,7 +427,7 @@ impl pallet_assets::Trait for Runtime {
 impl pallet_names::Trait for Runtime {
 	type Name = Vec<u8>;
 	type Value = Vec<u8>;
-	type Currency = pallet_balances::Module<Self>;
+	type Currency = Uart;
 	type Event = Event;
 
 	fn get_name_fee(op: &pallet_names::Operation<Self>) -> Option<Balance> {
@@ -435,6 +464,82 @@ impl pallet_nft::Trait for Runtime {
 	type Event = Event;
 }
 
+// Uni-Art Treasury
+parameter_types! {
+	pub const GeneralCouncilMotionDuration: BlockNumber = 0;
+	pub const GeneralCouncilMaxProposals: u32 = 100;
+}
+
+type GeneralCouncilInstance = pallet_collective::Instance1;
+impl pallet_collective::Trait<GeneralCouncilInstance> for Runtime {
+	type Origin = Origin;
+	type Proposal = Call;
+	type Event = Event;
+	type MotionDuration = GeneralCouncilMotionDuration;
+	type MaxProposals = GeneralCouncilMaxProposals;
+	type WeightInfo = ();
+}
+
+pub struct GeneralCouncilProvider;
+impl Contains<AccountId> for GeneralCouncilProvider {
+	fn contains(who: &AccountId) -> bool {
+		GeneralCouncil::is_member(who)
+	}
+
+	fn sorted_members() -> Vec<AccountId> {
+		GeneralCouncil::members()
+	}
+
+	#[cfg(feature = "runtime-benchmarks")]
+	fn add(_: &AccountId) {
+		todo!()
+	}
+}
+
+impl ContainsLengthBound for GeneralCouncilProvider {
+	fn max_len() -> usize {
+		100
+	}
+	fn min_len() -> usize {
+		0
+	}
+}
+
+// Uni-Art Treasury
+parameter_types! {
+	pub const ProposalBond: Permill = Permill::from_percent(5);
+	pub const ProposalBondMinimum: Balance = DOLLARS;
+	pub const SpendPeriod: BlockNumber = DAYS;
+	pub const Burn: Permill = Permill::from_percent(0);
+	pub const TipCountdown: BlockNumber = DAYS;
+	pub const TipFindersFee: Percent = Percent::from_percent(10);
+	pub const TipReportDepositBase: Balance = DOLLARS;
+	pub const TipReportDepositPerByte: Balance = CENTS;
+	pub const SevenDays: BlockNumber = 7 * DAYS;
+	pub const ZeroDay: BlockNumber = 0;
+	pub const OneDay: BlockNumber = DAYS;
+}
+
+impl pallet_treasury::Trait for Runtime {
+	type ModuleId = UniArtsTreasuryModuleId;
+	type Currency = Uart;
+	type ApproveOrigin = frame_system::EnsureRoot<AccountId>;
+	type RejectOrigin = frame_system::EnsureRoot<AccountId>;
+	type Tippers = GeneralCouncilProvider;
+	type TipCountdown = TipCountdown;
+	type TipFindersFee = TipFindersFee;
+	type TipReportDepositBase = TipReportDepositBase;
+	type TipReportDepositPerByte = TipReportDepositPerByte;
+	type Event = Event;
+	type ProposalBond = ProposalBond;
+	type ProposalBondMinimum = ProposalBondMinimum;
+	type ProposalRejection = UniArtsTreasury;
+	type SpendPeriod = SpendPeriod;
+	type Burn = Burn;
+	type BurnDestination = ();
+	type WeightInfo = ();
+}
+
 // Create the runtime by composing the FRAME pallets that were previously configured.
 construct_runtime!(
 	pub enum Runtime where
@@ -445,17 +550,23 @@ construct_runtime!(
 		System: frame_system::{Module, Call, Config, Storage, Event<T>},
 		RandomnessCollectiveFlip: pallet_randomness_collective_flip::{Module, Call, Storage},
 		Timestamp: pallet_timestamp::{Module, Call, Storage, Inherent},
-		
+
+		Session: pallet_session::{Module, Call, Storage, Event, Config<T>},
+		ValidatorSet: pallet_validator_set::{Module, Call, Storage, Event<T>, Config<T>},
 		Aura: pallet_aura::{Module, Config<T>, Inherent},
 		Grandpa: pallet_grandpa::{Module, Call, Storage, Config, Event},
-		Session: pallet_session::{Module, Call, Storage, Event, Config<T>},
 		Rewards: pallet_rewards::{Module, Storage},
 		Staking: pallet_staking::{Module, Call, Storage, Event<T>},
+		Vesting: pallet_vesting::{Module, Call, Storage, Event<T>, Config<T>},
 
 		Nicks: pallet_nicks::{Module, Call, Storage, Event<T>},
 		Balances: pallet_balances::{Module, Call, Storage, Config<T>, Event<T>},
 		Uart: pallet_balances::<Instance0>::{Module, Call, Storage, Config<T>, Event<T>},
 		Uink: pallet_balances::<Instance1>::{Module, Call, Storage, Config<T>, Event<T>},
+
+		// Governance
+		GeneralCouncil: pallet_collective::<Instance1>::{Module, Call, Storage, Origin<T>, Event<T>, Config<T>},
+		UniArtsTreasury: pallet_treasury::{Module, Call, Storage, Config, Event<T>},
 
 		TransactionPayment: pallet_transaction_payment::{Module, Storage},
 		Sudo: pallet_sudo::{Module, Call, Config<T>, Storage, Event<T>},

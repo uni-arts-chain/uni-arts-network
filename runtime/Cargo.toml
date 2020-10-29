@@ -37,17 +37,22 @@ sp-transaction-pool = { version = "2.0.0-rc6", default-features = false  }
 sp-version = { version = "2.0.0-rc6", default-features = false }
 pallet-session = { version = "2.0.0-rc6", default-features = false, features = ["historical"] }
 pallet-nicks = { version = "2.0.0-rc6", default-features = false }
+pallet-vesting = { version = "2.0.0-rc6", default-features = false }
+pallet-collective = { version = "2.0.0-rc6", default-features = false }
+pallet-treasury = { version = "2.0.0-rc6", default-features = false }
 
 # Used for the node template's RPCs
 frame-system-rpc-runtime-api = { version = "2.0.0-rc6", default-features = false }
 pallet-transaction-payment-rpc-runtime-api = { version = "2.0.0-rc6", default-features = false }
 
+# Uni-Arts pallets
 pallet-certificate = { path = "../pallets/certificate", default-features = false }
 pallet-assets = { path = "../pallets/assets", default-features = false }
 pallet-names = { path = "../pallets/names", default-features = false }
 pallet-nft = { path = "../pallets/nft", default-features = false }
 pallet-rewards = { path = "../pallets/rewards", default-features = false }
 pallet-staking = { path = "../pallets/staking", default-features = false }
+pallet-validator-set = { path = "../pallets/validator-set", default-features = false }
 primitives = { package = "uniart-primitives", path = "../primitives", default-features = false }
 
 [build-dependencies]
@@ -62,6 +67,9 @@ std = [
 	"pallet-aura/std",
 	"pallet-balances/std",
 	"pallet-grandpa/std",
+	"pallet-vesting/std",
+	"pallet-collective/std",
+	"pallet-treasury/std",
 	"pallet-randomness-collective-flip/std",
 	"pallet-sudo/std",
 	"pallet-timestamp/std",
@@ -69,6 +77,7 @@ std = [
   	"pallet-transaction-payment-rpc-runtime-api/std",
 	"pallet-names/std",
 	"pallet-nft/std",
+	"pallet-validator-set/std",
 	"serde",
 	"sp-api/std",
 	"sp-block-builder/std",

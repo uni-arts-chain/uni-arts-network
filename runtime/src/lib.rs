@@ -9,13 +9,15 @@ include!(concat!(env!("OUT_DIR"), "/wasm_binary.rs"));
 use sp_std::prelude::*;
 use sp_core::{crypto::KeyTypeId, OpaqueMetadata};
 use sp_runtime::{
+	ModuleId,
 	ApplyExtrinsicResult, generic, create_runtime_str, impl_opaque_keys,
 	transaction_validity::{TransactionValidity, TransactionSource}
 };
 use sp_runtime::traits::{
 	BlakeTwo256, Block as BlockT, IdentityLookup, NumberFor, Saturating, 
-	Convert, OpaqueKeys
+	Convert, OpaqueKeys, SaturatedConversion, Bounded
 };
+
 use sp_api::impl_runtime_apis;
 use sp_consensus_aura::sr25519::AuthorityId as AuraId;
 use pallet_grandpa::{AuthorityId as GrandpaId, AuthorityList as GrandpaAuthorityList};
@@ -39,7 +41,10 @@ pub use frame_support::{
 	},
 };
 
-pub use primitives::{BlockNumber, Signature, AccountId, AccountIndex, Balance, Index, Hash, DigestItem, TokenSymbol, CurrencyId };
+pub use primitives::{
+	BlockNumber, Signature, AccountId, AccountIndex, Balance, Index, Hash, DigestItem, 
+	TokenSymbol, CurrencyId,
+};
 
 /// Import pallets.
 pub use pallet_certificate;
@@ -47,6 +52,7 @@ pub use pallet_assets;
 pub use pallet_nft;
 pub use pallet_nicks;
 pub use pallet_rewards;
+pub use pallet_staking;
 
 
 pub mod currency {
@@ -238,7 +244,10 @@ impl pallet_grandpa::Trait for Runtime {
 }
 
 parameter_types! {
-	pub const RewardPerBlock: Balance = 1 * UART;
+	pub const MiningRewardPerBlock: Balance = 1 * UART;
+	pub const StakingRewardPerBlock: Balance = 1 * UART;
+	pub const AmpFactor: Balance = 1e12 as Balance;
+	pub const StakingModuleId: ModuleId = ModuleId(*b"staking_");
 }
 
 pub struct AccoundIdOf;
@@ -252,7 +261,25 @@ impl pallet_rewards::Trait for Runtime {
 	type AccoundIdOf = AccoundIdOf;
 	type Balance = Balance;
 	type Currency = Uart;
-	type RewardPerBlock = RewardPerBlock;
+	type RewardPerBlock = MiningRewardPerBlock;
+}
+
+pub struct ConvertNumberToBalance;
+impl<BlockNumber, Balance: Bounded + core::convert::From<BlockNumber>> Convert<BlockNumber, Balance> for ConvertNumberToBalance {
+	fn convert(a: BlockNumber) -> Balance {
+		Balance::saturated_from::<BlockNumber>(a)
+	}
+}
+
+
+impl pallet_staking::Trait for Runtime {
+	type ModuleId = StakingModuleId;
+	type Event = Event;
+	type Currency = Uart;
+	type RewardPerBlock = StakingRewardPerBlock;
+	type Id = u32;
+	type AmpFactor = AmpFactor;
+	type ConvertNumberToBalance = ConvertNumberToBalance;
 }
 
 parameter_types! {
@@ -423,6 +450,7 @@ construct_runtime!(
 		Grandpa: pallet_grandpa::{Module, Call, Storage, Config, Event},
 		Session: pallet_session::{Module, Call, Storage, Event, Config<T>},
 		Rewards: pallet_rewards::{Module, Storage},
+		Staking: pallet_staking::{Module, Call, Storage, Event<T>},
 
 		Nicks: pallet_nicks::{Module, Call, Storage, Event<T>},
 		Balances: pallet_balances::{Module, Call, Storage, Config<T>, Event<T>},

@@ -38,6 +38,8 @@ sp-version = { version = "2.0.0-rc6", default-features = false }
 pallet-session = { version = "2.0.0-rc6", default-features = false, features = ["historical"] }
 pallet-nicks = { version = "2.0.0-rc6", default-features = false }
 pallet-vesting = { version = "2.0.0-rc6", default-features = false }
+pallet-collective = { version = "2.0.0-rc6", default-features = false }
+pallet-treasury = { version = "2.0.0-rc6", default-features = false }
 
 # Used for the node template's RPCs
 frame-system-rpc-runtime-api = { version = "2.0.0-rc6", default-features = false }
@@ -65,6 +67,8 @@ std = [
 	"pallet-balances/std",
 	"pallet-grandpa/std",
 	"pallet-vesting/std",
+	"pallet-collective/std",
+	"pallet-treasury/std",
 	"pallet-randomness-collective-flip/std",
 	"pallet-sudo/std",
 	"pallet-timestamp/std",

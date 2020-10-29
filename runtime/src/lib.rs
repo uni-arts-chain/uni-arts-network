@@ -13,7 +13,7 @@ use sp_runtime::{
 	transaction_validity::{TransactionValidity, TransactionSource}
 };
 use sp_runtime::traits::{
-	BlakeTwo256, Block as BlockT, IdentityLookup, NumberFor, Saturating, ConvertInto,
+	BlakeTwo256, Block as BlockT, IdentityLookup, NumberFor, Saturating, ConvertInto, AccountIdConversion,
 	Convert, OpaqueKeys
 };
 use sp_api::impl_runtime_apis;
@@ -27,12 +27,12 @@ use sp_version::NativeVersion;
 // A few exports that help ease life for downstream crates.
 #[cfg(any(feature = "std", test))]
 pub use sp_runtime::BuildStorage;
+pub use sp_runtime::{Permill, Perbill, Percent, traits::{Identity}, ModuleId};
 pub use pallet_timestamp::Call as TimestampCall;
 pub use pallet_balances::Call as BalancesCall;
-pub use sp_runtime::{Permill, Perbill, traits::{Identity}};
 pub use frame_support::{
 	construct_runtime, parameter_types, StorageValue,
-	traits::{KeyOwnerProofSystem, Randomness, StorageMapShim, Currency},
+	traits::{KeyOwnerProofSystem, Randomness, StorageMapShim, Currency, Contains, ContainsLengthBound},
 	weights::{
 		Weight, IdentityFee,
 		constants::{BlockExecutionWeight, ExtrinsicBaseWeight, RocksDbWeight, WEIGHT_PER_SECOND},
@@ -116,6 +116,19 @@ pub fn native_version() -> NativeVersion {
 		runtime_version: VERSION,
 		can_author_with: Default::default(),
 	}
+}
+
+// Module accounts of runtime
+parameter_types! {
+	pub const UniArtsTreasuryModuleId: ModuleId = ModuleId(*b"art/trsy");
+	pub ZeroAccountId: AccountId = AccountId::from([0u8; 32]);
+}
+
+pub fn get_all_module_accounts() -> Vec<AccountId> {
+	vec![
+		UniArtsTreasuryModuleId::get().into_account(),
+		ZeroAccountId::get(),
+	]
 }
 
 parameter_types! {
@@ -425,6 +438,82 @@ impl pallet_nft::Trait for Runtime {
 	type Event = Event;
 }
 
+// Uni-Art Treasury
+parameter_types! {
+	pub const GeneralCouncilMotionDuration: BlockNumber = 0;
+	pub const GeneralCouncilMaxProposals: u32 = 100;
+}
+
+type GeneralCouncilInstance = pallet_collective::Instance1;
+impl pallet_collective::Trait<GeneralCouncilInstance> for Runtime {
+	type Origin = Origin;
+	type Proposal = Call;
+	type Event = Event;
+	type MotionDuration = GeneralCouncilMotionDuration;
+	type MaxProposals = GeneralCouncilMaxProposals;
+	type WeightInfo = ();
+}
+
+pub struct GeneralCouncilProvider;
+impl Contains<AccountId> for GeneralCouncilProvider {
+	fn contains(who: &AccountId) -> bool {
+		GeneralCouncil::is_member(who)
+	}
+
+	fn sorted_members() -> Vec<AccountId> {
+		GeneralCouncil::members()
+	}
+
+	#[cfg(feature = "runtime-benchmarks")]
+	fn add(_: &AccountId) {
+		todo!()
+	}
+}
+
+impl ContainsLengthBound for GeneralCouncilProvider {
+	fn max_len() -> usize {
+		100
+	}
+	fn min_len() -> usize {
+		0
+	}
+}
+
+// Uni-Art Treasury
+parameter_types! {
+	pub const ProposalBond: Permill = Permill::from_percent(5);
+	pub const ProposalBondMinimum: Balance = DOLLARS;
+	pub const SpendPeriod: BlockNumber = DAYS;
+	pub const Burn: Permill = Permill::from_percent(0);
+	pub const TipCountdown: BlockNumber = DAYS;
+	pub const TipFindersFee: Percent = Percent::from_percent(10);
+	pub const TipReportDepositBase: Balance = DOLLARS;
+	pub const TipReportDepositPerByte: Balance = CENTS;
+	pub const SevenDays: BlockNumber = 7 * DAYS;
+	pub const ZeroDay: BlockNumber = 0;
+	pub const OneDay: BlockNumber = DAYS;
+}
+
+impl pallet_treasury::Trait for Runtime {
+	type ModuleId = UniArtsTreasuryModuleId;
+	type Currency = Uart;
+	type ApproveOrigin = frame_system::EnsureRoot<AccountId>;
+	type RejectOrigin = frame_system::EnsureRoot<AccountId>;
+	type Tippers = GeneralCouncilProvider;
+	type TipCountdown = TipCountdown;
+	type TipFindersFee = TipFindersFee;
+	type TipReportDepositBase = TipReportDepositBase;
+	type TipReportDepositPerByte = TipReportDepositPerByte;
+	type Event = Event;
+	type ProposalBond = ProposalBond;
+	type ProposalBondMinimum = ProposalBondMinimum;
+	type ProposalRejection = UniArtsTreasury;
+	type SpendPeriod = SpendPeriod;
+	type Burn = Burn;
+	type BurnDestination = ();
+	type WeightInfo = ();
+}
+
 // Create the runtime by composing the FRAME pallets that were previously configured.
 construct_runtime!(
 	pub enum Runtime where
@@ -447,6 +536,10 @@ construct_runtime!(
 		Balances: pallet_balances::{Module, Call, Storage, Config<T>, Event<T>},
 		Uart: pallet_balances::<Instance0>::{Module, Call, Storage, Config<T>, Event<T>},
 		Uink: pallet_balances::<Instance1>::{Module, Call, Storage, Config<T>, Event<T>},
+
+		// Governance
+		GeneralCouncil: pallet_collective::<Instance1>::{Module, Call, Storage, Origin<T>, Event<T>, Config<T>},
+		UniArtsTreasury: pallet_treasury::{Module, Call, Storage, Config, Event<T>},
 
 		TransactionPayment: pallet_transaction_payment::{Module, Storage},
 		Sudo: pallet_sudo::{Module, Call, Config<T>, Storage, Event<T>},

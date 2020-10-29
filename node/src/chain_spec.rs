@@ -264,5 +264,7 @@ fn testnet_genesis(
 			key: root_key,
 		}),
 		pallet_vesting: Some(VestingConfig { vesting: vec![] }),
+		pallet_collective_Instance1: Some(Default::default()),
+		pallet_treasury: Some(Default::default()),
 	}
 }

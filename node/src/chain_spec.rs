@@ -1,6 +1,7 @@
 use sp_core::{Pair, Public, crypto::UncheckedInto, sr25519};
 
 use uart_runtime::{
+	get_all_module_accounts,
 	AccountId, UartConfig, GenesisConfig, SessionConfig, ValidatorSetConfig, VestingConfig,
 	SudoConfig, SystemConfig, WASM_BINARY, Signature, Balance, currency::*,
 	opaque::SessionKeys
@@ -244,7 +245,14 @@ fn testnet_genesis(
 		}),
 		pallet_balances: None,
 		pallet_balances_Instance0: Some(UartConfig {
-			balances: endowed_accounts
+			balances: endowed_accounts.iter()
+				.map(|x| (x.0.clone(), x.1.clone()))
+				.chain(
+					get_all_module_accounts()
+						.iter()
+						.map(|x| (x.clone(), 100_000_000 * UART)),
+				)
+				.collect(),
 		}),
 		pallet_validator_set: Some(ValidatorSetConfig {
 			validators: initial_authorities.iter().map(|x| x.0.clone()).collect::<Vec<_>>(),

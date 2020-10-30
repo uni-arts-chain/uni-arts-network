@@ -52,6 +52,7 @@ pallet-assets = { path = "../pallets/assets", default-features = false }
 pallet-names = { path = "../pallets/names", default-features = false }
 pallet-nft = { path = "../pallets/nft", default-features = false }
 pallet-rewards = { path = "../pallets/rewards", default-features = false }
+pallet-staking = { path = "../pallets/staking", default-features = false }
 pallet-validator-set = { path = "../pallets/validator-set", default-features = false }
 primitives = { package = "uniart-primitives", path = "../primitives", default-features = false }
 

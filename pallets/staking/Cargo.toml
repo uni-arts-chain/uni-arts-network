@@ -1,5 +1,5 @@
 [package]
-name = "pallet-rewards"
+name = "pallet-staking"
 version = "0.1.0"
 authors = ["yxf <yxf4559@gmail.com>"]
 edition = "2018"
@@ -13,6 +13,3 @@ frame-system = { version = "2.0.0-rc6", default-features = false }
 sp-std = { version = "2.0.0-rc6", default-features = false }
 sp-core = { version = "2.0.0-rc6", default-features = false }
 sp-runtime = { version = "2.0.0-rc6", default-features = false }
-pallet-aura = { version = "2.0.0-rc6", default-features = false }
-pallet-session = { version = "2.0.0-rc6", default-features = false }
-sp-consensus-aura = { version = "0.8.0-rc6", default-features = false }

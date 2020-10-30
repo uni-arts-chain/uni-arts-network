@@ -117,6 +117,7 @@ pub fn native_version() -> NativeVersion {
 // Module accounts of runtime
 parameter_types! {
 	pub const UniArtsTreasuryModuleId: ModuleId = ModuleId(*b"art/trsy");
+	pub const StakingModuleId: ModuleId = ModuleId(*b"staking_");
 	pub ZeroAccountId: AccountId = AccountId::from([0u8; 32]);
 }
 
@@ -255,7 +256,6 @@ parameter_types! {
 	pub const MiningRewardPerBlock: Balance = 1 * UART;
 	pub const StakingRewardPerBlock: Balance = 1 * UART;
 	pub const AmpFactor: Balance = 1e12 as Balance;
-	pub const StakingModuleId: ModuleId = ModuleId(*b"staking_");
 }
 
 pub struct AccoundIdOf;

@@ -30,6 +30,7 @@ use sp_version::NativeVersion;
 
 // Uni-Arts
 use constants::{currency::*};
+type Uart = Balances;
 
 // A few exports that help ease life for downstream crates.
 #[cfg(any(feature = "std", test))]
@@ -580,7 +581,7 @@ construct_runtime!(
 		Vesting: pallet_vesting::{Module, Call, Storage, Event<T>, Config<T>},
 
 		Nicks: pallet_nicks::{Module, Call, Storage, Event<T>},
-		Uart: pallet_balances::{Module, Call, Storage, Config<T>, Event<T>},
+		Balances: pallet_balances::{Module, Call, Storage, Config<T>, Event<T>},
 		// Uart: pallet_balances::<Instance0>::{Module, Call, Storage, Config<T>, Event<T>},
 		Uink: pallet_balances::<Instance1>::{Module, Call, Storage, Config<T>, Event<T>},
 

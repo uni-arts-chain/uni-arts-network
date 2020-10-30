@@ -16,8 +16,10 @@ use sp_runtime::traits::{
 	BlakeTwo256, Block as BlockT, IdentityLookup, NumberFor, Saturating, ConvertInto, AccountIdConversion,
 	Convert, OpaqueKeys
 };
+use frame_system::{EnsureOneOf, EnsureRoot};
 use sp_api::impl_runtime_apis;
 use sp_consensus_aura::sr25519::AuthorityId as AuraId;
+use sp_core::{u32_trait::{_1, _2}, };
 use pallet_grandpa::{AuthorityId as GrandpaId, AuthorityList as GrandpaAuthorityList};
 use pallet_grandpa::fg_primitives;
 use sp_version::RuntimeVersion;
@@ -27,7 +29,7 @@ use sp_version::NativeVersion;
 // A few exports that help ease life for downstream crates.
 #[cfg(any(feature = "std", test))]
 pub use sp_runtime::BuildStorage;
-pub use sp_runtime::{Permill, Perbill, Percent, traits::{Identity}, ModuleId};
+pub use sp_runtime::{Permill, Perbill, Percent, ModuleId};
 pub use pallet_timestamp::Call as TimestampCall;
 pub use pallet_balances::Call as BalancesCall;
 pub use frame_support::{
@@ -57,6 +59,7 @@ pub mod currency {
 	pub const DOLLARS: Balance = UART / 6;
 	pub const CENTS: Balance = UART / 100;
 	pub const MILLICENTS: Balance = UART / 1_000;
+	pub const COIN: Balance = 1_000 * MILLICENTS;
 
 	pub const fn deposit(items: u32, bytes: u32) -> Balance {
 		items as Balance * 20 * DOLLARS + (bytes as Balance) * 100 * MILLICENTS
@@ -514,6 +517,35 @@ impl pallet_treasury::Trait for Runtime {
 	type WeightInfo = ();
 }
 
+type EnsureRootOrMoreThanHalfCouncil = EnsureOneOf<
+	AccountId,
+	EnsureRoot<AccountId>,
+	pallet_collective::EnsureProportionMoreThan<_1, _2, AccountId, GeneralCouncilInstance>,
+>;
+
+parameter_types! {
+	pub const BasicDeposit: Balance = 10 * COIN;            // 258 bytes on-chain
+	pub const FieldDeposit: Balance = 250 * MILLICENTS;     // 66 bytes on-chain
+	pub const SubAccountDeposit: Balance = 2 * COIN;        // 53 bytes on-chain
+	pub const MaxSubAccounts: u32 = 100;
+	pub const MaxAdditionalFields: u32 = 100;
+	pub const MaxRegistrars: u32 = 20;
+}
+impl pallet_identity::Trait for Runtime {
+	type Event = Event;
+	type Currency = Uart;
+	type BasicDeposit = BasicDeposit;
+	type FieldDeposit = FieldDeposit;
+	type SubAccountDeposit = SubAccountDeposit;
+	type MaxSubAccounts = MaxSubAccounts;
+	type MaxAdditionalFields = MaxAdditionalFields;
+	type MaxRegistrars = MaxRegistrars;
+	type Slashed = UniArtsTreasury;
+	type ForceOrigin = EnsureRootOrMoreThanHalfCouncil;
+	type RegistrarOrigin = EnsureRootOrMoreThanHalfCouncil;
+	type WeightInfo = ();
+}
+
 // Create the runtime by composing the FRAME pallets that were previously configured.
 construct_runtime!(
 	pub enum Runtime where
@@ -540,6 +572,7 @@ construct_runtime!(
 		// Governance
 		GeneralCouncil: pallet_collective::<Instance1>::{Module, Call, Storage, Origin<T>, Event<T>, Config<T>},
 		UniArtsTreasury: pallet_treasury::{Module, Call, Storage, Config, Event<T>},
+		Identity: pallet_identity::{Module, Call, Storage, Event<T>},
 
 		TransactionPayment: pallet_transaction_payment::{Module, Storage},
 		Sudo: pallet_sudo::{Module, Call, Config<T>, Storage, Event<T>},

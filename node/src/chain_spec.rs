@@ -243,8 +243,8 @@ fn testnet_genesis(
 			code: wasm_binary.to_vec(),
 			changes_trie_config: Default::default(),
 		}),
-		pallet_balances: None,
-		pallet_balances_Instance0: Some(UartConfig {
+		// pallet_balances: None,
+		pallet_balances: Some(UartConfig {
 			balances: endowed_accounts.iter()
 				.map(|x| (x.0.clone(), x.1.clone()))
 				.chain(

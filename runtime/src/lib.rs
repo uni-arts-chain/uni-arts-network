@@ -318,7 +318,7 @@ parameter_types! {
 	pub const ExistentialDeposit: u128 = 500;
 }
 
-type UartInstance = pallet_balances::Instance0;
+// type UartInstance = pallet_balances::Instance0;
 type UinkInstance = pallet_balances::Instance1;
 
 impl pallet_balances::Trait for Runtime {
@@ -332,19 +332,19 @@ impl pallet_balances::Trait for Runtime {
 	type WeightInfo = ();
 }
 
-impl pallet_balances::Trait<UartInstance> for Runtime {
-	/// The type for recording an account's balance.
-	type Balance = Balance;
-	/// The ubiquitous event type.
-	type Event = Event;
-	type DustRemoval = ();
-	type ExistentialDeposit = ExistentialDeposit;
-	type AccountStore = System;
-	type WeightInfo = ();
-}
+// impl pallet_balances::Trait<UartInstance> for Runtime {
+// 	/// The type for recording an account's balance.
+// 	type Balance = Balance;
+// 	/// The ubiquitous event type.
+// 	type Event = Event;
+// 	type DustRemoval = ();
+// 	type ExistentialDeposit = ExistentialDeposit;
+// 	type AccountStore = System;
+// 	type WeightInfo = ();
+// }
 
 type UinkAccountStore = StorageMapShim<
-		pallet_balances::Account<Runtime, UartInstance>,
+		pallet_balances::Account<Runtime, UinkInstance>,
 		frame_system::CallOnCreatedAccount<Runtime>,
 		frame_system::CallKillAccount<Runtime>,
 		AccountId,
@@ -580,8 +580,8 @@ construct_runtime!(
 		Vesting: pallet_vesting::{Module, Call, Storage, Event<T>, Config<T>},
 
 		Nicks: pallet_nicks::{Module, Call, Storage, Event<T>},
-		Balances: pallet_balances::{Module, Call, Storage, Config<T>, Event<T>},
-		Uart: pallet_balances::<Instance0>::{Module, Call, Storage, Config<T>, Event<T>},
+		Uart: pallet_balances::{Module, Call, Storage, Config<T>, Event<T>},
+		// Uart: pallet_balances::<Instance0>::{Module, Call, Storage, Config<T>, Event<T>},
 		Uink: pallet_balances::<Instance1>::{Module, Call, Storage, Config<T>, Event<T>},
 
 		// Governance

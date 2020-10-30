@@ -2,16 +2,17 @@ use sp_core::{Pair, Public, crypto::UncheckedInto, sr25519};
 
 use uart_runtime::{
 	get_all_module_accounts,
-	AccountId, UartConfig, GenesisConfig, SessionConfig, ValidatorSetConfig, VestingConfig,
+	AccountId, BalancesConfig, GenesisConfig, SessionConfig, ValidatorSetConfig, VestingConfig,
 	SudoConfig, SystemConfig, WASM_BINARY, Signature, Balance, constants::currency::*,
 	opaque::SessionKeys
 };
 use sp_consensus_aura::sr25519::AuthorityId as AuraId;
 use sp_finality_grandpa::AuthorityId as GrandpaId;
 use sp_runtime::traits::{Verify, IdentifyAccount};
-use sc_service::ChainType;
+use sc_service::{ChainType, Properties};
 use hex_literal::hex;
 use sc_telemetry::TelemetryEndpoints;
+
 
 
 const DEFAULT_PROTOCOL_ID: &str = "uart";
@@ -58,13 +59,7 @@ pub fn session_keys(
 	SessionKeys { aura, grandpa }
 }
 
-pub fn pangu_config() -> Result<ChainSpec, String> {
-	ChainSpec::from_json_bytes(&include_bytes!("../res/pangu.json")[..])
-}
-
-pub fn staging_config() -> Result<ChainSpec, String> {
-	let wasm_binary = WASM_BINARY.ok_or("Staging wasm binary not available".to_string())?;
-
+pub fn properties() -> Option<Properties> {
 	let properties = serde_json::json!({
 		"ss58Format": 2,
 		"tokenDecimals": 12,
@@ -72,6 +67,16 @@ pub fn staging_config() -> Result<ChainSpec, String> {
 		"uinkDecimals": 12,
 		"uinkSymbol": "UINK",
 	});
+
+	serde_json::from_value(properties).ok()
+}
+
+pub fn pangu_config() -> Result<ChainSpec, String> {
+	ChainSpec::from_json_bytes(&include_bytes!("../res/pangu.json")[..])
+}
+
+pub fn staging_config() -> Result<ChainSpec, String> {
+	let wasm_binary = WASM_BINARY.ok_or("Staging wasm binary not available".to_string())?;
 
 	let initial_authorities: Vec<(AccountId, AccountId, AuraId, GrandpaId)> = vec![
 		(
@@ -120,7 +125,7 @@ pub fn staging_config() -> Result<ChainSpec, String> {
 		// Protocol ID
 		Some(DEFAULT_PROTOCOL_ID),
 		// Properties
-		serde_json::from_value(properties).ok(),
+		properties(),
 		// Extensions
 		None,
 	))
@@ -128,14 +133,6 @@ pub fn staging_config() -> Result<ChainSpec, String> {
 
 pub fn development_config() -> Result<ChainSpec, String> {
 	let wasm_binary = WASM_BINARY.ok_or("Development wasm binary not available".to_string())?;
-
-	let properties = serde_json::json!({
-		"ss58Format": 2,
-		"tokenDecimals": 12,
-		"tokenSymbol": "UART",
-		"uinkDecimals": 12,
-		"uinkSymbol": "UINK",
-	});
 
 	Ok(ChainSpec::from_genesis(
 		// Name
@@ -167,7 +164,7 @@ pub fn development_config() -> Result<ChainSpec, String> {
 		// Protocol ID
 		None,
 		// Properties
-		serde_json::from_value(properties).ok(),
+		properties(),
 		// Extensions
 		None,
 	))
@@ -175,14 +172,6 @@ pub fn development_config() -> Result<ChainSpec, String> {
 
 pub fn local_testnet_config() -> Result<ChainSpec, String> {
 	let wasm_binary = WASM_BINARY.ok_or("Development wasm binary not available".to_string())?;
-
-	let properties = serde_json::json!({
-		"ss58Format": 2,
-		"tokenDecimals": 12,
-		"tokenSymbol": "UART",
-		"uinkDecimals": 12,
-		"uinkSymbol": "UINK",
-	});
 
 	Ok(ChainSpec::from_genesis(
 		// Name
@@ -223,7 +212,7 @@ pub fn local_testnet_config() -> Result<ChainSpec, String> {
 		// Protocol ID
 		None,
 		// Properties
-		serde_json::from_value(properties).ok(),
+		properties(),
 		// Extensions
 		None,
 	))
@@ -244,7 +233,7 @@ fn testnet_genesis(
 			changes_trie_config: Default::default(),
 		}),
 		// pallet_balances: None,
-		pallet_balances: Some(UartConfig {
+		pallet_balances: Some(BalancesConfig {
 			balances: endowed_accounts.iter()
 				.map(|x| (x.0.clone(), x.1.clone()))
 				.chain(

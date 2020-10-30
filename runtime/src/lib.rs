@@ -6,6 +6,8 @@
 #[cfg(feature = "std")]
 include!(concat!(env!("OUT_DIR"), "/wasm_binary.rs"));
 
+pub mod constants;
+
 use sp_std::prelude::*;
 use sp_core::{crypto::KeyTypeId, OpaqueMetadata};
 use sp_runtime::{
@@ -25,6 +27,9 @@ use pallet_grandpa::fg_primitives;
 use sp_version::RuntimeVersion;
 #[cfg(feature = "std")]
 use sp_version::NativeVersion;
+
+// Uni-Arts
+use constants::{currency::*};
 
 // A few exports that help ease life for downstream crates.
 #[cfg(any(feature = "std", test))]
@@ -55,22 +60,6 @@ pub use pallet_rewards;
 pub use pallet_staking;
 pub use pallet_validator_set;
 
-
-pub mod currency {
-	use super::Balance;
-
-	pub const UART: Balance = 1_000_000_000_000;
-	pub const DOLLARS: Balance = UART / 6;
-	pub const CENTS: Balance = UART / 100;
-	pub const MILLICENTS: Balance = UART / 1_000;
-	pub const COIN: Balance = 1_000 * MILLICENTS;
-
-	pub const fn deposit(items: u32, bytes: u32) -> Balance {
-		items as Balance * 20 * DOLLARS + (bytes as Balance) * 100 * MILLICENTS
-	}
-}
-
-use currency::*;
 
 
 /// Opaque types. These are used by the CLI to instantiate machinery that don't need to know

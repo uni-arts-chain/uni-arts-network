@@ -3,7 +3,7 @@ use sp_core::{Pair, Public, crypto::UncheckedInto, sr25519};
 use uart_runtime::{
 	get_all_module_accounts,
 	AccountId, UartConfig, GenesisConfig, SessionConfig, ValidatorSetConfig, VestingConfig,
-	SudoConfig, SystemConfig, WASM_BINARY, Signature, Balance, currency::*,
+	SudoConfig, SystemConfig, WASM_BINARY, Signature, Balance, constants::currency::*,
 	opaque::SessionKeys
 };
 use sp_consensus_aura::sr25519::AuthorityId as AuraId;

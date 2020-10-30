@@ -30,6 +30,7 @@ use sp_version::NativeVersion;
 
 // Uni-Arts
 use constants::{currency::*};
+type Uart = Balances;
 
 // A few exports that help ease life for downstream crates.
 #[cfg(any(feature = "std", test))]
@@ -117,6 +118,7 @@ pub fn native_version() -> NativeVersion {
 // Module accounts of runtime
 parameter_types! {
 	pub const UniArtsTreasuryModuleId: ModuleId = ModuleId(*b"art/trsy");
+	pub const StakingModuleId: ModuleId = ModuleId(*b"staking_");
 	pub ZeroAccountId: AccountId = AccountId::from([0u8; 32]);
 }
 
@@ -255,7 +257,6 @@ parameter_types! {
 	pub const MiningRewardPerBlock: Balance = 1 * UART;
 	pub const StakingRewardPerBlock: Balance = 1 * UART;
 	pub const AmpFactor: Balance = 1e12 as Balance;
-	pub const StakingModuleId: ModuleId = ModuleId(*b"staking_");
 }
 
 pub struct AccoundIdOf;
@@ -499,13 +500,13 @@ impl ContainsLengthBound for GeneralCouncilProvider {
 // Uni-Art Treasury
 parameter_types! {
 	pub const ProposalBond: Permill = Permill::from_percent(5);
-	pub const ProposalBondMinimum: Balance = DOLLARS;
+	pub const ProposalBondMinimum: Balance = UART;
 	pub const SpendPeriod: BlockNumber = DAYS;
 	pub const Burn: Permill = Permill::from_percent(0);
 	pub const TipCountdown: BlockNumber = DAYS;
 	pub const TipFindersFee: Percent = Percent::from_percent(10);
-	pub const TipReportDepositBase: Balance = DOLLARS;
-	pub const TipReportDepositPerByte: Balance = CENTS;
+	pub const TipReportDepositBase: Balance = UART;
+	pub const TipReportDepositPerByte: Balance = MILLI;
 	pub const SevenDays: BlockNumber = 7 * DAYS;
 	pub const ZeroDay: BlockNumber = 0;
 	pub const OneDay: BlockNumber = DAYS;
@@ -538,9 +539,9 @@ type EnsureRootOrMoreThanHalfCouncil = EnsureOneOf<
 >;
 
 parameter_types! {
-	pub const BasicDeposit: Balance = 10 * COIN;            // 258 bytes on-chain
-	pub const FieldDeposit: Balance = 250 * MILLICENTS;     // 66 bytes on-chain
-	pub const SubAccountDeposit: Balance = 2 * COIN;        // 53 bytes on-chain
+	pub const BasicDeposit: Balance = 10 * UART;            // 258 bytes on-chain
+	pub const FieldDeposit: Balance = 250 * MICRO;          // 66 bytes on-chain
+	pub const SubAccountDeposit: Balance = 2 * UART;        // 53 bytes on-chain
 	pub const MaxSubAccounts: u32 = 100;
 	pub const MaxAdditionalFields: u32 = 100;
 	pub const MaxRegistrars: u32 = 20;
@@ -580,7 +581,7 @@ construct_runtime!(
 		Vesting: pallet_vesting::{Module, Call, Storage, Event<T>, Config<T>},
 
 		Nicks: pallet_nicks::{Module, Call, Storage, Event<T>},
-		Uart: pallet_balances::{Module, Call, Storage, Config<T>, Event<T>},
+		Balances: pallet_balances::{Module, Call, Storage, Config<T>, Event<T>},
 		// Uart: pallet_balances::<Instance0>::{Module, Call, Storage, Config<T>, Event<T>},
 		Uink: pallet_balances::<Instance1>::{Module, Call, Storage, Config<T>, Event<T>},
 

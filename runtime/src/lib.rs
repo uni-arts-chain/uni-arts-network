@@ -507,47 +507,51 @@ impl ContainsLengthBound for GeneralCouncilProvider {
 }
 
 // Uni-Art Treasury
-// parameter_types! {
-// 	pub const ProposalBond: Permill = Permill::from_percent(5);
-// 	pub const ProposalBondMinimum: Balance = UART;
-// 	pub const SpendPeriod: BlockNumber = DAYS;
-// 	pub const Burn: Permill = Permill::from_percent(0);
-// 	pub const TipCountdown: BlockNumber = DAYS;
-// 	pub const TipFindersFee: Percent = Percent::from_percent(10);
-// 	pub const TipReportDepositBase: Balance = UART;
-// 	pub const TipReportDepositPerByte: Balance = MILLI;
-// 	pub const SevenDays: BlockNumber = 7 * DAYS;
-// 	pub const ZeroDay: BlockNumber = 0;
-// 	pub const OneDay: BlockNumber = DAYS;
-// }
+parameter_types! {
+	pub const ProposalBond: Permill = Permill::from_percent(5);
+	pub const ProposalBondMinimum: Balance = 1 * UART;
+	pub const SpendPeriod: BlockNumber = 1 * DAYS;
+	pub const Burn: Permill = Permill::from_percent(0);
+	pub const TipCountdown: BlockNumber = 1 * DAYS;
+	pub const TipFindersFee: Percent = Percent::from_percent(10);
+	pub const TipReportDepositBase: Balance = 1 * UART;
+	pub const SevenDays: BlockNumber = 7 * DAYS;
+	pub const ZeroDay: BlockNumber = 0;
+	pub const OneDay: BlockNumber = DAYS;
+	pub const DataDepositPerByte: Balance = 1 * MILLI;
+	pub const BountyDepositBase: Balance = 1 * UART;
+	pub const BountyDepositPayoutDelay: BlockNumber = 4 * DAYS;
+	pub const BountyUpdatePeriod: BlockNumber = 90 * DAYS;
+	pub const BountyCuratorDeposit: Permill = Permill::from_percent(50);
+	pub const BountyValueMinimum: Balance = 2 * UART;
+	pub const MaximumReasonLength: u32 = 16384;
+}
 
-// impl pallet_treasury::Trait for Runtime {
-// 	type ModuleId = UniArtsTreasuryModuleId;
-// 	type Currency = Uart;
-// 	type ApproveOrigin = frame_system::EnsureRoot<AccountId>;
-// 	type RejectOrigin = frame_system::EnsureRoot<AccountId>;
-// 	type Tippers = GeneralCouncilProvider;
-// 	type TipCountdown = TipCountdown;
-// 	type TipFindersFee = TipFindersFee;
-// 	type TipReportDepositBase = TipReportDepositBase;
-// 	// type TipReportDepositPerByte = TipReportDepositPerByte;
-// 	type Event = Event;
-// 	type ProposalBond = ProposalBond;
-// 	type ProposalBondMinimum = ProposalBondMinimum;
-// 	// type ProposalRejection = UniArtsTreasury;
-// 	type SpendPeriod = SpendPeriod;
-// 	type Burn = Burn;
-// 	type BurnDestination = ();
-// 	type WeightInfo = ();
-// 	type DataDepositPerByte = Type;
-// 	type OnSlash = Type;
-// 	type BountyDepositBase = Type;
-// 	type BountyDepositPayoutDelay = Type;
-// 	type BountyUpdatePeriod = Type;
-// 	type BountyCuratorDeposit = Type;
-// 	type BountyValueMinimum = Type;
-// 	type MaximumReasonLength = Type;
-// }
+impl pallet_treasury::Trait for Runtime {
+	type ModuleId = UniArtsTreasuryModuleId;
+	type Currency = Uart;
+	type ApproveOrigin = frame_system::EnsureRoot<AccountId>;
+	type RejectOrigin = frame_system::EnsureRoot<AccountId>;
+	type Tippers = GeneralCouncilProvider;
+	type TipCountdown = TipCountdown;
+	type TipFindersFee = TipFindersFee;
+	type TipReportDepositBase = TipReportDepositBase;
+	type Event = Event;
+	type ProposalBond = ProposalBond;
+	type ProposalBondMinimum = ProposalBondMinimum;
+	type SpendPeriod = SpendPeriod;
+	type Burn = Burn;
+	type BurnDestination = ();
+	type WeightInfo = ();
+	type DataDepositPerByte = DataDepositPerByte;
+	type OnSlash = UniArtsTreasury;
+	type BountyDepositBase = BountyDepositBase;
+	type BountyDepositPayoutDelay = BountyDepositPayoutDelay;
+	type BountyUpdatePeriod = BountyUpdatePeriod;
+	type BountyCuratorDeposit = BountyCuratorDeposit;
+	type BountyValueMinimum = BountyValueMinimum;
+	type MaximumReasonLength = MaximumReasonLength;
+}
 
 type EnsureRootOrMoreThanHalfCouncil = EnsureOneOf<
 	AccountId,
@@ -572,7 +576,7 @@ impl pallet_identity::Trait for Runtime {
 	type MaxSubAccounts = MaxSubAccounts;
 	type MaxAdditionalFields = MaxAdditionalFields;
 	type MaxRegistrars = MaxRegistrars;
-	type Slashed = ();//UniArtsTreasury;
+	type Slashed = UniArtsTreasury;
 	type ForceOrigin = EnsureRootOrMoreThanHalfCouncil;
 	type RegistrarOrigin = EnsureRootOrMoreThanHalfCouncil;
 	type WeightInfo = ();
@@ -604,7 +608,7 @@ construct_runtime!(
 
 		// Governance
 		GeneralCouncil: pallet_collective::<Instance1>::{Module, Call, Storage, Origin<T>, Event<T>, Config<T>},
-		// UniArtsTreasury: pallet_treasury::{Module, Call, Storage, Config, Event<T>},
+		UniArtsTreasury: pallet_treasury::{Module, Call, Storage, Config, Event<T>},
 		Identity: pallet_identity::{Module, Call, Storage, Event<T>},
 
 		TransactionPayment: pallet_transaction_payment::{Module, Storage},

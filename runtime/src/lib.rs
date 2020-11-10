@@ -122,7 +122,7 @@ pub fn native_version() -> NativeVersion {
 parameter_types! {
 	pub const UniArtsTreasuryModuleId: ModuleId = ModuleId(*b"art/trsy");
 	pub const StakingModuleId: ModuleId = ModuleId(*b"staking_");
-	pub const UniArtsNftModuleId: ModuleId = ModuleId(*b"art/nftl");
+	pub const UniArtsNftModuleId: ModuleId = ModuleId(*b"art/nftb");
 	pub ZeroAccountId: AccountId = AccountId::from([0u8; 32]);
 }
 

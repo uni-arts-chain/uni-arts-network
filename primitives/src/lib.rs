@@ -48,3 +48,29 @@ pub enum TokenSymbol {
 pub enum CurrencyId {
     Token(TokenSymbol),
 }
+
+#[ignore]
+#[test]
+fn print_module_account() {
+    // --- substrate ---
+    use sp_core::crypto::{set_default_ss58_version, Ss58AddressFormat, Ss58AddressFormat::*};
+    use sp_runtime::{traits::AccountIdConversion, ModuleId};
+
+    fn account_of(alias: [u8; 8], ss58_version: Ss58AddressFormat) {
+        set_default_ss58_version(ss58_version);
+
+        let alias_str = unsafe { core::str::from_utf8_unchecked(&alias) };
+        let id = <ModuleId as AccountIdConversion<AccountId>>::into_account(&ModuleId(alias));
+
+        eprintln!("{}:\n\t{}\n\t{:?}", alias_str, id, id);
+    }
+    // art/trsy:
+    // 5EYCAe5fj5zwisbuZm6HpPsKzehYYV2sFrhmHw1sM52tEnBm
+    // 6d6f646c6172742f747273790000000000000000000000000000000000000000 (5EYCAe5f...)
+    account_of(*b"art/trsy", SubstrateAccount);
+
+    // art/nftb:
+    // 5EYCAe5fj5zwigs2Sr1KavTHcx1xfnpjUkN4SnAW9ngo8k4g
+    // 6d6f646c6172742f6e6674620000000000000000000000000000000000000000 (5EYCAe5f...)
+    account_of(*b"art/nftb", SubstrateAccount);
+}

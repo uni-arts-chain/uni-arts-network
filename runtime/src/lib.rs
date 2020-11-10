@@ -8,6 +8,9 @@ include!(concat!(env!("OUT_DIR"), "/wasm_binary.rs"));
 
 pub mod constants;
 
+/// Weights for pallets used in the runtime.
+mod weights;
+
 use sp_std::prelude::*;
 use sp_core::{crypto::KeyTypeId, OpaqueMetadata};
 use sp_runtime::{
@@ -119,6 +122,7 @@ pub fn native_version() -> NativeVersion {
 parameter_types! {
 	pub const UniArtsTreasuryModuleId: ModuleId = ModuleId(*b"art/trsy");
 	pub const StakingModuleId: ModuleId = ModuleId(*b"staking_");
+	pub const UniArtsNftModuleId: ModuleId = ModuleId(*b"art/nftl");
 	pub ZeroAccountId: AccountId = AccountId::from([0u8; 32]);
 }
 
@@ -458,6 +462,8 @@ impl pallet_names::Trait for Runtime {
 
 /// Used for the module nft in `./nft.rs`
 impl pallet_nft::Trait for Runtime {
+	type ModuleId = UniArtsNftModuleId;
+	type Currency = Uart;
 	type Event = Event;
 }
 
@@ -582,6 +588,20 @@ impl pallet_identity::Trait for Runtime {
 	type WeightInfo = ();
 }
 
+parameter_types! {
+	pub const MaxScheduledPerBlock: u32 = 50;
+}
+impl pallet_scheduler::Trait for Runtime {
+	type Event = Event;
+	type Origin = Origin;
+	type PalletsOrigin = OriginCaller;
+	type Call = Call;
+	type MaximumWeight = MaximumBlockWeight;
+	type ScheduleOrigin = EnsureRoot<AccountId>;
+	type MaxScheduledPerBlock = MaxScheduledPerBlock;
+	type WeightInfo = weights::pallet_scheduler::WeightInfo<Runtime>;
+}
+
 // Create the runtime by composing the FRAME pallets that were previously configured.
 construct_runtime!(
 	pub enum Runtime where
@@ -611,6 +631,8 @@ construct_runtime!(
 		UniArtsTreasury: pallet_treasury::{Module, Call, Storage, Config, Event<T>},
 		Identity: pallet_identity::{Module, Call, Storage, Event<T>},
 
+		// System scheduler.
+		Scheduler: pallet_scheduler::{Module, Call, Storage, Event<T>},
 		TransactionPayment: pallet_transaction_payment::{Module, Storage},
 		Sudo: pallet_sudo::{Module, Call, Config<T>, Storage, Event<T>},
 

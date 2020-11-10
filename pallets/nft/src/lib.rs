@@ -22,9 +22,10 @@ pub use frame_support::{
 use frame_system::{self as system, ensure_signed};
 use sp_runtime::sp_std::prelude::Vec;
 use sp_runtime::{
+    ModuleId,
     traits::{
         DispatchInfoOf, Dispatchable, PostDispatchInfoOf, SaturatedConversion, Saturating,
-        SignedExtension, Zero,
+        SignedExtension, Zero, AccountIdConversion,
     },
     transaction_validity::{
         InvalidTransaction, TransactionPriority, TransactionValidity, TransactionValidityError,
@@ -153,7 +154,15 @@ pub struct VestingItem<AccountId, Moment> {
     pub vesting_date: Moment,
 }
 
+pub type AccountId<T> = <T as frame_system::Trait>::AccountId;
+
 pub trait Trait: system::Trait {
+    /// The NFT's module id, used for deriving its sovereign account ID.
+    type ModuleId: Get<ModuleId>;
+
+    /// The transaction locking balance.
+    type Currency: Currency<AccountId<Self>> + Send + Sync;
+
     type Event: From<Event<Self>> + Into<<Self as system::Trait>::Event>;
 }
 
@@ -203,6 +212,12 @@ decl_event!(
 
 decl_module! {
     pub struct Module<T: Trait> for enum Call where origin: T::Origin {
+
+        /// The NFT's module id, used for deriving its sovereign account ID.
+		const ModuleId: ModuleId = T::ModuleId::get();
+
+        /// The NFT's account id
+		const ModuleAccountId: T::AccountId = T::ModuleId::get().into_account();
 
         fn deposit_event() = default;
 
@@ -697,6 +712,14 @@ decl_module! {
 }
 
 impl<T: Trait> Module<T> {
+    /// The account ID of the treasury pot.
+	///
+	/// This actually does computation. If you need to keep using it, then make sure you cache the
+	/// value and only call this once.
+    pub fn account_id() -> T::AccountId {
+        T::ModuleId::get().into_account()
+    }
+
     fn add_fungible_item(item: FungibleItemType<T::AccountId>) -> DispatchResult {
         let current_index = <ItemListIndex>::get(item.collection)
             .checked_add(1)

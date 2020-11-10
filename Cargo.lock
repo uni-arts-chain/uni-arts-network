@@ -3729,6 +3729,20 @@ dependencies = [
 ]
 
 [[package]]
+name = "pallet-scheduler"
+version = "2.0.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "5f8abd5ae3f0ca51809f1e5173877ead7b2ffe90704773d150fd27496f91f9a9"
+dependencies = [
+ "frame-support",
+ "frame-system",
+ "parity-scale-codec",
+ "sp-io",
+ "sp-runtime",
+ "sp-std",
+]
+
+[[package]]
 name = "pallet-session"
 version = "2.0.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -7521,6 +7535,7 @@ dependencies = [
  "pallet-nicks",
  "pallet-randomness-collective-flip",
  "pallet-rewards",
+ "pallet-scheduler",
  "pallet-session",
  "pallet-staking",
  "pallet-sudo",

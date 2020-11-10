@@ -216,9 +216,6 @@ decl_module! {
         /// The NFT's module id, used for deriving its sovereign account ID.
 		const ModuleId: ModuleId = T::ModuleId::get();
 
-        /// The NFT's account id
-		const ModuleAccountId: T::AccountId = T::ModuleId::get().into_account();
-
         fn deposit_event() = default;
 
         fn on_initialize(now: T::BlockNumber) -> Weight {

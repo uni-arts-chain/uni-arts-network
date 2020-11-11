@@ -42,9 +42,10 @@ pallet-collective = { version = "2.0.0", default-features = false }
 pallet-treasury = { version = "2.0.0", default-features = false }
 pallet-identity = { version = "2.0.0", default-features = false }
 
-# Used for the node template's RPCs
+# Used for RPCs
 frame-system-rpc-runtime-api = { version = "2.0.0", default-features = false }
 pallet-transaction-payment-rpc-runtime-api = { version = "2.0.0", default-features = false }
+pallet-staking-rpc-runtime-api = { version = "0.1.0", default-features = false, path = "../pallets/staking/rpc/runtime-api"}
 
 # Uni-Arts pallets
 pallet-certificate = { path = "../pallets/certificate", default-features = false }

@@ -20,7 +20,6 @@ use sp_runtime::{
 use codec::{Encode, Decode};
 use sp_std::prelude::*;
 
-
 pub type BalanceOf<T> =
 	<<T as Trait>::Currency as Currency<<T as frame_system::Trait>::AccountId>>::Balance;
 pub type AccountId<T> = <T as frame_system::Trait>::AccountId;
@@ -290,6 +289,27 @@ impl<T: Trait> Module<T> {
 	pub fn reward_per_block() -> BalanceOf<T> {
 		// TODO: adjust rewards of staking 
 		T::RewardPerBlock::get()
+	}
+
+	/// Pending rewards of staker
+	pub fn pending_rewards(pool_id: T::Id, account_id: T::AccountId) -> BalanceOf<T> {
+		let staker_key = (pool_id, account_id);
+		let staker = Self::stakers(&staker_key);
+		let pool = Self::pools(pool_id);
+
+		let block_number = frame_system::Module::<T>::block_number();
+		let reward_per_block: BalanceOf<T> = Self::reward_per_block();
+		let factor: BalanceOf<T> = T::AmpFactor::get();
+
+		let delta = block_number.saturating_sub(pool.last_reward_block);
+		let blocks: BalanceOf<T> = T::ConvertNumberToBalance::convert(delta);
+		let rewards = reward_per_block.saturating_mul(blocks);
+		if pool.total_balance == Zero::zero() {
+			return Zero::zero();
+		}
+		let rewards_per_share = rewards.saturating_mul(factor) / pool.total_balance;
+		let acc_rewards_per_share = pool.acc_rewards_per_share.saturating_add(rewards_per_share);
+		staker.amount.saturating_mul(acc_rewards_per_share) / factor - staker.debt
 	}
 }
 	

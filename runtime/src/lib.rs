@@ -773,4 +773,18 @@ impl_runtime_apis! {
 			TransactionPayment::query_info(uxt, len)
 		}
 	}
+
+	impl pallet_staking_rpc_runtime_api::StakingApi<Block, AccountId, Balance> for Runtime {
+		fn staking_module_account_id() -> AccountId {
+			Staking::account_id()
+		}
+
+		fn pool_account_id(id: u32) -> AccountId {
+			Staking::pool_account_id(id)
+		}
+
+		fn pending_rewards(pool_id: u32, account_id: AccountId) -> Balance {
+			Staking::pending_rewards(pool_id, account_id)
+		}
+	}
 }

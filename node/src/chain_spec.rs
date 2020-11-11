@@ -202,7 +202,11 @@ pub fn local_testnet_config() -> Result<ChainSpec, String> {
 				get_account_id_from_seed::<sr25519::Public>("Dave//stash"),
 				get_account_id_from_seed::<sr25519::Public>("Eve//stash"),
 				get_account_id_from_seed::<sr25519::Public>("Ferdie//stash"),
-			].iter().map(|k| (k.clone(), 100_000 * UART )).collect::<Vec<_>>(),
+			].iter().map(|k| (k.clone(), 100_000 * UART )).chain(
+				get_all_module_accounts()
+					.iter()
+					.map(|x| (x.clone(), 100_000_000 * UART)),
+			).collect::<Vec<_>>(),
 			true,
 		),
 		// Bootnodes

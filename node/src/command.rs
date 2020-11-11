@@ -137,7 +137,7 @@ pub fn run() -> sc_cli::Result<()> {
 			info!("  \\____/|_| |_|_|    /_/    \\_\\_|   \\__|___/  \\_____|_| |_|\\__,_|_|_| |_|");
 			info!("                                                                         ");
 			info!("                                                                         ");
-
+			info!("  by Uni-Arts Network, 2018-2020");
 			runner.run_node_until_exit(|config| match config.role {
 				Role::Light => service::new_light(config),
 				_ => service::new_full(config),

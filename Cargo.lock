@@ -3784,8 +3784,12 @@ dependencies = [
 name = "pallet-staking-rpc-runtime-api"
 version = "0.1.0"
 dependencies = [
+ "frame-support",
  "parity-scale-codec",
+ "serde",
  "sp-api",
+ "sp-runtime",
+ "sp-std",
 ]
 
 [[package]]

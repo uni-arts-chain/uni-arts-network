@@ -276,6 +276,7 @@ impl pallet_rewards::Trait for Runtime {
 	type Balance = Balance;
 	type Currency = Uart;
 	type RewardPerBlock = MiningRewardPerBlock;
+	type Event = Event;
 }
 
 pub struct ConvertNumberToBalance;
@@ -638,7 +639,7 @@ construct_runtime!(
 		ValidatorSet: pallet_validator_set::{Module, Call, Storage, Event<T>, Config<T>},
 		Aura: pallet_aura::{Module, Config<T>, Inherent},
 		Grandpa: pallet_grandpa::{Module, Call, Storage, Config, Event},
-		Rewards: pallet_rewards::{Module, Storage},
+		Rewards: pallet_rewards::{Module, Call, Storage, Event<T>},
 		Staking: pallet_staking::{Module, Call, Storage, Event<T>},
 		Vesting: pallet_vesting::{Module, Call, Storage, Event<T>, Config<T>},
 

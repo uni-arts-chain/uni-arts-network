@@ -3840,6 +3840,41 @@ dependencies = [
 ]
 
 [[package]]
+name = "pallet-token"
+version = "2.0.0"
+dependencies = [
+ "frame-support",
+ "frame-system",
+ "pallet-balances",
+ "pallet-randomness-collective-flip",
+ "parity-scale-codec",
+ "sp-core",
+ "sp-io",
+ "sp-runtime",
+ "sp-std",
+]
+
+[[package]]
+name = "pallet-trade"
+version = "2.0.0"
+dependencies = [
+ "byteorder 1.3.4",
+ "frame-support",
+ "frame-system",
+ "num-traits",
+ "pallet-balances",
+ "pallet-randomness-collective-flip",
+ "pallet-token",
+ "parity-scale-codec",
+ "safe-mix",
+ "sp-arithmetic",
+ "sp-core",
+ "sp-io",
+ "sp-runtime",
+ "sp-std",
+]
+
+[[package]]
 name = "pallet-transaction-payment"
 version = "2.0.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -7572,6 +7607,8 @@ dependencies = [
  "pallet-staking-rpc-runtime-api",
  "pallet-sudo",
  "pallet-timestamp",
+ "pallet-token",
+ "pallet-trade",
  "pallet-transaction-payment",
  "pallet-transaction-payment-rpc-runtime-api",
  "pallet-treasury",

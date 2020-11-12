@@ -9,5 +9,7 @@ members = [
     'primitives',
     'pallets/assets',
     'pallets/nft',
+    'pallets/token',
+    'pallets/trade',
     'pallets/validator-set'
 ]

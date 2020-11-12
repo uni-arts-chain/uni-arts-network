@@ -63,7 +63,8 @@ pub use pallet_nicks;
 pub use pallet_rewards;
 pub use pallet_staking;
 pub use pallet_validator_set;
-
+pub use pallet_token;
+pub use pallet_trade;
 
 
 /// Opaque types. These are used by the CLI to instantiate machinery that don't need to know
@@ -426,6 +427,26 @@ impl pallet_assets::Trait for Runtime {
 	type AssetId = u32;
 }
 
+impl pallet_token::Trait for Runtime {
+	type Event = Event;
+}
+
+parameter_types! {
+	pub const PriceFactor: u128 = 100_000_000;
+    pub const BlocksPerDay: u32 = 6 * 60 * 24;
+    pub const OpenedOrdersArrayCap: u8 = 20;
+    pub const ClosedOrdersArrayCap: u8 = 100;
+}
+
+impl pallet_trade::Trait for Runtime {
+	type Event = Event;
+	type Price = u128;
+	type PriceFactor = PriceFactor;
+	type BlocksPerDay = BlocksPerDay;
+	type OpenedOrdersArrayCap = OpenedOrdersArrayCap;
+	type ClosedOrdersArrayCap = ClosedOrdersArrayCap;
+}
+
 impl pallet_names::Trait for Runtime {
 	type Name = Vec<u8>;
 	type Value = Vec<u8>;
@@ -641,6 +662,8 @@ construct_runtime!(
 		Assets: pallet_assets::{Module, Call, Storage, Event<T>},
 		Names: pallet_names::{Module, Call, Storage, Event<T>},
 		Nft: pallet_nft::{Module, Call, Storage, Event<T>},
+		Token: pallet_token::{Module, Call, Storage, Event<T>},
+		Trade: pallet_trade::{Module, Call, Storage, Event<T>},
 	}
 );
 

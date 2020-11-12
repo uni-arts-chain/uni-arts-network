@@ -55,6 +55,8 @@ pallet-nft = { path = "../pallets/nft", default-features = false }
 pallet-rewards = { path = "../pallets/rewards", default-features = false }
 pallet-staking = { path = "../pallets/staking", default-features = false }
 pallet-validator-set = { path = "../pallets/validator-set", default-features = false }
+pallet-token = { path = "../pallets/token", default-features = false }
+pallet-trade = { path = "../pallets/trade", default-features = false }
 primitives = { package = "uniart-primitives", path = "../primitives", default-features = false }
 
 [build-dependencies]
@@ -81,6 +83,8 @@ std = [
 	"pallet-names/std",
 	"pallet-nft/std",
 	"pallet-validator-set/std",
+	'pallet-token/std',
+	'pallet-trade/std',
 	"serde",
 	"sp-api/std",
 	"sp-block-builder/std",

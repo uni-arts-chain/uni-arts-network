@@ -154,6 +154,15 @@ pub struct VestingItem<AccountId, Moment> {
     pub vesting_date: Moment,
 }
 
+#[derive(Encode, Decode, Default, Clone, PartialEq)]
+#[cfg_attr(feature = "std", derive(Debug))]
+pub struct SaleOrder<AccountId> {
+    pub collection_id: u64,
+    pub item_id: u64,
+    pub owner: AccountId,
+    pub price: u64, // maker order's price\
+}
+
 pub type AccountId<T> = <T as frame_system::Trait>::AccountId;
 
 pub trait Trait: system::Trait {
@@ -196,6 +205,9 @@ decl_storage! {
         /// Sponsorship
         pub ContractSponsor get(fn contract_sponsor): map hasher(identity) T::AccountId => T::AccountId;
         pub UnconfirmedContractSponsor get(fn unconfirmed_contract_sponsor): map hasher(identity) T::AccountId => T::AccountId;
+
+        /// Consignment
+        pub SaleOrderList get(fn nft_trade_id): double_map hasher(blake2_128_concat) u64, hasher(blake2_128_concat) u64 => SaleOrder<T::AccountId>;
     }
 }
 
@@ -207,6 +219,7 @@ decl_event!(
         Created(u64, u8, AccountId),
         ItemCreated(u64, u64),
         ItemDestroyed(u64, u64),
+        ItemOrderLocked(u64, u64),
     }
 );
 
@@ -705,15 +718,48 @@ decl_module! {
 
             Ok(())
         }
+
+        #[weight = 0]
+        pub fn create_sale_order(origin, collection_id: u64, item_id: u64, value: u64, price: u64 ) -> DispatchResult {
+            let sender = ensure_signed(origin)?;
+
+            let item_owner = Self::is_item_owner(sender.clone(), collection_id, item_id);
+            if !item_owner {
+                Self::check_white_list(collection_id, sender.clone())?;
+            }
+
+            let target_collection = <Collection<T>>::get(collection_id);
+            let recipient = Self::nft_account_id();
+
+            match target_collection.mode
+            {
+                CollectionMode::NFT(_) => Self::transfer_nft(collection_id, item_id, sender.clone(), recipient)?,
+                CollectionMode::Fungible(_)  => Self::transfer_fungible(collection_id, item_id, value, sender.clone(), recipient)?,
+                CollectionMode::ReFungible(_, _)  => Self::transfer_refungible(collection_id, item_id, value, sender.clone(), recipient)?,
+                _ => ()
+            };
+
+            // Create order
+            let order = SaleOrder {
+                collection_id: collection_id,
+                item_id: item_id,
+                owner: sender,
+                price: price,
+            };
+
+            <SaleOrderList<T>>::insert(collection_id, item_id, order);
+            Ok(())
+        }
+
     }
 }
 
 impl<T: Trait> Module<T> {
-    /// The account ID of the treasury pot.
+    /// The account ID of the NFT.
 	///
 	/// This actually does computation. If you need to keep using it, then make sure you cache the
 	/// value and only call this once.
-    pub fn account_id() -> T::AccountId {
+    pub fn nft_account_id() -> T::AccountId {
         T::ModuleId::get().into_account()
     }
 

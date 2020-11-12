@@ -219,7 +219,7 @@ decl_event!(
         Created(u64, u8, AccountId),
         ItemCreated(u64, u64),
         ItemDestroyed(u64, u64),
-        ItemOrderLocked(u64, u64),
+        ItemOrderLocked(u64, u64, u64),
     }
 );
 
@@ -748,6 +748,9 @@ decl_module! {
             };
 
             <SaleOrderList<T>>::insert(collection_id, item_id, order);
+
+            // call event
+            Self::deposit_event(RawEvent::ItemOrderLocked(collection_id, item_id, price));
             Ok(())
         }
 

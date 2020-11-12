@@ -87,6 +87,12 @@
     "Owner": "AccountId",
     "Data": "Vec<u8>"
   },
+  "SaleOrder": {
+    "collection_id": "u64",
+    "item_id": "u64",
+    "owner": "AccountId",
+    "price": "u64"
+  },
   "Ownership": {
     "owner": "AccountId",
     "fraction": "u128"

@@ -69,10 +69,6 @@ decl_storage! {
 				&<Module<T>>::account_id(),
 				T::Currency::minimum_balance(),
 			);
-			let _ = T::Currency::make_free_balance_be(
-				&<Module<T>>::lock_account_id(),
-				T::Currency::minimum_balance(),
-			);
 		});
 	}
 }

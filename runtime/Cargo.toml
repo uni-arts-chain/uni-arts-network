@@ -87,6 +87,7 @@ std = [
 	"pallet-token/std",
 	"pallet-trade/std",
 	"pallet-staking/std",
+		"pallet-staking-rpc-runtime-api/std",
 	"serde",
 	"sp-api/std",
 	"sp-block-builder/std",

@@ -159,6 +159,7 @@ pub struct VestingItem<AccountId, Moment> {
 pub struct SaleOrder<AccountId> {
     pub collection_id: u64,
     pub item_id: u64,
+    pub value: u64,
     pub owner: AccountId,
     pub price: u64, // maker order's price\
 }
@@ -219,7 +220,8 @@ decl_event!(
         Created(u64, u8, AccountId),
         ItemCreated(u64, u64),
         ItemDestroyed(u64, u64),
-        ItemOrderLocked(u64, u64, u64),
+        ItemOrderCreated(u64, u64, u64, u64),
+        ItemOrderCancel(u64, u64),
     }
 );
 
@@ -743,6 +745,7 @@ decl_module! {
             let order = SaleOrder {
                 collection_id: collection_id,
                 item_id: item_id,
+                value: value,
                 owner: sender,
                 price: price,
             };
@@ -750,7 +753,38 @@ decl_module! {
             <SaleOrderList<T>>::insert(collection_id, item_id, order);
 
             // call event
-            Self::deposit_event(RawEvent::ItemOrderLocked(collection_id, item_id, price));
+            Self::deposit_event(RawEvent::ItemOrderCreated(collection_id, item_id, value, price));
+            Ok(())
+        }
+
+        #[weight = 0]
+        pub fn cancel_sale_order(origin, collection_id: u64, item_id: u64, value: u64) -> DispatchResult {
+            let sender = ensure_signed(origin)?;
+
+            let target_sale_order = <SaleOrderList<T>>::get(collection_id, item_id);
+
+            let order_owner = Self::is_sale_order_owner(sender.clone(), collection_id, item_id);
+            if !order_owner
+            {
+                let mes = "Account is not sale order owner";
+                panic!(mes);
+            }
+
+            let target_collection = <Collection<T>>::get(collection_id);
+            let locker = Self::nft_account_id();
+
+            match target_collection.mode
+            {
+                CollectionMode::NFT(_) => Self::transfer_nft(collection_id, item_id, locker, sender.clone())?,
+                CollectionMode::Fungible(_)  => Self::transfer_fungible(collection_id, item_id, target_sale_order.value, locker, sender.clone())?,
+                CollectionMode::ReFungible(_, _)  => Self::transfer_refungible(collection_id, item_id, target_sale_order.value, locker, sender.clone())?,
+                _ => ()
+            };
+
+            <SaleOrderList<T>>::remove(collection_id, item_id);
+
+            // call event
+            Self::deposit_event(RawEvent::ItemOrderCancel(collection_id, item_id));
             Ok(())
         }
 
@@ -983,6 +1017,12 @@ impl<T: Trait> Module<T> {
             panic!(mes);
         }
         Ok(())
+    }
+
+    fn is_sale_order_owner(owner: T::AccountId, collection_id: u64, item_id: u64) -> bool {
+        let target_sale_order = <SaleOrderList<T>>::get(collection_id, item_id);
+
+        target_sale_order.owner == owner
     }
 
     fn transfer_fungible(

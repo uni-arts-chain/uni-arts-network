@@ -11,5 +11,7 @@ members = [
     'pallets/nft',
     'pallets/token',
     'pallets/trade',
-    'pallets/validator-set'
+    'pallets/validator-set',
+    'pallets/staking',
+    'pallets/rewards'
 ]

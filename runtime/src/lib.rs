@@ -209,10 +209,13 @@ parameter_types! {
 	pub const DisabledValidatorsThreshold: Perbill = Perbill::from_percent(17);
 	pub const Offset: BlockNumber = 0;
 	pub const Period: BlockNumber = 5;
+	pub const ValidatorMortgageLimit: Balance = 100 * UART;
 }
 
 impl pallet_validator_set::Trait for Runtime {
 	type Event = Event;
+	type Currency = Balances;
+	type ValidatorMortgageLimit = ValidatorMortgageLimit;
 }
 
 pub struct ValidatorIdOf;

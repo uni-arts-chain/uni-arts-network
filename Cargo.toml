@@ -13,5 +13,6 @@ members = [
     'pallets/trade',
     'pallets/validator-set',
     'pallets/staking',
-    'pallets/rewards'
+    'pallets/rewards',
+    'pallets/lotteries',
 ]

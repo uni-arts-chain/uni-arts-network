@@ -6,6 +6,29 @@
   "Id": "u32",
   "Name": "Vec<u8>",
   "Value": "Vec<u8>",
+  "ReasonIndex": "u32",
+  "LottoIndex": "u32",
+  "LotteryKind": {
+    "_enum": [
+      "Routine",
+      "TreasuryFunded(ReasonIndex)"
+    ]
+  },
+  "LottoResult": {
+    "_enum": [
+      "Routine(AccountId, Balance)",
+      "TreasuryFunded(Balance)"
+    ]
+  },
+  "Lottery": {
+    "round": "LottoIndex",
+    "kind": "LotteryKind",
+    "jackpot": "Balance",
+    "next_ticket_id": "u32",
+    "players": "BTreeMap<AccountId, bool>",
+    "tickets": "BTreeMap<u32, AccountId>",
+    "result": "Option<LottoResult<AccountId, Balance>>"
+  },
   "NameData": {
     "value": "Value",
     "owner": "AccountId",

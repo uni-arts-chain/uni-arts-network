@@ -58,6 +58,7 @@ pallet-staking = { path = "../pallets/staking", default-features = false }
 pallet-validator-set = { path = "../pallets/validator-set", default-features = false }
 pallet-token = { path = "../pallets/token", default-features = false }
 pallet-trade = { path = "../pallets/trade", default-features = false }
+pallet-lotteries = { path = "../pallets/lotteries", default-features = false }
 primitives = { package = "uniart-primitives", path = "../primitives", default-features = false }
 
 [build-dependencies]

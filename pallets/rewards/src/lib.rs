@@ -39,6 +39,7 @@ pub trait Trait: pallet_aura::Trait + pallet_session::Trait {
 
 	type Currency: Currency<AccountId<Self>> + Send + Sync;
 	type RewardPerBlock: Get<BalanceOf<Self>>;
+	type RewardThreshold: Get<BalanceOf<Self>>;
 
 	type AccoundIdOf: Convert<Self::ValidatorId, Option<AccountId<Self>>>;
 }
@@ -47,7 +48,8 @@ pub trait Trait: pallet_aura::Trait + pallet_session::Trait {
 // The pallet's runtime storage items.
 decl_storage! {
 	trait Store for Module<T: Trait> as Rewards {
-		pub BlockRewards get(fn rewards): map hasher(twox_64_concat) AccountId<T> => BalanceOf<T>;
+		pub MatureRewards get(fn mature_rewards): map hasher(twox_64_concat) AccountId<T> => BalanceOf<T>;
+		pub ImmatureRewards get(fn immature_rewards): map hasher(twox_64_concat) AccountId<T> => (BalanceOf<T>, T::BlockNumber);
 	}
 }
 
@@ -77,28 +79,44 @@ decl_module! {
 		#[weight = 10_000]
 		pub fn claim(origin) -> dispatch::DispatchResult {
 			let who = ensure_signed(origin)?;
-			let rewards = Self::rewards(&who);
+			let mut rewards = Self::mature_rewards(&who);
 			ensure!(rewards > Zero::zero(), Error::<T>::NoReward);
 
-			<BlockRewards<T>>::mutate(&who, |val|
+			<MatureRewards<T>>::mutate(&who, |val|
 				*val = Zero::zero()
 			);
+			let now = frame_system::Module::<T>::block_number();
+			let (immature_rewards, n) = Self::immature_rewards(&who);
+			if now > n + <T as frame_system::Trait>::BlockNumber::from(14400 * 14) {
+				rewards = rewards.saturating_add(immature_rewards);
+			}
+
 			Self::payout_rewards(who.clone(), rewards);
 			Self::deposit_event(RawEvent::ClaimReward(who.clone(), rewards));
 
 			Ok(())
 		}
 
-		fn on_finalize(_now: T::BlockNumber) {
+		fn on_finalize(now: T::BlockNumber) {
 			let logs = frame_system::Module::<T>::digest().logs;
 			let digest = logs.iter().filter_map(|s| s.as_pre_runtime());
 			let reward: BalanceOf<T> = T::RewardPerBlock::get();
+			let threshold: BalanceOf<T> = T::RewardThreshold::get();
+
 			if let Some(index) = pallet_aura::Module::<T>::find_author(digest) {
 				let validator = pallet_session::Module::<T>::validators()[index as usize].clone();
 				if let Some(account) = T::AccoundIdOf::convert(validator) {
-					<BlockRewards<T>>::mutate(account, |rewards|
-						*rewards = rewards.saturating_add(reward)
-					);
+
+					let (immature_rewards, _) = Self::immature_rewards(&account);
+					if immature_rewards < threshold {
+						<ImmatureRewards<T>>::mutate(&account, |val|
+							*val = (val.0.saturating_add(reward), now)
+						);
+					} else {
+						<MatureRewards<T>>::mutate(&account, |rewards|
+							*rewards = rewards.saturating_add(reward)
+						);
+					}
 				}
 			}
 		}

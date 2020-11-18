@@ -265,6 +265,7 @@ impl pallet_grandpa::Trait for Runtime {
 
 parameter_types! {
 	pub const MiningRewardPerBlock: Balance = 1 * UART;
+	pub const RewardThreshold: Balance = 14 * (BlocksPerDay::get() as Balance) * MiningRewardPerBlock::get();
 	pub const StakingRewardPerBlock: Balance = 1 * UART;
 	pub const AmpFactor: Balance = 1e12 as Balance;
 }
@@ -280,6 +281,7 @@ impl pallet_rewards::Trait for Runtime {
 	type AccoundIdOf = AccoundIdOf;
 	type Balance = Balance;
 	type Currency = Uart;
+	type RewardThreshold = RewardThreshold;
 	type RewardPerBlock = MiningRewardPerBlock;
 	type Event = Event;
 }

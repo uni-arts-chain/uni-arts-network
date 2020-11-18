@@ -656,11 +656,11 @@ impl InstanceFilter<Call> for ProxyType {
 				c,
 				Call::System(..) |
 				Call::Timestamp(..) |
-				// Specifically omitting Indices `transfer`, `force_transfer`
 				// Specifically omitting the entire Balances pallet
 				Call::Staking(..) |
 				Call::Session(..) |
 				Call::Grandpa(..) |
+				Call::Utility(..) |
 				Call::GeneralCouncil(..) |
 				Call::UniArtsTreasury(..) |
 				Call::Identity(..) |

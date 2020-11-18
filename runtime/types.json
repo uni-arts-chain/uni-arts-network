@@ -110,6 +110,21 @@
     "Owner": "AccountId",
     "Data": "Vec<u8>"
   },
+  "FungibleItemType": {
+    "Collection": "u64",
+    "Owner": "AccountId",
+    "value": "u128"
+  },
+  "ApprovePermissions": {
+    "approved": "AccountId",
+    "amount": "u64"
+  },
+  "AccessMode": {
+    "_enum": [
+      "Normal",
+      "WhiteList"
+    ]
+  },
   "SaleOrder": {
     "collection_id": "u64",
     "item_id": "u64",

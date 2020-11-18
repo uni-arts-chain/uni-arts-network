@@ -3729,6 +3729,22 @@ dependencies = [
 ]
 
 [[package]]
+name = "pallet-proxy"
+version = "2.0.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "1aef2ebae7bcd5ccfb185a3515b1647948d3680371653dbcffa175436c26af4e"
+dependencies = [
+ "frame-support",
+ "frame-system",
+ "parity-scale-codec",
+ "serde",
+ "sp-core",
+ "sp-io",
+ "sp-runtime",
+ "sp-std",
+]
+
+[[package]]
 name = "pallet-randomness-collective-flip"
 version = "2.0.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -7631,6 +7647,7 @@ dependencies = [
  "pallet-names",
  "pallet-nft",
  "pallet-nicks",
+ "pallet-proxy",
  "pallet-randomness-collective-flip",
  "pallet-rewards",
  "pallet-scheduler",

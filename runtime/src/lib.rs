@@ -11,10 +11,12 @@ pub mod constants;
 /// Weights for pallets used in the runtime.
 mod weights;
 
+// --- crates ---
+use codec::{Decode, Encode};
 use sp_std::prelude::*;
 use sp_core::{crypto::KeyTypeId, OpaqueMetadata};
 use sp_runtime::{
-	ApplyExtrinsicResult, generic, create_runtime_str, impl_opaque_keys,
+	ApplyExtrinsicResult, generic, create_runtime_str, impl_opaque_keys, RuntimeDebug,
 	transaction_validity::{TransactionValidity, TransactionSource}
 };
 use sp_runtime::traits::{
@@ -43,7 +45,7 @@ pub use pallet_timestamp::Call as TimestampCall;
 pub use pallet_balances::Call as BalancesCall;
 pub use frame_support::{
 	construct_runtime, parameter_types, StorageValue,
-	traits::{KeyOwnerProofSystem, Randomness, StorageMapShim, Currency, Contains, ContainsLengthBound},
+	traits::{KeyOwnerProofSystem, Randomness, StorageMapShim, Currency, Contains, ContainsLengthBound, InstanceFilter},
 	weights::{
 		Weight, IdentityFee,
 		constants::{BlockExecutionWeight, ExtrinsicBaseWeight, RocksDbWeight, WEIGHT_PER_SECOND},
@@ -631,6 +633,93 @@ impl pallet_scheduler::Trait for Runtime {
 	type WeightInfo = weights::pallet_scheduler::WeightInfo<Runtime>;
 }
 
+/// The type used to represent the kinds of proxying allowed.
+#[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Encode, Decode, RuntimeDebug)]
+pub enum ProxyType {
+	Any,
+	NonTransfer,
+	Governance,
+	Staking,
+	IdentityJudgement,
+}
+impl Default for ProxyType {
+	fn default() -> Self {
+		Self::Any
+	}
+}
+
+impl InstanceFilter<Call> for ProxyType {
+	fn filter(&self, c: &Call) -> bool {
+		match self {
+			ProxyType::Any => true,
+			ProxyType::NonTransfer => matches!(
+				c,
+				Call::System(..) |
+				Call::Timestamp(..) |
+				// Specifically omitting Indices `transfer`, `force_transfer`
+				// Specifically omitting the entire Balances pallet
+				Call::Staking(..) |
+				Call::Session(..) |
+				Call::Grandpa(..) |
+				Call::GeneralCouncil(..) |
+				Call::UniArtsTreasury(..) |
+				Call::Identity(..) |
+				Call::Scheduler(..) |
+				Call::Proxy(..) |
+				Call::Multisig(..) |
+				Call::Nicks(..) |
+				Call::Nft(..) |
+				Call::Token(..) |
+				Call::Trade(..)
+			),
+			ProxyType::Governance => matches!(
+				c,
+				Call::GeneralCouncil(..) | Call::UniArtsTreasury(..)
+			),
+			ProxyType::Staking => matches!(c, Call::Staking(..)),
+			ProxyType::IdentityJudgement => matches!(
+				c,
+				Call::Identity(pallet_identity::Call::provide_judgement(..))
+			)
+		}
+	}
+	fn is_superset(&self, o: &Self) -> bool {
+		match (self, o) {
+			(x, y) if x == y => true,
+			(ProxyType::Any, _) => true,
+			(_, ProxyType::Any) => false,
+			(ProxyType::NonTransfer, _) => true,
+			_ => false,
+		}
+	}
+}
+
+parameter_types! {
+	// One storage item; key size 32, value size 8; .
+	pub const ProxyDepositBase: Balance = deposit(1, 8);
+	// Additional storage item size of 33 bytes.
+	pub const ProxyDepositFactor: Balance = deposit(0, 33);
+	pub const MaxProxies: u16 = 32;
+	pub const AnnouncementDepositBase: Balance = deposit(1, 8);
+	pub const AnnouncementDepositFactor: Balance = deposit(0, 66);
+	pub const MaxPending: u16 = 32;
+}
+
+impl pallet_proxy::Trait for Runtime {
+	type Event = Event;
+	type Call = Call;
+	type Currency = Balances;
+	type ProxyType = ProxyType;
+	type ProxyDepositBase = ProxyDepositBase;
+	type ProxyDepositFactor = ProxyDepositFactor;
+	type MaxProxies = MaxProxies;
+	type MaxPending = MaxPending;
+	type CallHasher = BlakeTwo256;
+	type AnnouncementDepositBase = AnnouncementDepositBase;
+	type AnnouncementDepositFactor = AnnouncementDepositFactor;
+	type WeightInfo = weights::pallet_proxy::WeightInfo<Runtime>;
+}
+
 parameter_types! {
 	// One storage item; key size is 32; value is size 4+4+16+32 bytes = 56 bytes.
 	pub const DepositBase: Balance = deposit(1, 88);
@@ -706,6 +795,7 @@ construct_runtime!(
 		Nft: pallet_nft::{Module, Call, Storage, Event<T>},
 		Token: pallet_token::{Module, Call, Storage, Event<T>},
 		Trade: pallet_trade::{Module, Call, Storage, Event<T>},
+		Proxy: pallet_proxy::{Module, Call, Storage, Event<T>},
 		Multisig: pallet_multisig::{Module, Call, Storage, Event<T>},
 	}
 );

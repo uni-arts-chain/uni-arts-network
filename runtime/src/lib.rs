@@ -65,7 +65,7 @@ pub use pallet_staking;
 pub use pallet_validator_set;
 pub use pallet_token;
 pub use pallet_trade;
-pub use pallet_lotteries;
+// pub use pallet_lotteries;
 
 
 /// Opaque types. These are used by the CLI to instantiate machinery that don't need to know
@@ -632,20 +632,38 @@ impl pallet_scheduler::Trait for Runtime {
 }
 
 parameter_types! {
-	pub const TicketPrice: Balance = 10 * UART;
-	pub const LuckyPeriod: BlockNumber = 1200;
+	// One storage item; key size is 32; value is size 4+4+16+32 bytes = 56 bytes.
+	pub const DepositBase: Balance = deposit(1, 88);
+	// Additional storage item size of 32 bytes.
+	pub const DepositFactor: Balance = deposit(0, 32);
+	pub const MaxSignatories: u16 = 100;
 }
 
-impl pallet_lotteries::Trait for Runtime {
+impl pallet_multisig::Trait for Runtime {
 	type Event = Event;
 	type Call = Call;
-	type ModuleId = LotteryModuleId;
 	type Currency = Uart;
-	type LotteryDrawOrigin = EnsureRootOrMoreThanHalfCouncil;
-	type TicketPrice = TicketPrice;
-	type LuckyPeriod = LuckyPeriod;
-	type Randomness = RandomnessCollectiveFlip;
+	type DepositBase = DepositBase;
+	type DepositFactor = DepositFactor;
+	type MaxSignatories = MaxSignatories;
+	type WeightInfo = weights::pallet_multisig::WeightInfo<Runtime>;
 }
+
+// parameter_types! {
+// 	pub const TicketPrice: Balance = 10 * UART;
+// 	pub const LuckyPeriod: BlockNumber = 1200;
+// }
+//
+// impl pallet_lotteries::Trait for Runtime {
+// 	type Event = Event;
+// 	type Call = Call;
+// 	type ModuleId = LotteryModuleId;
+// 	type Currency = Uart;
+// 	type LotteryDrawOrigin = EnsureRootOrMoreThanHalfCouncil;
+// 	type TicketPrice = TicketPrice;
+// 	type LuckyPeriod = LuckyPeriod;
+// 	type Randomness = RandomnessCollectiveFlip;
+// }
 
 // Create the runtime by composing the FRAME pallets that were previously configured.
 construct_runtime!(
@@ -668,7 +686,7 @@ construct_runtime!(
 
 		Nicks: pallet_nicks::{Module, Call, Storage, Event<T>},
 		Balances: pallet_balances::{Module, Call, Storage, Config<T>, Event<T>},
-		Lotteries: pallet_lotteries::{Module, Call, Storage, Event<T>},
+		// Lotteries: pallet_lotteries::{Module, Call, Storage, Event<T>},
 		// Uart: pallet_balances::<Instance0>::{Module, Call, Storage, Config<T>, Event<T>},
 		Uink: pallet_balances::<Instance1>::{Module, Call, Storage, Config<T>, Event<T>},
 
@@ -688,6 +706,7 @@ construct_runtime!(
 		Nft: pallet_nft::{Module, Call, Storage, Event<T>},
 		Token: pallet_token::{Module, Call, Storage, Event<T>},
 		Trade: pallet_trade::{Module, Call, Storage, Event<T>},
+		Multisig: pallet_multisig::{Module, Call, Storage, Event<T>},
 	}
 );
 

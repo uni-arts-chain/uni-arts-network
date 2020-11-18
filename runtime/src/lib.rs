@@ -720,6 +720,12 @@ impl pallet_proxy::Trait for Runtime {
 	type WeightInfo = weights::pallet_proxy::WeightInfo<Runtime>;
 }
 
+impl pallet_utility::Trait for Runtime {
+	type Event = Event;
+	type Call = Call;
+	type WeightInfo = ();
+}
+
 parameter_types! {
 	// One storage item; key size is 32; value is size 4+4+16+32 bytes = 56 bytes.
 	pub const DepositBase: Balance = deposit(1, 88);
@@ -795,6 +801,7 @@ construct_runtime!(
 		Nft: pallet_nft::{Module, Call, Storage, Event<T>},
 		Token: pallet_token::{Module, Call, Storage, Event<T>},
 		Trade: pallet_trade::{Module, Call, Storage, Event<T>},
+		Utility: pallet_utility::{Module, Call, Event},
 		Proxy: pallet_proxy::{Module, Call, Storage, Event<T>},
 		Multisig: pallet_multisig::{Module, Call, Storage, Event<T>},
 	}

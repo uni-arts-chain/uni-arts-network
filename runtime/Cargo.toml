@@ -44,6 +44,7 @@ pallet-identity = { version = "2.0.0", default-features = false }
 pallet-scheduler = { version = "2.0.0", default-features = false }
 pallet-multisig = { version = "2.0.0", default-features = false }
 pallet-proxy = { version = "2.0.0", default-features = false }
+pallet-utility = { version = "2.0.0", default-features = false }
 
 # Used for RPCs
 frame-system-rpc-runtime-api = { version = "2.0.0", default-features = false }
@@ -93,6 +94,7 @@ std = [
 	"pallet-staking-rpc-runtime-api/std",
 	"pallet-multisig/std",
 	"pallet-proxy/std",
+	"pallet-utility/std",
 	"serde",
 	"sp-api/std",
 	"sp-block-builder/std",

@@ -10,17 +10,25 @@
 
 use sp_std::prelude::*;
 use frame_support::{
+		traits::{Currency, LockableCurrency, Get, WithdrawReasons},
     StorageValue,
-    decl_event, decl_storage, decl_module, decl_error,
+    decl_event, decl_storage, decl_module, decl_error, ensure,
     dispatch
 };
 use frame_system::{self as system, ensure_root};
 use sp_runtime::traits::Convert;
 
+pub type BalanceOf<T> =
+	<<T as Trait>::Currency as Currency<<T as frame_system::Trait>::AccountId>>::Balance;
+pub type AccountId<T> = <T as frame_system::Trait>::AccountId;
 
 pub trait Trait: system::Trait + pallet_session::Trait {
     type Event: From<Event<Self>> + Into<<Self as system::Trait>::Event>;
+    type Currency: Currency<AccountId<Self>> + LockableCurrency<AccountId<Self>, Moment=Self::BlockNumber> + Send + Sync;
+    type ValidatorMortgageLimit: Get<BalanceOf<Self>>;
 }
+
+const VALIDATOR_LOCK_ID: [u8; 8] = *b"validatr";
 
 decl_storage! {
 	trait Store for Module<T: Trait> as ValidatorSet {
@@ -46,6 +54,8 @@ decl_error! {
 	/// Errors for the module.
 	pub enum Error for Module<T: Trait> {
 		NoValidators,
+		AlreadyValidator,
+		InsufficientMortgage,
 	}
 }
 
@@ -60,6 +70,14 @@ decl_module! {
 		pub fn add_validator(origin, validator_id: T::AccountId) -> dispatch::DispatchResult {
 			ensure_root(origin)?;
 			let mut validators = Self::validators().ok_or(Error::<T>::NoValidators)?;
+			ensure!(!validators.contains(&validator_id), Error::<T>::AlreadyValidator);
+
+			let free = T::Currency::free_balance(&validator_id);
+			let mortgage_limit = T::ValidatorMortgageLimit::get();
+			ensure!(free >= mortgage_limit, Error::<T>::InsufficientMortgage);
+			// Lock mortgage to validator
+			T::Currency::set_lock(VALIDATOR_LOCK_ID, &validator_id, mortgage_limit, WithdrawReasons::all());
+
 			validators.push(validator_id.clone());
 			<Validators<T>>::put(validators);
 			// Calling rotate_session to queue the new session keys.
@@ -79,11 +97,18 @@ decl_module! {
 			// Assuming that this will be a PoA network for enterprise use-cases, 
 			// the validator count may not be too big; the for loop shouldn't be too heavy.
 			// In case the validator count is large, we need to find another way.
+			let mut removed = false;
 			for (i, v) in validators.clone().into_iter().enumerate() {
 				if v == validator_id {
 					validators.swap_remove(i);
+					removed = true;
 				}
 			}
+
+			if removed {
+				T::Currency::remove_lock(VALIDATOR_LOCK_ID, &validator_id);
+			}
+
 			<Validators<T>>::put(validators);
 			// Calling rotate_session to queue the new session keys.
 			<pallet_session::Module<T>>::rotate_session();

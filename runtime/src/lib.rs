@@ -656,6 +656,9 @@ impl InstanceFilter<Call> for ProxyType {
 				c,
 				Call::System(..) |
 				Call::Timestamp(..) |
+				Call::Indices(pallet_indices::Call::claim(..)) |
+				Call::Indices(pallet_indices::Call::free(..)) |
+				Call::Indices(pallet_indices::Call::freeze(..)) |
 				// Specifically omitting the entire Balances pallet
 				Call::Staking(..) |
 				Call::Session(..) |
@@ -744,6 +747,17 @@ impl pallet_multisig::Trait for Runtime {
 	type WeightInfo = weights::pallet_multisig::WeightInfo<Runtime>;
 }
 
+parameter_types! {
+	pub const IndexDeposit: Balance = 1 * UART;
+}
+impl pallet_indices::Trait for Runtime {
+	type AccountIndex = AccountIndex;
+	type Currency = Uart;
+	type Deposit = IndexDeposit;
+	type Event = Event;
+	type WeightInfo = weights::pallet_indices::WeightInfo<Runtime>;
+}
+
 // parameter_types! {
 // 	pub const TicketPrice: Balance = 10 * UART;
 // 	pub const LuckyPeriod: BlockNumber = 1200;
@@ -770,6 +784,7 @@ construct_runtime!(
 		System: frame_system::{Module, Call, Config, Storage, Event<T>},
 		RandomnessCollectiveFlip: pallet_randomness_collective_flip::{Module, Call, Storage},
 		Timestamp: pallet_timestamp::{Module, Call, Storage, Inherent},
+		Indices: pallet_indices::{Module, Call, Storage, Config<T>, Event<T>},
 
 		Session: pallet_session::{Module, Call, Storage, Event, Config<T>},
 		ValidatorSet: pallet_validator_set::{Module, Call, Storage, Event<T>, Config<T>},

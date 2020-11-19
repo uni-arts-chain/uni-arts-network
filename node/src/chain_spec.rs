@@ -237,6 +237,7 @@ fn testnet_genesis(
 			changes_trie_config: Default::default(),
 		}),
 		// pallet_balances: None,
+		pallet_indices: Some(Default::default()),
 		pallet_balances: Some(BalancesConfig {
 			balances: endowed_accounts.iter()
 				.map(|x| (x.0.clone(), x.1.clone()))

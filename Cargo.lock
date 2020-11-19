@@ -3650,6 +3650,23 @@ dependencies = [
 ]
 
 [[package]]
+name = "pallet-indices"
+version = "2.0.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "4d234bf46076a835b473a987f089299ffa3efd961a92b5be9384cc280fcc8c8f"
+dependencies = [
+ "frame-support",
+ "frame-system",
+ "parity-scale-codec",
+ "serde",
+ "sp-core",
+ "sp-io",
+ "sp-keyring",
+ "sp-runtime",
+ "sp-std",
+]
+
+[[package]]
 name = "pallet-lotteries"
 version = "2.0.0"
 dependencies = [
@@ -7658,6 +7675,7 @@ dependencies = [
  "pallet-collective",
  "pallet-grandpa",
  "pallet-identity",
+ "pallet-indices",
  "pallet-lotteries",
  "pallet-multisig",
  "pallet-names",

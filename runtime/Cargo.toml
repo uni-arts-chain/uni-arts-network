@@ -46,6 +46,7 @@ pallet-multisig = { version = "2.0.0", default-features = false }
 pallet-proxy = { version = "2.0.0", default-features = false }
 pallet-utility = { version = "2.0.0", default-features = false }
 pallet-indices = { version = "2.0.0", default-features = false }
+pallet-recovery = { version = "2.0.0", default-features = false }
 
 # Used for RPCs
 frame-system-rpc-runtime-api = { version = "2.0.0", default-features = false }
@@ -97,6 +98,7 @@ std = [
 	"pallet-proxy/std",
 	"pallet-utility/std",
 	"pallet-indices/std",
+	"pallet-recovery/std",
 	"serde",
 	"sp-api/std",
 	"sp-block-builder/std",

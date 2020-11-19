@@ -660,6 +660,12 @@ impl InstanceFilter<Call> for ProxyType {
 				Call::Indices(pallet_indices::Call::free(..)) |
 				Call::Indices(pallet_indices::Call::freeze(..)) |
 				// Specifically omitting the entire Balances pallet
+				Call::Recovery(pallet_recovery::Call::as_recovered(..)) |
+				Call::Recovery(pallet_recovery::Call::vouch_recovery(..)) |
+				Call::Recovery(pallet_recovery::Call::claim_recovery(..)) |
+				Call::Recovery(pallet_recovery::Call::close_recovery(..)) |
+				Call::Recovery(pallet_recovery::Call::remove_recovery(..)) |
+				Call::Recovery(pallet_recovery::Call::cancel_recovered(..)) |
 				Call::Staking(..) |
 				Call::Session(..) |
 				Call::Grandpa(..) |
@@ -758,6 +764,23 @@ impl pallet_indices::Trait for Runtime {
 	type WeightInfo = weights::pallet_indices::WeightInfo<Runtime>;
 }
 
+parameter_types! {
+	pub const ConfigDepositBase: Balance = 10 * MILLI;
+	pub const FriendDepositFactor: Balance = MILLI;
+	pub const MaxFriends: u16 = 9;
+	pub const RecoveryDeposit: Balance = 10 * MILLI;
+}
+
+impl pallet_recovery::Trait for Runtime {
+	type Event = Event;
+	type Call = Call;
+	type Currency = Balances;
+	type ConfigDepositBase = ConfigDepositBase;
+	type FriendDepositFactor = FriendDepositFactor;
+	type MaxFriends = MaxFriends;
+	type RecoveryDeposit = RecoveryDeposit;
+}
+
 // parameter_types! {
 // 	pub const TicketPrice: Balance = 10 * UART;
 // 	pub const LuckyPeriod: BlockNumber = 1200;
@@ -819,6 +842,7 @@ construct_runtime!(
 		Utility: pallet_utility::{Module, Call, Event},
 		Proxy: pallet_proxy::{Module, Call, Storage, Event<T>},
 		Multisig: pallet_multisig::{Module, Call, Storage, Event<T>},
+		Recovery: pallet_recovery::{Module, Call, Storage, Event<T>},
 	}
 );
 

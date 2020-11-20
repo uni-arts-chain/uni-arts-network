@@ -1,6 +1,11 @@
 # Uni-arts Network [云画链](https://uniarts.me)
 
 链接信用、助力原创。
+
+[![Substrate version](https://img.shields.io/badge/Substrate-2.0.0-brightgreen?logo=Parity%20Substrate)](https://substrate.dev/)
+[![Discord](https://img.shields.io/badge/Discord-gray?logo=discord)](https://discord.gg/ZBDGY79X)
+[![Telegram](https://img.shields.io/badge/Telegram-gray?logo=telegram)](https://t.me/uniarts)
+
 ```
     _    _       _                    _          _____ _           _
    | |  | |     (_)        /\        | |        / ____| |         (_)

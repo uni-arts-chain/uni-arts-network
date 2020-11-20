@@ -1,19 +1,13 @@
 # Uni-arts Network [云画链](https://uniarts.me)
 
 链接信用、助力原创。
+![Image text](https://raw.githubusercontent.com/uni-arts-chain/uni-arts-network/master/uni-arts.jpeg)
 
 [![Substrate version](https://img.shields.io/badge/Substrate-2.0.0-brightgreen?logo=Parity%20Substrate)](https://substrate.dev/)
 [![Discord](https://img.shields.io/badge/Discord-gray?logo=discord)](https://discord.gg/ZBDGY79X)
 [![Telegram](https://img.shields.io/badge/Telegram-gray?logo=telegram)](https://t.me/uniarts)
 
-```
-    _    _       _                    _          _____ _           _
-   | |  | |     (_)        /\        | |        / ____| |         (_)
-   | |  | |_ __  _ ______ /  \   _ __| |_ ___  | |    | |__   __ _ _ _ __
-   | |  | | '_ \| |______/ /\ \ | '__| __/ __| | |    | '_ \ / _` | | '_ \
-   | |__| | | | | |     / ____ \| |  | |_\__ \ | |____| | | | (_| | | | | |
-    \____/|_| |_|_|    /_/    \_\_|   \__|___/  \_____|_| |_|\__,_|_|_| |_|
-```
+
 
 ## Build from source
 

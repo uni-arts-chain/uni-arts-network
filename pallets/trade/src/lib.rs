@@ -955,6 +955,7 @@ impl<T: Trait> Module<T> {
         Ok(())
     }
 
+    #[allow(dead_code)]
     fn debug_log_market(tp_hash: T::Hash) {
         if_std! {
             let mut item = <OrderLinkedItemList<T>>::read_bottom(tp_hash);

@@ -45,7 +45,7 @@ pub use pallet_timestamp::Call as TimestampCall;
 pub use pallet_balances::Call as BalancesCall;
 pub use frame_support::{
 	construct_runtime, parameter_types, StorageValue,
-	traits::{KeyOwnerProofSystem, Randomness, StorageMapShim, Currency, Contains, ContainsLengthBound, InstanceFilter},
+	traits::{ChangeMembers, KeyOwnerProofSystem, Randomness, StorageMapShim, Currency, Contains, ContainsLengthBound, InstanceFilter},
 	weights::{
 		Weight, IdentityFee,
 		constants::{BlockExecutionWeight, ExtrinsicBaseWeight, RocksDbWeight, WEIGHT_PER_SECOND},
@@ -500,22 +500,37 @@ impl pallet_nft::Trait for Runtime {
 
 // Uni-Art Treasury
 parameter_types! {
-	pub const GeneralCouncilMotionDuration: BlockNumber = 0;
+	pub const GeneralCouncilMotionDuration: BlockNumber = 3 * DAYS;
 	pub const GeneralCouncilMaxProposals: u32 = 100;
 	pub const CouncilMaxProposals: u32 = 100;
 	pub const CouncilMaxMembers: u32 = 100;
+	pub const TechnicalMotionDuration: BlockNumber = 3 * DAYS;
+	pub const TechnicalMaxProposals: u32 = 100;
+	pub const TechnicalMaxMembers: u32 = 100;
 }
 
-type GeneralCouncilInstance = pallet_collective::Instance1;
+type GeneralCouncilInstance = pallet_collective::Instance0;
 impl pallet_collective::Trait<GeneralCouncilInstance> for Runtime {
 	type Origin = Origin;
 	type Proposal = Call;
 	type Event = Event;
 	type MotionDuration = GeneralCouncilMotionDuration;
 	type MaxProposals = GeneralCouncilMaxProposals;
-	type WeightInfo = ();
 	type MaxMembers = CouncilMaxMembers;
 	type DefaultVote = pallet_collective::PrimeDefaultVote;
+	type WeightInfo = weights::pallet_collective::WeightInfo<Runtime>;
+}
+
+type TechnicalCollective = pallet_collective::Instance1;
+impl pallet_collective::Trait<TechnicalCollective> for Runtime {
+	type Origin = Origin;
+	type Proposal = Call;
+	type Event = Event;
+	type MotionDuration = TechnicalMotionDuration;
+	type MaxProposals = TechnicalMaxProposals;
+	type MaxMembers = TechnicalMaxMembers;
+	type DefaultVote = pallet_collective::PrimeDefaultVote;
+	type WeightInfo = weights::pallet_collective::WeightInfo<Runtime>;
 }
 
 pub struct GeneralCouncilProvider;
@@ -596,6 +611,29 @@ type EnsureRootOrMoreThanHalfCouncil = EnsureOneOf<
 	pallet_collective::EnsureProportionMoreThan<_1, _2, AccountId, GeneralCouncilInstance>,
 >;
 
+
+pub struct MembershipChangedGroup;
+impl ChangeMembers<AccountId> for MembershipChangedGroup {
+	fn change_members_sorted(
+		incoming: &[AccountId],
+		outgoing: &[AccountId],
+		sorted_new: &[AccountId],
+	) {
+		TechnicalCommittee::change_members_sorted(incoming, outgoing, sorted_new);
+	}
+}
+
+impl pallet_membership::Trait<pallet_membership::Instance0> for Runtime {
+	type Event = Event;
+	type AddOrigin = EnsureRootOrMoreThanHalfCouncil;
+	type RemoveOrigin = EnsureRootOrMoreThanHalfCouncil;
+	type SwapOrigin = EnsureRootOrMoreThanHalfCouncil;
+	type ResetOrigin = EnsureRootOrMoreThanHalfCouncil;
+	type PrimeOrigin = EnsureRootOrMoreThanHalfCouncil;
+	type MembershipInitialized = TechnicalCommittee;
+	type MembershipChanged = MembershipChangedGroup;
+}
+
 parameter_types! {
 	pub const BasicDeposit: Balance = 10 * UART;            // 258 bytes on-chain
 	pub const FieldDeposit: Balance = 250 * MICRO;          // 66 bytes on-chain
@@ -671,6 +709,8 @@ impl InstanceFilter<Call> for ProxyType {
 				Call::Grandpa(..) |
 				Call::Utility(..) |
 				Call::GeneralCouncil(..) |
+				Call::TechnicalCommittee(..) |
+				Call::TechnicalMembership(..) |
 				Call::UniArtsTreasury(..) |
 				Call::Identity(..) |
 				Call::Scheduler(..) |
@@ -824,8 +864,10 @@ construct_runtime!(
 		Uink: pallet_balances::<Instance1>::{Module, Call, Storage, Config<T>, Event<T>},
 
 		// Governance
-		GeneralCouncil: pallet_collective::<Instance1>::{Module, Call, Storage, Origin<T>, Event<T>, Config<T>},
+		GeneralCouncil: pallet_collective::<Instance0>::{Module, Call, Storage, Origin<T>, Event<T>, Config<T>},
 		UniArtsTreasury: pallet_treasury::{Module, Call, Storage, Config, Event<T>},
+		TechnicalCommittee: pallet_collective::<Instance1>::{Module, Call, Storage, Origin<T>, Config<T>, Event<T>},
+		TechnicalMembership: pallet_membership::<Instance0>::{Module, Call, Storage, Config<T>, Event<T>},
 		Identity: pallet_identity::{Module, Call, Storage, Event<T>},
 
 		// System scheduler.

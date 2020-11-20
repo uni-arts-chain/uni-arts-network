@@ -3681,6 +3681,21 @@ dependencies = [
 ]
 
 [[package]]
+name = "pallet-membership"
+version = "2.0.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "31c6e1aed47ccc244c6d197a117efdbfe76cd5c1c3815b6aafa822542b625bef"
+dependencies = [
+ "frame-support",
+ "frame-system",
+ "parity-scale-codec",
+ "serde",
+ "sp-io",
+ "sp-runtime",
+ "sp-std",
+]
+
+[[package]]
 name = "pallet-multisig"
 version = "2.0.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -7693,6 +7708,7 @@ dependencies = [
  "pallet-identity",
  "pallet-indices",
  "pallet-lotteries",
+ "pallet-membership",
  "pallet-multisig",
  "pallet-names",
  "pallet-nft",

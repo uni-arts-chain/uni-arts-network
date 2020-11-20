@@ -39,6 +39,7 @@ pallet-session = { version = "2.0.0", default-features = false, features = ["his
 pallet-nicks = { version = "2.0.0", default-features = false }
 pallet-vesting = { version = "2.0.0", default-features = false }
 pallet-collective = { version = "2.0.0", default-features = false }
+pallet-membership = { version = "2.0.0", default-features = false }
 pallet-treasury = { version = "2.0.0", default-features = false }
 pallet-identity = { version = "2.0.0", default-features = false }
 pallet-scheduler = { version = "2.0.0", default-features = false }
@@ -80,6 +81,7 @@ std = [
 	"pallet-grandpa/std",
 	"pallet-vesting/std",
 	"pallet-collective/std",
+	"pallet-membership/std",
 	"pallet-treasury/std",
 	"pallet-identity/std",
 	"pallet-randomness-collective-flip/std",

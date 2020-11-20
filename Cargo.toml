@@ -8,6 +8,8 @@ members = [
     'node',
     'primitives',
     'pallets/assets',
+    'pallets/certificate',
+    'pallets/names',
     'pallets/nft',
     'pallets/token',
     'pallets/trade',

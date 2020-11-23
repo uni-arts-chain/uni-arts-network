@@ -26,7 +26,7 @@ use sp_runtime::traits::{
 use frame_system::{EnsureOneOf, EnsureRoot};
 use sp_api::impl_runtime_apis;
 use sp_consensus_aura::sr25519::AuthorityId as AuraId;
-use sp_core::{u32_trait::{_1, _2}, };
+use sp_core::{u32_trait::{_1, _2, _3, _5}, };
 use pallet_grandpa::{AuthorityId as GrandpaId, AuthorityList as GrandpaAuthorityList};
 use pallet_grandpa::fg_primitives;
 use sp_version::RuntimeVersion;
@@ -128,6 +128,7 @@ parameter_types! {
 	pub const StakingModuleId: ModuleId = ModuleId(*b"staking_");
 	pub const UniArtsNftModuleId: ModuleId = ModuleId(*b"art/nftb");
 	pub const LotteryModuleId: ModuleId = ModuleId(*b"art/lotb");
+	pub const SocietyModuleId: ModuleId = ModuleId(*b"art/soci");
 	pub ZeroAccountId: AccountId = AccountId::from([0u8; 32]);
 }
 
@@ -498,6 +499,33 @@ impl pallet_nft::Trait for Runtime {
 	type Event = Event;
 }
 
+parameter_types! {
+	pub const CandidateDeposit: Balance = 10 * UART;
+	pub const WrongSideDeduction: Balance = 2 * UART;
+	pub const MaxStrikes: u32 = 10;
+	pub const RotationPeriod: BlockNumber = 80 * HOURS;
+	pub const PeriodSpend: Balance = 500 * UART;
+	pub const MaxLockDuration: BlockNumber = 36 * 30 * DAYS;
+	pub const ChallengePeriod: BlockNumber = 7 * DAYS;
+}
+
+impl pallet_society::Trait for Runtime {
+	type Event = Event;
+	type ModuleId = SocietyModuleId;
+	type Currency = Uart;
+	type Randomness = RandomnessCollectiveFlip;
+	type CandidateDeposit = CandidateDeposit;
+	type WrongSideDeduction = WrongSideDeduction;
+	type MaxStrikes = MaxStrikes;
+	type PeriodSpend = PeriodSpend;
+	type MembershipChanged = ();
+	type RotationPeriod = RotationPeriod;
+	type MaxLockDuration = MaxLockDuration;
+	type FounderSetOrigin = EnsureRootOrMoreThanHalfCouncil;
+	type SuspensionJudgementOrigin = pallet_society::EnsureFounder<Runtime>;
+	type ChallengePeriod = ChallengePeriod;
+}
+
 // Uni-Art Treasury
 parameter_types! {
 	pub const GeneralCouncilMotionDuration: BlockNumber = 3 * DAYS;
@@ -533,6 +561,34 @@ impl pallet_collective::Trait<TechnicalCollective> for Runtime {
 	type WeightInfo = weights::pallet_collective::WeightInfo<Runtime>;
 }
 
+type EnsureRootOrMoreThanHalfCouncil = EnsureOneOf<
+	AccountId,
+	EnsureRoot<AccountId>,
+	pallet_collective::EnsureProportionMoreThan<_1, _2, AccountId, GeneralCouncilInstance>,
+>;
+
+pub struct MembershipChangedGroup;
+impl ChangeMembers<AccountId> for MembershipChangedGroup {
+	fn change_members_sorted(
+		incoming: &[AccountId],
+		outgoing: &[AccountId],
+		sorted_new: &[AccountId],
+	) {
+		TechnicalCommittee::change_members_sorted(incoming, outgoing, sorted_new);
+	}
+}
+
+impl pallet_membership::Trait<pallet_membership::Instance0> for Runtime {
+	type Event = Event;
+	type AddOrigin = EnsureRootOrMoreThanHalfCouncil;
+	type RemoveOrigin = EnsureRootOrMoreThanHalfCouncil;
+	type SwapOrigin = EnsureRootOrMoreThanHalfCouncil;
+	type ResetOrigin = EnsureRootOrMoreThanHalfCouncil;
+	type PrimeOrigin = EnsureRootOrMoreThanHalfCouncil;
+	type MembershipInitialized = TechnicalCommittee;
+	type MembershipChanged = MembershipChangedGroup;
+}
+
 pub struct GeneralCouncilProvider;
 impl Contains<AccountId> for GeneralCouncilProvider {
 	fn contains(who: &AccountId) -> bool {
@@ -559,6 +615,12 @@ impl ContainsLengthBound for GeneralCouncilProvider {
 }
 
 // Uni-Art Treasury
+type ApproveOrigin = EnsureOneOf<
+	AccountId,
+	EnsureRoot<AccountId>,
+	pallet_collective::EnsureProportionAtLeast<_3, _5, AccountId, GeneralCouncilInstance>,
+>;
+
 parameter_types! {
 	pub const ProposalBond: Permill = Permill::from_percent(5);
 	pub const ProposalBondMinimum: Balance = 1 * UART;
@@ -582,8 +644,8 @@ parameter_types! {
 impl pallet_treasury::Trait for Runtime {
 	type ModuleId = UniArtsTreasuryModuleId;
 	type Currency = Uart;
-	type ApproveOrigin = frame_system::EnsureRoot<AccountId>;
-	type RejectOrigin = frame_system::EnsureRoot<AccountId>;
+	type ApproveOrigin = ApproveOrigin;
+	type RejectOrigin = EnsureRootOrMoreThanHalfCouncil;
 	type Tippers = GeneralCouncilProvider;
 	type TipCountdown = TipCountdown;
 	type TipFindersFee = TipFindersFee;
@@ -593,7 +655,7 @@ impl pallet_treasury::Trait for Runtime {
 	type ProposalBondMinimum = ProposalBondMinimum;
 	type SpendPeriod = SpendPeriod;
 	type Burn = Burn;
-	type BurnDestination = ();
+	type BurnDestination = Society;
 	type WeightInfo = ();
 	type DataDepositPerByte = DataDepositPerByte;
 	type OnSlash = UniArtsTreasury;
@@ -603,35 +665,6 @@ impl pallet_treasury::Trait for Runtime {
 	type BountyCuratorDeposit = BountyCuratorDeposit;
 	type BountyValueMinimum = BountyValueMinimum;
 	type MaximumReasonLength = MaximumReasonLength;
-}
-
-type EnsureRootOrMoreThanHalfCouncil = EnsureOneOf<
-	AccountId,
-	EnsureRoot<AccountId>,
-	pallet_collective::EnsureProportionMoreThan<_1, _2, AccountId, GeneralCouncilInstance>,
->;
-
-
-pub struct MembershipChangedGroup;
-impl ChangeMembers<AccountId> for MembershipChangedGroup {
-	fn change_members_sorted(
-		incoming: &[AccountId],
-		outgoing: &[AccountId],
-		sorted_new: &[AccountId],
-	) {
-		TechnicalCommittee::change_members_sorted(incoming, outgoing, sorted_new);
-	}
-}
-
-impl pallet_membership::Trait<pallet_membership::Instance0> for Runtime {
-	type Event = Event;
-	type AddOrigin = EnsureRootOrMoreThanHalfCouncil;
-	type RemoveOrigin = EnsureRootOrMoreThanHalfCouncil;
-	type SwapOrigin = EnsureRootOrMoreThanHalfCouncil;
-	type ResetOrigin = EnsureRootOrMoreThanHalfCouncil;
-	type PrimeOrigin = EnsureRootOrMoreThanHalfCouncil;
-	type MembershipInitialized = TechnicalCommittee;
-	type MembershipChanged = MembershipChangedGroup;
 }
 
 parameter_types! {
@@ -708,6 +741,7 @@ impl InstanceFilter<Call> for ProxyType {
 				Call::Session(..) |
 				Call::Grandpa(..) |
 				Call::Utility(..) |
+				Call::Society(..) |
 				Call::GeneralCouncil(..) |
 				Call::TechnicalCommittee(..) |
 				Call::TechnicalMembership(..) |
@@ -869,6 +903,8 @@ construct_runtime!(
 		TechnicalCommittee: pallet_collective::<Instance1>::{Module, Call, Storage, Origin<T>, Config<T>, Event<T>},
 		TechnicalMembership: pallet_membership::<Instance0>::{Module, Call, Storage, Config<T>, Event<T>},
 		Identity: pallet_identity::{Module, Call, Storage, Event<T>},
+		// Society module.
+		Society: pallet_society::{Module, Call, Storage, Event<T>},
 
 		// System scheduler.
 		Scheduler: pallet_scheduler::{Module, Call, Storage, Event<T>},

@@ -3858,6 +3858,21 @@ dependencies = [
 ]
 
 [[package]]
+name = "pallet-society"
+version = "2.0.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "75a9097dccf372915661c637d0f3839663cd8d11b7749fa70323f6060cff69fa"
+dependencies = [
+ "frame-support",
+ "frame-system",
+ "parity-scale-codec",
+ "rand_chacha 0.2.2",
+ "serde",
+ "sp-runtime",
+ "sp-std",
+]
+
+[[package]]
 name = "pallet-staking"
 version = "0.1.0"
 dependencies = [
@@ -7719,6 +7734,7 @@ dependencies = [
  "pallet-rewards",
  "pallet-scheduler",
  "pallet-session",
+ "pallet-society",
  "pallet-staking",
  "pallet-staking-rpc-runtime-api",
  "pallet-sudo",

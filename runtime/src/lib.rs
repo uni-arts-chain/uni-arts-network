@@ -658,7 +658,7 @@ impl pallet_treasury::Trait for Runtime {
 	type BurnDestination = Society;
 	type WeightInfo = ();
 	type DataDepositPerByte = DataDepositPerByte;
-	type OnSlash = UniArtsTreasury;
+	type OnSlash = Treasury;
 	type BountyDepositBase = BountyDepositBase;
 	type BountyDepositPayoutDelay = BountyDepositPayoutDelay;
 	type BountyUpdatePeriod = BountyUpdatePeriod;
@@ -684,7 +684,7 @@ impl pallet_identity::Trait for Runtime {
 	type MaxSubAccounts = MaxSubAccounts;
 	type MaxAdditionalFields = MaxAdditionalFields;
 	type MaxRegistrars = MaxRegistrars;
-	type Slashed = UniArtsTreasury;
+	type Slashed = Treasury;
 	type ForceOrigin = EnsureRootOrMoreThanHalfCouncil;
 	type RegistrarOrigin = EnsureRootOrMoreThanHalfCouncil;
 	type WeightInfo = ();
@@ -745,7 +745,7 @@ impl InstanceFilter<Call> for ProxyType {
 				Call::GeneralCouncil(..) |
 				Call::TechnicalCommittee(..) |
 				Call::TechnicalMembership(..) |
-				Call::UniArtsTreasury(..) |
+				Call::Treasury(..) |
 				Call::Identity(..) |
 				Call::Scheduler(..) |
 				Call::Proxy(..) |
@@ -757,7 +757,7 @@ impl InstanceFilter<Call> for ProxyType {
 			),
 			ProxyType::Governance => matches!(
 				c,
-				Call::GeneralCouncil(..) | Call::UniArtsTreasury(..)
+				Call::GeneralCouncil(..) | Call::Treasury(..)
 			),
 			ProxyType::Staking => matches!(c, Call::Staking(..)),
 			ProxyType::IdentityJudgement => matches!(
@@ -899,7 +899,7 @@ construct_runtime!(
 
 		// Governance
 		GeneralCouncil: pallet_collective::<Instance0>::{Module, Call, Storage, Origin<T>, Event<T>, Config<T>},
-		UniArtsTreasury: pallet_treasury::{Module, Call, Storage, Config, Event<T>},
+		Treasury: pallet_treasury::{Module, Call, Storage, Config, Event<T>},
 		TechnicalCommittee: pallet_collective::<Instance1>::{Module, Call, Storage, Origin<T>, Config<T>, Event<T>},
 		TechnicalMembership: pallet_membership::<Instance0>::{Module, Call, Storage, Config<T>, Event<T>},
 		Identity: pallet_identity::{Module, Call, Storage, Event<T>},

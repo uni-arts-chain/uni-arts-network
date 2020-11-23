@@ -162,6 +162,12 @@
     "asset_id": "Id",
     "total_balance": "Balance"
   },
+  "TreasuryProposal": {
+    "proposer": "AccountId",
+    "beneficiary": "AccountId",
+    "value": "Balance",
+    "bond": "Balance"
+  },
   "Staker": {
     "amount": "Balance",
     "reward": "Balance",

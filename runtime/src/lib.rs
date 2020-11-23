@@ -410,7 +410,7 @@ impl pallet_nicks::Trait for Runtime {
 	/// Use the NickReservationFee from the parameter_types block.
 	type ReservationFee = NickReservationFee;
 	/// No action is taken when deposits are forfeited.
-	type Slashed = ();
+	type Slashed = Treasury;
 	/// Configure the FRAME System Root origin as the Nick pallet admin.
 	type ForceOrigin = frame_system::EnsureRoot<AccountId>;
 	/// Use the MinNickLength from the parameter_types block.

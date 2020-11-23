@@ -128,4 +128,9 @@ impl<T: Trait> Module<T> {
 	fn payout_rewards(author: AccountId<T>, amount: BalanceOf<T>) {
 		let _ = T::Currency::deposit_into_existing(&author, amount);
 	}
+
+	fn calc_reward_per_block() -> BalanceOf<T> {
+		let initial = T::RewardPerBlock::get();
+		return initial
+	}
 }

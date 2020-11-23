@@ -528,8 +528,7 @@ impl pallet_society::Trait for Runtime {
 
 // Uni-Art Treasury
 parameter_types! {
-	pub const GeneralCouncilMotionDuration: BlockNumber = 3 * DAYS;
-	pub const GeneralCouncilMaxProposals: u32 = 100;
+	pub const CouncilMotionDuration: BlockNumber = 3 * DAYS;
 	pub const CouncilMaxProposals: u32 = 100;
 	pub const CouncilMaxMembers: u32 = 100;
 	pub const TechnicalMotionDuration: BlockNumber = 3 * DAYS;
@@ -537,13 +536,13 @@ parameter_types! {
 	pub const TechnicalMaxMembers: u32 = 100;
 }
 
-type GeneralCouncilInstance = pallet_collective::Instance0;
-impl pallet_collective::Trait<GeneralCouncilInstance> for Runtime {
+type CouncilInstance = pallet_collective::Instance0;
+impl pallet_collective::Trait<CouncilInstance> for Runtime {
 	type Origin = Origin;
 	type Proposal = Call;
 	type Event = Event;
-	type MotionDuration = GeneralCouncilMotionDuration;
-	type MaxProposals = GeneralCouncilMaxProposals;
+	type MotionDuration = CouncilMotionDuration;
+	type MaxProposals = CouncilMaxProposals;
 	type MaxMembers = CouncilMaxMembers;
 	type DefaultVote = pallet_collective::PrimeDefaultVote;
 	type WeightInfo = weights::pallet_collective::WeightInfo<Runtime>;
@@ -564,7 +563,7 @@ impl pallet_collective::Trait<TechnicalCollective> for Runtime {
 type EnsureRootOrMoreThanHalfCouncil = EnsureOneOf<
 	AccountId,
 	EnsureRoot<AccountId>,
-	pallet_collective::EnsureProportionMoreThan<_1, _2, AccountId, GeneralCouncilInstance>,
+	pallet_collective::EnsureProportionMoreThan<_1, _2, AccountId, CouncilInstance>,
 >;
 
 pub struct MembershipChangedGroup;
@@ -589,14 +588,14 @@ impl pallet_membership::Trait<pallet_membership::Instance0> for Runtime {
 	type MembershipChanged = MembershipChangedGroup;
 }
 
-pub struct GeneralCouncilProvider;
-impl Contains<AccountId> for GeneralCouncilProvider {
+pub struct CouncilProvider;
+impl Contains<AccountId> for CouncilProvider {
 	fn contains(who: &AccountId) -> bool {
-		GeneralCouncil::is_member(who)
+		Council::is_member(who)
 	}
 
 	fn sorted_members() -> Vec<AccountId> {
-		GeneralCouncil::members()
+		Council::members()
 	}
 
 	#[cfg(feature = "runtime-benchmarks")]
@@ -605,7 +604,7 @@ impl Contains<AccountId> for GeneralCouncilProvider {
 	}
 }
 
-impl ContainsLengthBound for GeneralCouncilProvider {
+impl ContainsLengthBound for CouncilProvider {
 	fn max_len() -> usize {
 		100
 	}
@@ -618,7 +617,7 @@ impl ContainsLengthBound for GeneralCouncilProvider {
 type ApproveOrigin = EnsureOneOf<
 	AccountId,
 	EnsureRoot<AccountId>,
-	pallet_collective::EnsureProportionAtLeast<_3, _5, AccountId, GeneralCouncilInstance>,
+	pallet_collective::EnsureProportionAtLeast<_3, _5, AccountId, CouncilInstance>,
 >;
 
 parameter_types! {
@@ -646,7 +645,7 @@ impl pallet_treasury::Trait for Runtime {
 	type Currency = Uart;
 	type ApproveOrigin = ApproveOrigin;
 	type RejectOrigin = EnsureRootOrMoreThanHalfCouncil;
-	type Tippers = GeneralCouncilProvider;
+	type Tippers = CouncilProvider;
 	type TipCountdown = TipCountdown;
 	type TipFindersFee = TipFindersFee;
 	type TipReportDepositBase = TipReportDepositBase;
@@ -742,7 +741,7 @@ impl InstanceFilter<Call> for ProxyType {
 				Call::Grandpa(..) |
 				Call::Utility(..) |
 				Call::Society(..) |
-				Call::GeneralCouncil(..) |
+				Call::Council(..) |
 				Call::TechnicalCommittee(..) |
 				Call::TechnicalMembership(..) |
 				Call::Treasury(..) |
@@ -757,7 +756,7 @@ impl InstanceFilter<Call> for ProxyType {
 			),
 			ProxyType::Governance => matches!(
 				c,
-				Call::GeneralCouncil(..) | Call::Treasury(..)
+				Call::Council(..) | Call::Treasury(..)
 			),
 			ProxyType::Staking => matches!(c, Call::Staking(..)),
 			ProxyType::IdentityJudgement => matches!(
@@ -898,7 +897,7 @@ construct_runtime!(
 		Uink: pallet_balances::<Instance1>::{Module, Call, Storage, Config<T>, Event<T>},
 
 		// Governance
-		GeneralCouncil: pallet_collective::<Instance0>::{Module, Call, Storage, Origin<T>, Event<T>, Config<T>},
+		Council: pallet_collective::<Instance0>::{Module, Call, Storage, Origin<T>, Event<T>, Config<T>},
 		Treasury: pallet_treasury::{Module, Call, Storage, Config, Event<T>},
 		TechnicalCommittee: pallet_collective::<Instance1>::{Module, Call, Storage, Origin<T>, Config<T>, Event<T>},
 		TechnicalMembership: pallet_membership::<Instance0>::{Module, Call, Storage, Config<T>, Event<T>},

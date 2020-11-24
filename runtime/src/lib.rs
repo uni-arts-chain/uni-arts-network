@@ -612,9 +612,9 @@ impl pallet_elections_phragmen::Trait for Runtime {
 	type TermDuration = TermDuration;
 	type DesiredMembers = DesiredMembers;
 	type DesiredRunnersUp = DesiredRunnersUp;
-	type LoserCandidate = ();
-	type KickedMember = ();
-	type BadReport = ();
+	type LoserCandidate = Treasury;
+	type KickedMember = Treasury;
+	type BadReport = Treasury;
 	type WeightInfo = ();
 }
 

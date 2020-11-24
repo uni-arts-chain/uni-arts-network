@@ -57,6 +57,7 @@ pallet-transaction-payment-rpc-runtime-api = { version = "2.0.0", default-featur
 pallet-staking-rpc-runtime-api = { version = "0.1.0", default-features = false, path = "../pallets/staking/rpc/runtime-api"}
 
 # Uni-Arts pallets
+uniarts-common = { path = "../pallets/common", default-features = false }
 pallet-certificate = { path = "../pallets/certificate", default-features = false }
 pallet-assets = { path = "../pallets/assets", default-features = false }
 pallet-names = { path = "../pallets/names", default-features = false }
@@ -94,6 +95,7 @@ std = [
 	"pallet-timestamp/std",
 	"pallet-transaction-payment/std",
   	"pallet-transaction-payment-rpc-runtime-api/std",
+	"uniarts-common/std",
 	"pallet-names/std",
 	"pallet-nft/std",
 	"pallet-validator-set/std",

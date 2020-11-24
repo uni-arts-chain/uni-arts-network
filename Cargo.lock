@@ -7803,6 +7803,7 @@ dependencies = [
  "sp-version",
  "substrate-wasm-builder-runner",
  "uniart-primitives",
+ "uniarts-common",
 ]
 
 [[package]]
@@ -7824,6 +7825,17 @@ dependencies = [
  "parity-scale-codec",
  "serde",
  "sp-core",
+ "sp-runtime",
+ "sp-std",
+]
+
+[[package]]
+name = "uniarts-common"
+version = "0.1.0"
+dependencies = [
+ "frame-support",
+ "frame-system",
+ "parity-scale-codec",
  "sp-runtime",
  "sp-std",
 ]

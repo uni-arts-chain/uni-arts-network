@@ -69,6 +69,7 @@ pub use pallet_staking;
 pub use pallet_validator_set;
 pub use pallet_token;
 pub use pallet_trade;
+pub use uniarts_common;
 // pub use pallet_lotteries;
 
 
@@ -100,7 +101,7 @@ pub const VERSION: RuntimeVersion = RuntimeVersion {
 	spec_name: create_runtime_str!("uart"),
 	impl_name: create_runtime_str!("uart"),
 	authoring_version: 1,
-	spec_version: 3,
+	spec_version: 4,
 	impl_version: 1,
 	apis: RUNTIME_API_VERSIONS,
 	transaction_version: 1,
@@ -591,32 +592,6 @@ impl pallet_membership::Trait<pallet_membership::Instance0> for Runtime {
 	type MembershipChanged = MembershipChangedGroup;
 }
 
-/// A structure that converts the currency type into a lossy u64
-/// And back from u128
-pub struct CurrencyToVoteHandler;
-
-impl Convert<u128, u64> for CurrencyToVoteHandler {
-	fn convert(x: u128) -> u64 {
-		if x >> 96 == 0 {
-			x as u64
-		} else {
-			u64::max_value()
-		}
-	}
-}
-
-impl Convert<u128, u128> for CurrencyToVoteHandler {
-	fn convert(x: u128) -> u128 {
-		// if it practically fits in u64
-		if x >> 64 == 0 {
-			x
-		} else {
-			// 0000_0000_FFFF_FFFF_FFFF_FFFF_0000_0000
-			u64::max_value() as u128
-		}
-	}
-}
-
 parameter_types! {
 	pub const CandidacyBond: Balance = 10 * UART;
 	pub const VotingBond: Balance = 1 * UART;
@@ -629,7 +604,7 @@ impl pallet_elections_phragmen::Trait for Runtime {
 	type ModuleId = ElectionsPhragmenModuleId;
 	type Event = Event;
 	type Currency = Uart;
-	type CurrencyToVote = CurrencyToVoteHandler;
+	type CurrencyToVote = uniarts_common::currency::CurrencyToVoteHandler;
 	type ChangeMembers = Council;
 	type InitializeMembers = Council;
 	type CandidacyBond = CandidacyBond;

@@ -760,6 +760,7 @@ impl InstanceFilter<Call> for ProxyType {
 				Call::Utility(..) |
 				Call::Society(..) |
 				Call::Council(..) |
+				Call::CouncilMembership(..) |
 				Call::TechnicalCommittee(..) |
 				Call::TechnicalMembership(..) |
 				Call::ElectionsPhragmen(..) |

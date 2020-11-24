@@ -45,7 +45,9 @@ pub use pallet_timestamp::Call as TimestampCall;
 pub use pallet_balances::Call as BalancesCall;
 pub use frame_support::{
 	construct_runtime, parameter_types, StorageValue,
-	traits::{ChangeMembers, KeyOwnerProofSystem, Randomness, StorageMapShim, Currency, Contains, ContainsLengthBound, InstanceFilter},
+	traits::{ChangeMembers, KeyOwnerProofSystem, Randomness, StorageMapShim, Currency,
+			 Contains, ContainsLengthBound, InstanceFilter, LockIdentifier
+	},
 	weights::{
 		Weight, IdentityFee,
 		constants::{BlockExecutionWeight, ExtrinsicBaseWeight, RocksDbWeight, WEIGHT_PER_SECOND},
@@ -129,6 +131,7 @@ parameter_types! {
 	pub const UniArtsNftModuleId: ModuleId = ModuleId(*b"art/nftb");
 	pub const LotteryModuleId: ModuleId = ModuleId(*b"art/lotb");
 	pub const SocietyModuleId: ModuleId = ModuleId(*b"art/soci");
+	pub const ElectionsPhragmenModuleId: LockIdentifier = *b"art/phre";
 	pub ZeroAccountId: AccountId = AccountId::from([0u8; 32]);
 }
 
@@ -588,29 +591,56 @@ impl pallet_membership::Trait<pallet_membership::Instance0> for Runtime {
 	type MembershipChanged = MembershipChangedGroup;
 }
 
-pub struct CouncilProvider;
-impl Contains<AccountId> for CouncilProvider {
-	fn contains(who: &AccountId) -> bool {
-		Council::is_member(who)
-	}
+/// A structure that converts the currency type into a lossy u64
+/// And back from u128
+pub struct CurrencyToVoteHandler;
 
-	fn sorted_members() -> Vec<AccountId> {
-		Council::members()
-	}
-
-	#[cfg(feature = "runtime-benchmarks")]
-	fn add(_: &AccountId) {
-		todo!()
+impl Convert<u128, u64> for CurrencyToVoteHandler {
+	fn convert(x: u128) -> u64 {
+		if x >> 96 == 0 {
+			x as u64
+		} else {
+			u64::max_value()
+		}
 	}
 }
 
-impl ContainsLengthBound for CouncilProvider {
-	fn max_len() -> usize {
-		100
+impl Convert<u128, u128> for CurrencyToVoteHandler {
+	fn convert(x: u128) -> u128 {
+		// if it practically fits in u64
+		if x >> 64 == 0 {
+			x
+		} else {
+			// 0000_0000_FFFF_FFFF_FFFF_FFFF_0000_0000
+			u64::max_value() as u128
+		}
 	}
-	fn min_len() -> usize {
-		0
-	}
+}
+
+parameter_types! {
+	pub const CandidacyBond: Balance = 10 * UART;
+	pub const VotingBond: Balance = 1 * UART;
+	pub const TermDuration: BlockNumber = 24 * HOURS;
+	pub const DesiredMembers: u32 = 13;
+	pub const DesiredRunnersUp: u32 = 7;
+}
+
+impl pallet_elections_phragmen::Trait for Runtime {
+	type ModuleId = ElectionsPhragmenModuleId;
+	type Event = Event;
+	type Currency = Uart;
+	type CurrencyToVote = CurrencyToVoteHandler;
+	type ChangeMembers = Council;
+	type InitializeMembers = Council;
+	type CandidacyBond = CandidacyBond;
+	type VotingBond = VotingBond;
+	type TermDuration = TermDuration;
+	type DesiredMembers = DesiredMembers;
+	type DesiredRunnersUp = DesiredRunnersUp;
+	type LoserCandidate = ();
+	type KickedMember = ();
+	type BadReport = ();
+	type WeightInfo = ();
 }
 
 // Uni-Art Treasury
@@ -645,7 +675,7 @@ impl pallet_treasury::Trait for Runtime {
 	type Currency = Uart;
 	type ApproveOrigin = ApproveOrigin;
 	type RejectOrigin = EnsureRootOrMoreThanHalfCouncil;
-	type Tippers = CouncilProvider;
+	type Tippers = ElectionsPhragmen;
 	type TipCountdown = TipCountdown;
 	type TipFindersFee = TipFindersFee;
 	type TipReportDepositBase = TipReportDepositBase;
@@ -744,6 +774,7 @@ impl InstanceFilter<Call> for ProxyType {
 				Call::Council(..) |
 				Call::TechnicalCommittee(..) |
 				Call::TechnicalMembership(..) |
+				Call::ElectionsPhragmen(..) |
 				Call::Treasury(..) |
 				Call::Identity(..) |
 				Call::Scheduler(..) |
@@ -756,7 +787,11 @@ impl InstanceFilter<Call> for ProxyType {
 			),
 			ProxyType::Governance => matches!(
 				c,
-				Call::Council(..) | Call::Treasury(..)
+				Call::Council(..) |
+				Call::Treasury(..) |
+				Call::TechnicalCommittee(..) |
+				Call::ElectionsPhragmen(..) |
+				Call::Utility(..)
 			),
 			ProxyType::Staking => matches!(c, Call::Staking(..)),
 			ProxyType::IdentityJudgement => matches!(
@@ -902,6 +937,7 @@ construct_runtime!(
 		TechnicalCommittee: pallet_collective::<Instance1>::{Module, Call, Storage, Origin<T>, Config<T>, Event<T>},
 		TechnicalMembership: pallet_membership::<Instance0>::{Module, Call, Storage, Config<T>, Event<T>},
 		Identity: pallet_identity::{Module, Call, Storage, Event<T>},
+		ElectionsPhragmen: pallet_elections_phragmen::{Module, Call, Storage, Event<T>},
 		// Society module.
 		Society: pallet_society::{Module, Call, Storage, Event<T>},
 

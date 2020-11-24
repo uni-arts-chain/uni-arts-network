@@ -581,7 +581,20 @@ impl ChangeMembers<AccountId> for MembershipChangedGroup {
 	}
 }
 
-impl pallet_membership::Trait<pallet_membership::Instance0> for Runtime {
+type CouncilMembershipInstance = pallet_membership::Instance0;
+impl pallet_membership::Trait<CouncilMembershipInstance> for Runtime {
+	type Event = Event;
+	type AddOrigin = EnsureRootOrMoreThanHalfCouncil;
+	type RemoveOrigin = EnsureRootOrMoreThanHalfCouncil;
+	type SwapOrigin = EnsureRootOrMoreThanHalfCouncil;
+	type ResetOrigin = EnsureRootOrMoreThanHalfCouncil;
+	type PrimeOrigin = EnsureRootOrMoreThanHalfCouncil;
+	type MembershipInitialized = Council;
+	type MembershipChanged = Council;
+}
+
+type TechnicalCommitteeMembershipInstance = pallet_membership::Instance1;
+impl pallet_membership::Trait<TechnicalCommitteeMembershipInstance> for Runtime {
 	type Event = Event;
 	type AddOrigin = EnsureRootOrMoreThanHalfCouncil;
 	type RemoveOrigin = EnsureRootOrMoreThanHalfCouncil;
@@ -908,9 +921,10 @@ construct_runtime!(
 
 		// Governance
 		Council: pallet_collective::<Instance0>::{Module, Call, Storage, Origin<T>, Event<T>, Config<T>},
+		CouncilMembership: pallet_membership::<Instance0>::{Module, Call, Storage, Event<T>, Config<T>},
 		Treasury: pallet_treasury::{Module, Call, Storage, Config, Event<T>},
 		TechnicalCommittee: pallet_collective::<Instance1>::{Module, Call, Storage, Origin<T>, Config<T>, Event<T>},
-		TechnicalMembership: pallet_membership::<Instance0>::{Module, Call, Storage, Config<T>, Event<T>},
+		TechnicalMembership: pallet_membership::<Instance1>::{Module, Call, Storage, Config<T>, Event<T>},
 		Identity: pallet_identity::{Module, Call, Storage, Event<T>},
 		ElectionsPhragmen: pallet_elections_phragmen::{Module, Call, Storage, Event<T>},
 		// Society module.

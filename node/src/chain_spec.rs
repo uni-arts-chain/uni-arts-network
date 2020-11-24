@@ -3,7 +3,7 @@ use sp_core::{Pair, Public, crypto::UncheckedInto, sr25519};
 use uart_runtime::{
 	get_all_module_accounts,
 	AccountId, BalancesConfig, GenesisConfig, SessionConfig, ValidatorSetConfig, VestingConfig,
-	SudoConfig, SystemConfig, WASM_BINARY, Signature, Balance, constants::currency::*,
+	SudoConfig, SystemConfig, CouncilMembershipConfig, WASM_BINARY, Signature, Balance, constants::currency::*,
 	opaque::SessionKeys
 };
 use sp_consensus_aura::sr25519::AuthorityId as AuraId;
@@ -263,12 +263,16 @@ fn testnet_genesis(
 		pallet_grandpa: None,
 		pallet_sudo: Some(SudoConfig {
 			// Assign network admin rights.
-			key: root_key,
+			key: root_key.clone(),
 		}),
 		pallet_vesting: Some(VestingConfig { vesting: vec![] }),
 		pallet_collective_Instance0: Some(Default::default()),
 		pallet_collective_Instance1: Some(Default::default()),
-		pallet_membership_Instance0: Some(Default::default()),
+		pallet_membership_Instance0: Some(CouncilMembershipConfig {
+			members: vec![root_key.clone()],
+			phantom: Default::default(),
+		}),
+		pallet_membership_Instance1: Some(Default::default()),
 		pallet_treasury: Some(Default::default()),
 	}
 }

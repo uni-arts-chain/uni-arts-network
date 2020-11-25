@@ -45,7 +45,9 @@ pub use pallet_timestamp::Call as TimestampCall;
 pub use pallet_balances::Call as BalancesCall;
 pub use frame_support::{
 	construct_runtime, parameter_types, StorageValue,
-	traits::{ChangeMembers, KeyOwnerProofSystem, Randomness, StorageMapShim, Currency, Contains, ContainsLengthBound, InstanceFilter},
+	traits::{ChangeMembers, KeyOwnerProofSystem, Randomness, StorageMapShim, Currency,
+			 Contains, ContainsLengthBound, InstanceFilter, LockIdentifier
+	},
 	weights::{
 		Weight, IdentityFee,
 		constants::{BlockExecutionWeight, ExtrinsicBaseWeight, RocksDbWeight, WEIGHT_PER_SECOND},
@@ -67,6 +69,7 @@ pub use pallet_staking;
 pub use pallet_validator_set;
 pub use pallet_token;
 pub use pallet_trade;
+pub use uniarts_common;
 // pub use pallet_lotteries;
 
 
@@ -98,7 +101,7 @@ pub const VERSION: RuntimeVersion = RuntimeVersion {
 	spec_name: create_runtime_str!("uart"),
 	impl_name: create_runtime_str!("uart"),
 	authoring_version: 1,
-	spec_version: 2,
+	spec_version: 4,
 	impl_version: 1,
 	apis: RUNTIME_API_VERSIONS,
 	transaction_version: 1,
@@ -129,6 +132,7 @@ parameter_types! {
 	pub const UniArtsNftModuleId: ModuleId = ModuleId(*b"art/nftb");
 	pub const LotteryModuleId: ModuleId = ModuleId(*b"art/lotb");
 	pub const SocietyModuleId: ModuleId = ModuleId(*b"art/soci");
+	pub const ElectionsPhragmenModuleId: LockIdentifier = *b"art/phre";
 	pub ZeroAccountId: AccountId = AccountId::from([0u8; 32]);
 }
 
@@ -535,8 +539,7 @@ impl pallet_society::Trait for Runtime {
 
 // Uni-Art Treasury
 parameter_types! {
-	pub const GeneralCouncilMotionDuration: BlockNumber = 3 * DAYS;
-	pub const GeneralCouncilMaxProposals: u32 = 100;
+	pub const CouncilMotionDuration: BlockNumber = 3 * DAYS;
 	pub const CouncilMaxProposals: u32 = 100;
 	pub const CouncilMaxMembers: u32 = 100;
 	pub const TechnicalMotionDuration: BlockNumber = 3 * DAYS;
@@ -544,13 +547,13 @@ parameter_types! {
 	pub const TechnicalMaxMembers: u32 = 100;
 }
 
-type GeneralCouncilInstance = pallet_collective::Instance0;
-impl pallet_collective::Trait<GeneralCouncilInstance> for Runtime {
+type CouncilInstance = pallet_collective::Instance0;
+impl pallet_collective::Trait<CouncilInstance> for Runtime {
 	type Origin = Origin;
 	type Proposal = Call;
 	type Event = Event;
-	type MotionDuration = GeneralCouncilMotionDuration;
-	type MaxProposals = GeneralCouncilMaxProposals;
+	type MotionDuration = CouncilMotionDuration;
+	type MaxProposals = CouncilMaxProposals;
 	type MaxMembers = CouncilMaxMembers;
 	type DefaultVote = pallet_collective::PrimeDefaultVote;
 	type WeightInfo = weights::pallet_collective::WeightInfo<Runtime>;
@@ -571,7 +574,7 @@ impl pallet_collective::Trait<TechnicalCollective> for Runtime {
 type EnsureRootOrMoreThanHalfCouncil = EnsureOneOf<
 	AccountId,
 	EnsureRoot<AccountId>,
-	pallet_collective::EnsureProportionMoreThan<_1, _2, AccountId, GeneralCouncilInstance>,
+	pallet_collective::EnsureProportionMoreThan<_1, _2, AccountId, CouncilInstance>,
 >;
 
 pub struct MembershipChangedGroup;
@@ -585,7 +588,20 @@ impl ChangeMembers<AccountId> for MembershipChangedGroup {
 	}
 }
 
-impl pallet_membership::Trait<pallet_membership::Instance0> for Runtime {
+type CouncilMembershipInstance = pallet_membership::Instance0;
+impl pallet_membership::Trait<CouncilMembershipInstance> for Runtime {
+	type Event = Event;
+	type AddOrigin = EnsureRootOrMoreThanHalfCouncil;
+	type RemoveOrigin = EnsureRootOrMoreThanHalfCouncil;
+	type SwapOrigin = EnsureRootOrMoreThanHalfCouncil;
+	type ResetOrigin = EnsureRootOrMoreThanHalfCouncil;
+	type PrimeOrigin = EnsureRootOrMoreThanHalfCouncil;
+	type MembershipInitialized = Council;
+	type MembershipChanged = Council;
+}
+
+type TechnicalCommitteeMembershipInstance = pallet_membership::Instance1;
+impl pallet_membership::Trait<TechnicalCommitteeMembershipInstance> for Runtime {
 	type Event = Event;
 	type AddOrigin = EnsureRootOrMoreThanHalfCouncil;
 	type RemoveOrigin = EnsureRootOrMoreThanHalfCouncil;
@@ -596,36 +612,37 @@ impl pallet_membership::Trait<pallet_membership::Instance0> for Runtime {
 	type MembershipChanged = MembershipChangedGroup;
 }
 
-pub struct GeneralCouncilProvider;
-impl Contains<AccountId> for GeneralCouncilProvider {
-	fn contains(who: &AccountId) -> bool {
-		GeneralCouncil::is_member(who)
-	}
-
-	fn sorted_members() -> Vec<AccountId> {
-		GeneralCouncil::members()
-	}
-
-	#[cfg(feature = "runtime-benchmarks")]
-	fn add(_: &AccountId) {
-		todo!()
-	}
+parameter_types! {
+	pub const CandidacyBond: Balance = 10 * UART;
+	pub const VotingBond: Balance = 1 * UART;
+	pub const TermDuration: BlockNumber = 24 * HOURS;
+	pub const DesiredMembers: u32 = 13;
+	pub const DesiredRunnersUp: u32 = 7;
 }
 
-impl ContainsLengthBound for GeneralCouncilProvider {
-	fn max_len() -> usize {
-		100
-	}
-	fn min_len() -> usize {
-		0
-	}
+impl pallet_elections_phragmen::Trait for Runtime {
+	type ModuleId = ElectionsPhragmenModuleId;
+	type Event = Event;
+	type Currency = Uart;
+	type CurrencyToVote = uniarts_common::currency::CurrencyToVoteHandler;
+	type ChangeMembers = Council;
+	type InitializeMembers = Council;
+	type CandidacyBond = CandidacyBond;
+	type VotingBond = VotingBond;
+	type TermDuration = TermDuration;
+	type DesiredMembers = DesiredMembers;
+	type DesiredRunnersUp = DesiredRunnersUp;
+	type LoserCandidate = Treasury;
+	type KickedMember = Treasury;
+	type BadReport = Treasury;
+	type WeightInfo = ();
 }
 
 // Uni-Art Treasury
 type ApproveOrigin = EnsureOneOf<
 	AccountId,
 	EnsureRoot<AccountId>,
-	pallet_collective::EnsureProportionAtLeast<_3, _5, AccountId, GeneralCouncilInstance>,
+	pallet_collective::EnsureProportionAtLeast<_3, _5, AccountId, CouncilInstance>,
 >;
 
 parameter_types! {
@@ -653,7 +670,7 @@ impl pallet_treasury::Trait for Runtime {
 	type Currency = Uart;
 	type ApproveOrigin = ApproveOrigin;
 	type RejectOrigin = EnsureRootOrMoreThanHalfCouncil;
-	type Tippers = GeneralCouncilProvider;
+	type Tippers = ElectionsPhragmen;
 	type TipCountdown = TipCountdown;
 	type TipFindersFee = TipFindersFee;
 	type TipReportDepositBase = TipReportDepositBase;
@@ -749,9 +766,11 @@ impl InstanceFilter<Call> for ProxyType {
 				Call::Grandpa(..) |
 				Call::Utility(..) |
 				Call::Society(..) |
-				Call::GeneralCouncil(..) |
+				Call::Council(..) |
+				Call::CouncilMembership(..) |
 				Call::TechnicalCommittee(..) |
 				Call::TechnicalMembership(..) |
+				Call::ElectionsPhragmen(..) |
 				Call::Treasury(..) |
 				Call::Identity(..) |
 				Call::Scheduler(..) |
@@ -764,7 +783,11 @@ impl InstanceFilter<Call> for ProxyType {
 			),
 			ProxyType::Governance => matches!(
 				c,
-				Call::GeneralCouncil(..) | Call::Treasury(..)
+				Call::Council(..) |
+				Call::Treasury(..) |
+				Call::TechnicalCommittee(..) |
+				Call::ElectionsPhragmen(..) |
+				Call::Utility(..)
 			),
 			ProxyType::Staking => matches!(c, Call::Staking(..)),
 			ProxyType::IdentityJudgement => matches!(
@@ -905,11 +928,13 @@ construct_runtime!(
 		Uink: pallet_balances::<Instance1>::{Module, Call, Storage, Config<T>, Event<T>},
 
 		// Governance
-		GeneralCouncil: pallet_collective::<Instance0>::{Module, Call, Storage, Origin<T>, Event<T>, Config<T>},
+		Council: pallet_collective::<Instance0>::{Module, Call, Storage, Origin<T>, Event<T>, Config<T>},
+		CouncilMembership: pallet_membership::<Instance0>::{Module, Call, Storage, Event<T>, Config<T>},
 		Treasury: pallet_treasury::{Module, Call, Storage, Config, Event<T>},
 		TechnicalCommittee: pallet_collective::<Instance1>::{Module, Call, Storage, Origin<T>, Config<T>, Event<T>},
-		TechnicalMembership: pallet_membership::<Instance0>::{Module, Call, Storage, Config<T>, Event<T>},
+		TechnicalMembership: pallet_membership::<Instance1>::{Module, Call, Storage, Config<T>, Event<T>},
 		Identity: pallet_identity::{Module, Call, Storage, Event<T>},
+		ElectionsPhragmen: pallet_elections_phragmen::{Module, Call, Storage, Event<T>},
 		// Society module.
 		Society: pallet_society::{Module, Call, Storage, Event<T>},
 

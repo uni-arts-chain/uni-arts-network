@@ -243,7 +243,7 @@ impl pallet_session::Trait for Runtime {
 	type SessionHandler = <opaque::SessionKeys as OpaqueKeys>::KeyTypeIdProviders;
 	type Keys = opaque::SessionKeys;
 	type DisabledValidatorsThreshold = DisabledValidatorsThreshold;
-	type WeightInfo = ();
+	type WeightInfo = weights::pallet_session::WeightInfo<Runtime>;
 }
 
 impl pallet_aura::Trait for Runtime {
@@ -338,7 +338,7 @@ impl pallet_timestamp::Trait for Runtime {
 	type Moment = u64;
 	type OnTimestampSet = Aura;
 	type MinimumPeriod = MinimumPeriod;
-	type WeightInfo = ();
+	type WeightInfo = weights::pallet_timestamp::WeightInfo<Runtime>;
 }
 
 parameter_types! {
@@ -359,8 +359,8 @@ impl pallet_balances::Trait for Runtime {
 	type DustRemoval = ();
 	type ExistentialDeposit = ExistentialDeposit;
 	type AccountStore = System;
-	type WeightInfo = ();
 	type MaxLocks = MaxLocks;
+	type WeightInfo = weights::pallet_balances::WeightInfo<Runtime>;
 }
 
 // impl pallet_balances::Trait<UartInstance> for Runtime {
@@ -678,7 +678,7 @@ impl pallet_elections_phragmen::Trait for Runtime {
 	type LoserCandidate = Treasury;
 	type KickedMember = Treasury;
 	type BadReport = Treasury;
-	type WeightInfo = ();
+	type WeightInfo = weights::pallet_elections_phragmen::WeightInfo<Runtime>;
 }
 
 // Uni-Art Treasury
@@ -723,7 +723,6 @@ impl pallet_treasury::Trait for Runtime {
 	type SpendPeriod = SpendPeriod;
 	type Burn = Burn;
 	type BurnDestination = Society;
-	type WeightInfo = ();
 	type DataDepositPerByte = DataDepositPerByte;
 	type OnSlash = Treasury;
 	type BountyDepositBase = BountyDepositBase;
@@ -732,6 +731,7 @@ impl pallet_treasury::Trait for Runtime {
 	type BountyCuratorDeposit = BountyCuratorDeposit;
 	type BountyValueMinimum = BountyValueMinimum;
 	type MaximumReasonLength = MaximumReasonLength;
+	type WeightInfo = weights::pallet_treasury::WeightInfo<Runtime>;
 }
 
 parameter_types! {
@@ -754,7 +754,7 @@ impl pallet_identity::Trait for Runtime {
 	type Slashed = Treasury;
 	type ForceOrigin = EnsureRootOrMoreThanHalfCouncil;
 	type RegistrarOrigin = EnsureRootOrMoreThanHalfCouncil;
-	type WeightInfo = ();
+	type WeightInfo = weights::pallet_identity::WeightInfo<Runtime>;
 }
 
 parameter_types! {

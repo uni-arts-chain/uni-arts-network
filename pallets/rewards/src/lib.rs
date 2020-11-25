@@ -8,12 +8,12 @@ use frame_support::{
 	traits::{Currency, Get, FindAuthor},
 	// weights::Weight,
 };
-use frame_system::ensure_signed;
+use frame_system::{ensure_signed, ensure_root};
 
 use sp_runtime::{
 	// RuntimeDebug, DispatchResult, DispatchError, RuntimeAppPublic,
 	traits::{
-		Zero, 
+		Zero, One,
 		// StaticLookup, CheckedAdd, CheckedSub,
 		// Saturating, Bounded, IdentifyAccount,
 		Saturating,
@@ -39,9 +39,12 @@ pub trait Trait: pallet_aura::Trait + pallet_session::Trait {
 
 	type Currency: Currency<AccountId<Self>> + Send + Sync;
 	type RewardPerBlock: Get<BalanceOf<Self>>;
+	type BlocksPerYear: Get<Self::BlockNumber>;
 	type RewardThreshold: Get<BalanceOf<Self>>;
+	type MiningCap: Get<BalanceOf<Self>>;
 
 	type AccoundIdOf: Convert<Self::ValidatorId, Option<AccountId<Self>>>;
+	type ConvertNumberToBalance: Convert<Self::BlockNumber, BalanceOf<Self>>;
 }
 
 
@@ -50,6 +53,11 @@ decl_storage! {
 	trait Store for Module<T: Trait> as Rewards {
 		pub MatureRewards get(fn mature_rewards): map hasher(twox_64_concat) AccountId<T> => BalanceOf<T>;
 		pub ImmatureRewards get(fn immature_rewards): map hasher(twox_64_concat) AccountId<T> => (BalanceOf<T>, T::BlockNumber);
+
+		
+		pub MinedRewards get(fn mined_rewards): BalanceOf<T>;
+		pub CurrentRewardsPerBlock get(fn current_reward_per_block): BalanceOf<T> = T::RewardPerBlock::get();
+		pub StartBlock get(fn start_block): Option<T::BlockNumber>;
 	}
 }
 
@@ -76,6 +84,15 @@ decl_module! {
 		type Error = Error<T>;
 		fn deposit_event() = default;
 
+		#[weight = 0]
+		pub fn set_start_block(origin, number: T::BlockNumber) -> dispatch::DispatchResult {
+			ensure_root(origin)?;
+			if Self::start_block() == None {
+				<StartBlock<T>>::put(number);	
+			}
+			Ok(())
+		}
+
 		#[weight = 10_000]
 		pub fn claim(origin) -> dispatch::DispatchResult {
 			let who = ensure_signed(origin)?;
@@ -98,25 +115,39 @@ decl_module! {
 		}
 
 		fn on_finalize(now: T::BlockNumber) {
+
+			let start = match Self::start_block() {
+				None => return,
+				Some(n) => n,
+			};
+
+			if start > now {
+				return
+			}
+			// Reach to hard cap
+			if Self::mined_rewards() >= T::MiningCap::get() {
+				return;
+			}
+
 			let logs = frame_system::Module::<T>::digest().logs;
 			let digest = logs.iter().filter_map(|s| s.as_pre_runtime());
-			let reward: BalanceOf<T> = T::RewardPerBlock::get();
-			let threshold: BalanceOf<T> = T::RewardThreshold::get();
-
+			
 			if let Some(index) = pallet_aura::Module::<T>::find_author(digest) {
 				let validator = pallet_session::Module::<T>::validators()[index as usize].clone();
 				if let Some(account) = T::AccoundIdOf::convert(validator) {
 
-					let (immature_rewards, _) = Self::immature_rewards(&account);
-					if immature_rewards < threshold {
-						<ImmatureRewards<T>>::mutate(&account, |val|
-							*val = (val.0.saturating_add(reward), now)
-						);
-					} else {
-						<MatureRewards<T>>::mutate(&account, |rewards|
-							*rewards = rewards.saturating_add(reward)
-						);
+					let pre_year = now.saturating_sub(One::one()) / T::BlocksPerYear::get() + One::one();
+					let year = now / T::BlocksPerYear::get() + One::one();
+					frame_support::debug::info!("pre_year = {:?}", pre_year);
+					frame_support::debug::info!("year = {:?}", year);
+
+					if pre_year + One::one() == year {
+						let numerator = BalanceOf::<T>::from(8);
+						let denominator = BalanceOf::<T>::from(10);
+						<CurrentRewardsPerBlock<T>>::mutate(|current| *current = current.saturating_mul(numerator) / denominator);
 					}
+
+					Self::set_rewards(account, Self::current_reward_per_block(), now);
 				}
 			}
 		}
@@ -129,8 +160,18 @@ impl<T: Trait> Module<T> {
 		let _ = T::Currency::deposit_into_existing(&author, amount);
 	}
 
-	fn calc_reward_per_block() -> BalanceOf<T> {
-		let initial = T::RewardPerBlock::get();
-		return initial
+	fn set_rewards(account: AccountId<T>, reward: BalanceOf<T>, now: T::BlockNumber) {
+		let (immature_rewards, _) = Self::immature_rewards(&account);
+		if immature_rewards < T::RewardThreshold::get() {
+			<ImmatureRewards<T>>::mutate(&account, |val|
+				*val = (val.0.saturating_add(reward), now)
+			);
+		} else {
+			<MatureRewards<T>>::mutate(&account, |rewards|
+				*rewards = rewards.saturating_add(reward)
+			);
+		}
+		<MinedRewards<T>>::mutate(|mined| *mined = mined.saturating_add(reward));
+
 	}
 }

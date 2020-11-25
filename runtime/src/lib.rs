@@ -267,10 +267,12 @@ impl pallet_grandpa::Trait for Runtime {
 }
 
 parameter_types! {
-	pub const MiningRewardPerBlock: Balance = 1 * UART;
-	pub const RewardThreshold: Balance = 14 * (BlocksPerDay::get() as Balance) * MiningRewardPerBlock::get();
+	pub const MiningRewardPerBlock: Balance = 8 * UART;
+	pub const RewardThreshold: Balance = 30 * (BlocksPerDay::get() as Balance) * MiningRewardPerBlock::get();
 	pub const StakingRewardPerBlock: Balance = 1 * UART;
 	pub const AmpFactor: Balance = 1e12 as Balance;
+	pub const BlocksPerYear: u32 = 10; //365 * BlocksPerDay::get();
+	pub const MiningCap: Balance = 150_000_000 * UART;
 }
 
 pub struct AccoundIdOf;
@@ -280,21 +282,26 @@ impl<T> Convert<T, Option<T>> for AccoundIdOf {
 	}
 }
 
-impl pallet_rewards::Trait for Runtime {
-	type AccoundIdOf = AccoundIdOf;
-	type Balance = Balance;
-	type Currency = Uart;
-	type RewardThreshold = RewardThreshold;
-	type RewardPerBlock = MiningRewardPerBlock;
-	type Event = Event;
-}
-
 pub struct ConvertNumberToBalance;
 impl<BlockNumber, Balance: Bounded + core::convert::From<BlockNumber>> Convert<BlockNumber, Balance> for ConvertNumberToBalance {
 	fn convert(a: BlockNumber) -> Balance {
 		Balance::saturated_from::<BlockNumber>(a)
 	}
 }
+
+
+impl pallet_rewards::Trait for Runtime {
+	type AccoundIdOf = AccoundIdOf;
+	type Balance = Balance;
+	type Currency = Uart;
+	type RewardThreshold = RewardThreshold;
+	type RewardPerBlock = MiningRewardPerBlock;
+	type BlocksPerYear = BlocksPerYear;
+	type MiningCap = MiningCap;
+	type Event = Event;
+	type ConvertNumberToBalance = ConvertNumberToBalance;
+}
+
 
 
 impl pallet_staking::Trait for Runtime {

@@ -44,9 +44,9 @@ pub use sp_runtime::{Permill, Perbill, Percent, ModuleId};
 pub use pallet_timestamp::Call as TimestampCall;
 pub use pallet_balances::Call as BalancesCall;
 pub use frame_support::{
-	construct_runtime, parameter_types, StorageValue,
-	traits::{ChangeMembers, KeyOwnerProofSystem, Randomness, StorageMapShim, Currency,
-			 Contains, ContainsLengthBound, InstanceFilter, LockIdentifier
+	construct_runtime, parameter_types, StorageValue, ConsensusEngineId,
+	traits::{OnUnbalanced, ChangeMembers, KeyOwnerProofSystem, Randomness, StorageMapShim, Currency, Imbalance,
+			 Contains, ContainsLengthBound, InstanceFilter, LockIdentifier, SplitTwoWays, FindAuthor
 	},
 	weights::{
 		Weight, IdentityFee,
@@ -71,6 +71,8 @@ pub use pallet_token;
 pub use pallet_trade;
 pub use uniarts_common;
 // pub use pallet_lotteries;
+
+type NegativeImbalance = <Balances as Currency<AccountId>>::NegativeImbalance;
 
 
 /// Opaque types. These are used by the CLI to instantiate machinery that don't need to know
@@ -389,12 +391,64 @@ impl pallet_balances::Trait<UinkInstance> for Runtime {
 }
 
 parameter_types! {
-	pub const TransactionByteFee: Balance = 1;
+	pub const UncleGenerations: BlockNumber = 0;
+}
+
+impl pallet_authorship::Trait for Runtime {
+	type FindAuthor = AuraAccountAdapter;
+	type UncleGenerations = UncleGenerations;
+	type FilterUncle = ();
+	type EventHandler = ();
+}
+
+pub struct AuraAccountAdapter;
+
+impl FindAuthor<AccountId> for AuraAccountAdapter {
+	fn find_author<'a, I>(digests: I) -> Option<AccountId>
+		where I: 'a + IntoIterator<Item=(ConsensusEngineId, &'a [u8])>
+	{
+		if let Some(index) = pallet_aura::Module::<Runtime>::find_author(digests) {
+			let validator = pallet_session::Module::<Runtime>::validators()[index as usize].clone();
+			Some(validator)
+		}
+		else {
+			None
+		}
+	}
+}
+
+pub struct Author;
+impl OnUnbalanced<NegativeImbalance> for Author {
+	fn on_nonzero_unbalanced(amount: NegativeImbalance) {
+		let author = Authorship::author();
+		Balances::resolve_creating(&author, amount);
+	}
+}
+
+pub struct DealWithFees;
+
+impl OnUnbalanced<NegativeImbalance> for DealWithFees {
+	fn on_unbalanceds<B>(mut fees_then_tips: impl Iterator<Item = NegativeImbalance>) {
+		if let Some(fees) = fees_then_tips.next() {
+			// for fees, 60% to treasury, 40% to author
+			let mut split = fees.ration(60, 40);
+			if let Some(tips) = fees_then_tips.next() {
+				// for tips, if any, 60% to treasury, 40% to author (though this can be anything)
+				tips.ration_merge_into(60, 40, &mut split);
+			}
+			Treasury::on_unbalanced(split.0);
+			Author::on_unbalanced(split.1);
+		}
+	}
+}
+
+parameter_types! {
+	pub const TransactionByteFee: Balance = 1 * MICRO;
 }
 
 impl pallet_transaction_payment::Trait for Runtime {
 	type Currency = Uart;
-	type OnTransactionPayment = ();
+	type OnTransactionPayment = DealWithFees;
 	type TransactionByteFee = TransactionByteFee;
 	type WeightToFee = IdentityFee<Balance>;
 	type FeeMultiplierUpdate = ();
@@ -906,6 +960,7 @@ construct_runtime!(
 		Timestamp: pallet_timestamp::{Module, Call, Storage, Inherent},
 		Indices: pallet_indices::{Module, Call, Storage, Config<T>, Event<T>},
 
+		Authorship: pallet_authorship::{Module, Call, Storage},
 		Session: pallet_session::{Module, Call, Storage, Event, Config<T>},
 		ValidatorSet: pallet_validator_set::{Module, Call, Storage, Event<T>, Config<T>},
 		Aura: pallet_aura::{Module, Config<T>, Inherent},

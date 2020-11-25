@@ -17,6 +17,7 @@ pallet-aura = { version = "2.0.0", default-features = false }
 pallet-balances = { version = "2.0.0", default-features = false }
 frame-support = { version = "2.0.0", default-features = false }
 pallet-grandpa = { version = "2.0.0", default-features = false }
+pallet-authorship = { version = "2.0.0", default-features = false }
 pallet-randomness-collective-flip = { version = "2.0.0", default-features = false }
 pallet-sudo = { version = "2.0.0", default-features = false }
 frame-system = { version = "2.0.0", default-features = false }
@@ -82,6 +83,7 @@ std = [
 	"pallet-aura/std",
 	"pallet-balances/std",
 	"pallet-grandpa/std",
+	"pallet-authorship/std",
 	"pallet-vesting/std",
 	"pallet-collective/std",
 	"pallet-membership/std",

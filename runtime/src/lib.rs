@@ -815,6 +815,7 @@ impl InstanceFilter<Call> for ProxyType {
 				Call::Recovery(pallet_recovery::Call::close_recovery(..)) |
 				Call::Recovery(pallet_recovery::Call::remove_recovery(..)) |
 				Call::Recovery(pallet_recovery::Call::cancel_recovered(..)) |
+				Call::Authorship(..) |
 				Call::Staking(..) |
 				Call::Session(..) |
 				Call::Grandpa(..) |

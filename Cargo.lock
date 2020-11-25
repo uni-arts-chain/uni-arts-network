@@ -7803,8 +7803,8 @@ dependencies = [
  "sp-transaction-pool",
  "sp-version",
  "substrate-wasm-builder-runner",
- "uniart-primitives",
  "uniarts-common",
+ "uniarts-primitives",
 ]
 
 [[package]]
@@ -7820,23 +7820,27 @@ dependencies = [
 ]
 
 [[package]]
-name = "uniart-primitives"
-version = "0.1.0"
+name = "uniarts-common"
+version = "2.0.0"
+dependencies = [
+ "frame-support",
+ "frame-system",
+ "pallet-authorship",
+ "pallet-balances",
+ "pallet-transaction-payment",
+ "parity-scale-codec",
+ "sp-runtime",
+ "sp-std",
+ "uniarts-primitives",
+]
+
+[[package]]
+name = "uniarts-primitives"
+version = "2.0.0"
 dependencies = [
  "parity-scale-codec",
  "serde",
  "sp-core",
- "sp-runtime",
- "sp-std",
-]
-
-[[package]]
-name = "uniarts-common"
-version = "0.1.0"
-dependencies = [
- "frame-support",
- "frame-system",
- "parity-scale-codec",
  "sp-runtime",
  "sp-std",
 ]

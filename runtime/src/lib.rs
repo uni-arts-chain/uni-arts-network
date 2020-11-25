@@ -69,11 +69,8 @@ pub use pallet_staking;
 pub use pallet_validator_set;
 pub use pallet_token;
 pub use pallet_trade;
-pub use uniarts_common;
+pub use uniarts_common::*;
 // pub use pallet_lotteries;
-
-type NegativeImbalance = <Balances as Currency<AccountId>>::NegativeImbalance;
-
 
 /// Opaque types. These are used by the CLI to instantiate machinery that don't need to know
 /// the specifics of the runtime. They can then be made to be agnostic over specific formats
@@ -424,18 +421,10 @@ impl FindAuthor<AccountId> for AuraAccountAdapter {
 	}
 }
 
-pub struct Author;
-impl OnUnbalanced<NegativeImbalance> for Author {
-	fn on_nonzero_unbalanced(amount: NegativeImbalance) {
-		let author = Authorship::author();
-		Balances::resolve_creating(&author, amount);
-	}
-}
-
 pub struct DealWithFees;
 
-impl OnUnbalanced<NegativeImbalance> for DealWithFees {
-	fn on_unbalanceds<B>(mut fees_then_tips: impl Iterator<Item = NegativeImbalance>) {
+impl OnUnbalanced<NegativeImbalance<Runtime>> for DealWithFees {
+	fn on_unbalanceds<B>(mut fees_then_tips: impl Iterator<Item = NegativeImbalance<Runtime>>) {
 		if let Some(fees) = fees_then_tips.next() {
 			// for fees, 90% to treasury, 10% to author
 			let mut split = fees.ration(90, 10);

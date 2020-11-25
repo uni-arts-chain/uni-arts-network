@@ -1,6 +1,6 @@
 [package]
 name = "uniarts-common"
-version = "0.1.0"
+version = "2.0.0"
 authors = ["terry.tu <tuminfei1981@gmail.com>"]
 edition = "2018"
 
@@ -12,6 +12,10 @@ frame-support = { version = "2.0.0", default-features = false }
 frame-system = { version = "2.0.0", default-features = false }
 sp-std = { version = "2.0.0", default-features = false }
 sp-runtime = { version = "2.0.0", default-features = false }
+pallet-balances = { version = "2.0.0", default-features = false }
+pallet-authorship = { version = "2.0.0", default-features = false }
+pallet-transaction-payment = { version = "2.0.0", default-features = false }
+uniarts-primitives = { version = "2.0.0", default-features = false, path = "../../primitives" }
 
 [features]
 default = ['std']
@@ -20,4 +24,8 @@ std = [
     'sp-runtime/std',
     'frame-support/std',
     'frame-system/std',
+    'pallet-authorship/std',
+    "pallet-balances/std",
+    'pallet-transaction-payment/std',
+    'uniarts-primitives/std',
 ]

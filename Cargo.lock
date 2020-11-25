@@ -7756,6 +7756,7 @@ dependencies = [
  "frame-system-rpc-runtime-api",
  "pallet-assets",
  "pallet-aura",
+ "pallet-authorship",
  "pallet-balances",
  "pallet-certificate",
  "pallet-collective",

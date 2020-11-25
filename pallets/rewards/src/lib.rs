@@ -43,7 +43,7 @@ pub trait Trait: pallet_aura::Trait + pallet_session::Trait {
 	type RewardThreshold: Get<BalanceOf<Self>>;
 	type MiningCap: Get<BalanceOf<Self>>;
 
-	type AccoundIdOf: Convert<Self::ValidatorId, Option<AccountId<Self>>>;
+	type AccountIdOf: Convert<Self::ValidatorId, Option<AccountId<Self>>>;
 	type ConvertNumberToBalance: Convert<Self::BlockNumber, BalanceOf<Self>>;
 }
 
@@ -134,7 +134,7 @@ decl_module! {
 			
 			if let Some(index) = pallet_aura::Module::<T>::find_author(digest) {
 				let validator = pallet_session::Module::<T>::validators()[index as usize].clone();
-				if let Some(account) = T::AccoundIdOf::convert(validator) {
+				if let Some(account) = T::AccountIdOf::convert(validator) {
 
 					let pre_year = now.saturating_sub(One::one()) / T::BlocksPerYear::get() + One::one();
 					let year = now / T::BlocksPerYear::get() + One::one();

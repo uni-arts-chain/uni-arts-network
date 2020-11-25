@@ -279,8 +279,8 @@ parameter_types! {
 	pub const MiningCap: Balance = 150_000_000 * UART;
 }
 
-pub struct AccoundIdOf;
-impl<T> Convert<T, Option<T>> for AccoundIdOf {
+pub struct AccountIdOf;
+impl<T> Convert<T, Option<T>> for AccountIdOf {
 	fn convert(a: T) -> Option<T> { 
 		Some(a)
 	}
@@ -295,7 +295,7 @@ impl<BlockNumber, Balance: Bounded + core::convert::From<BlockNumber>> Convert<B
 
 
 impl pallet_rewards::Trait for Runtime {
-	type AccoundIdOf = AccoundIdOf;
+	type AccountIdOf = AccountIdOf;
 	type Balance = Balance;
 	type Currency = Uart;
 	type RewardThreshold = RewardThreshold;

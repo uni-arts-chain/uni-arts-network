@@ -17,6 +17,7 @@ frame-system = { version = "2.0.0", default-features = false }
 sp-std = { version = "2.0.0", default-features = false }
 sp-runtime = { version = "2.0.0", default-features = false }
 sp-io = { version = "2.0.0", default-features = false}
+sp-core = { version = "2.0.0", default-features = false }
 transaction-payment = { version = "2.0.0", package = 'pallet-transaction-payment', default-features = false}
 # third-party dependencies
 serde = { version = "1.0.102", features = ["derive"] }
@@ -37,4 +38,5 @@ std = [
     'frame-system/std',
     'sp-runtime/std',
     'sp-std/std',
+    "sp-core/std",
 ]

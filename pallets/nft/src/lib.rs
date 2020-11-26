@@ -6,10 +6,10 @@ use codec::{Decode, Encode};
 pub use frame_support::{
     construct_runtime, decl_event, decl_module, decl_storage,
     dispatch::DispatchResult,
-    ensure, parameter_types,
+    ensure, parameter_types, Parameter,
     traits::{
         Currency, ExistenceRequirement, Get, Imbalance, KeyOwnerProofSystem, OnUnbalanced,
-        Randomness, WithdrawReason,
+        Randomness, WithdrawReason, WithdrawReasons
     },
     weights::{
         constants::{BlockExecutionWeight, ExtrinsicBaseWeight, RocksDbWeight, WEIGHT_PER_SECOND},
@@ -25,7 +25,7 @@ use sp_runtime::{
     ModuleId,
     traits::{
         DispatchInfoOf, Dispatchable, PostDispatchInfoOf, SaturatedConversion, Saturating,
-        SignedExtension, Zero, AccountIdConversion,
+        SignedExtension, Zero, AccountIdConversion
     },
     transaction_validity::{
         InvalidTransaction, TransactionPriority, TransactionValidity, TransactionValidityError,
@@ -34,6 +34,7 @@ use sp_runtime::{
     FixedPointOperand, FixedU128,
 };
 use sp_std::prelude::*;
+use core::convert::TryInto;
 
 
 #[cfg(test)]
@@ -164,6 +165,12 @@ pub struct SaleOrder<AccountId> {
     pub price: u64, // maker order's price\
 }
 
+#[derive(Debug, Eq, PartialEq)]
+pub enum TransferFromAccountError {
+    InsufficientBalance,
+}
+
+pub type CurrencyBalanceOf<T> = <<T as Trait>::Currency as Currency<<T as frame_system::Trait>::AccountId>>::Balance;
 pub type AccountId<T> = <T as frame_system::Trait>::AccountId;
 
 pub trait Trait: system::Trait {
@@ -222,6 +229,7 @@ decl_event!(
         ItemDestroyed(u64, u64),
         ItemOrderCreated(u64, u64, u64, u64),
         ItemOrderCancel(u64, u64),
+        ItemOrderSucceed(u64, u64),
     }
 );
 
@@ -785,6 +793,46 @@ decl_module! {
 
             // call event
             Self::deposit_event(RawEvent::ItemOrderCancel(collection_id, item_id));
+            Ok(())
+        }
+
+        #[weight = 0]
+        pub fn accept_sale_order(origin, collection_id: u64, item_id: u64) -> DispatchResult {
+            let sender = ensure_signed(origin)?;
+
+            let target_sale_order = <SaleOrderList<T>>::get(collection_id, item_id);
+            let nft_owner = target_sale_order.owner;
+            let price = target_sale_order.price;
+
+
+            let target_collection = <Collection<T>>::get(collection_id);
+            let locker = Self::nft_account_id();
+            let balance_price = CurrencyBalanceOf::<T>::from(price.try_into().unwrap());
+
+            // Moves funds from buyer account into the owner's account
+            // We don't use T::Currency::transfer() to prevent fees being incurred.
+            let negative_imbalance = T::Currency::withdraw(
+                &sender,
+                balance_price,
+                WithdrawReasons::all(),
+                ExistenceRequirement::AllowDeath,
+            ).unwrap();
+
+            T::Currency::resolve_creating(&nft_owner, negative_imbalance);
+
+            // Moves nft from locker account into the buyer's account
+            match target_collection.mode
+            {
+                CollectionMode::NFT(_) => Self::transfer_nft(collection_id, item_id, sender.clone(), locker)?,
+                CollectionMode::Fungible(_)  => Self::transfer_fungible(collection_id, item_id, target_sale_order.value, sender.clone(), locker)?,
+                CollectionMode::ReFungible(_, _)  => Self::transfer_refungible(collection_id, item_id, target_sale_order.value, sender.clone(), locker)?,
+                _ => ()
+            };
+
+            <SaleOrderList<T>>::remove(collection_id, item_id);
+
+            // call event
+            Self::deposit_event(RawEvent::ItemOrderSucceed(collection_id, item_id));
             Ok(())
         }
 

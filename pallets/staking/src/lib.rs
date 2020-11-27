@@ -5,7 +5,7 @@ use frame_support::{
 	decl_event, decl_error, dispatch, ensure,
 	Parameter,
 	traits::{Currency, Get, ExistenceRequirement},
-	// weights::Weight,
+	weights::Weight,
 };
 use frame_system::{ensure_signed, ensure_root};
 
@@ -19,6 +19,13 @@ use sp_runtime::{
 };
 use codec::{Encode, Decode};
 use sp_std::prelude::*;
+
+mod default_weights;
+
+pub trait WeightInfo {
+	fn stake() -> Weight;
+	fn unstake() -> Weight;
+}
 
 pub type BalanceOf<T> =
 	<<T as Trait>::Currency as Currency<<T as frame_system::Trait>::AccountId>>::Balance;
@@ -35,6 +42,7 @@ pub trait Trait: frame_system::Trait {
 	type Id: Parameter + AtLeast32Bit + Default + Copy;
 	type AmpFactor: Get<BalanceOf<Self>>;
 	type ConvertNumberToBalance: Convert<BlockNumber<Self>, BalanceOf<Self>>;
+	type WeightInfo: WeightInfo;
 }
 
 
@@ -134,7 +142,7 @@ decl_module! {
 			Ok(())
 		}
 
-		#[weight = 10_000]
+		#[weight = T::WeightInfo::stake()]
 		pub fn stake(origin, pool_id: T::Id, amount: BalanceOf<T>) -> dispatch::DispatchResult {
 			let who = ensure_signed(origin)?;
 			ensure!(<Pools<T>>::contains_key(&pool_id), Error::<T>::PoolNotExists);
@@ -192,7 +200,7 @@ decl_module! {
 			Ok(())
 		}
 
-		#[weight = 10_000]
+		#[weight = T::WeightInfo::unstake()]
 		pub fn unstake(origin, pool_id: T::Id, amount: BalanceOf<T>) -> dispatch::DispatchResult {
 			let who = ensure_signed(origin)?;
 			ensure!(<Pools<T>>::contains_key(&pool_id), Error::<T>::PoolNotExists);

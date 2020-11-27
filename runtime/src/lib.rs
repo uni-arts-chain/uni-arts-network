@@ -302,7 +302,7 @@ impl pallet_rewards::Trait for Runtime {
 	type BlocksPerYear = BlocksPerYear;
 	type MiningCap = MiningCap;
 	type Event = Event;
-	type ConvertNumberToBalance = ConvertNumberToBalance;
+	type WeightInfo = ();
 }
 
 
@@ -315,6 +315,7 @@ impl pallet_staking::Trait for Runtime {
 	type Id = u32;
 	type AmpFactor = AmpFactor;
 	type ConvertNumberToBalance = ConvertNumberToBalance;
+	type WeightInfo = ();
 }
 
 parameter_types! {

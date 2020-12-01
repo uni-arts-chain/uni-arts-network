@@ -9,7 +9,6 @@ members = [
     'primitives',
     'pallets/common',
     'pallets/assets',
-    'pallets/certificate',
     'pallets/names',
     'pallets/nft',
     'pallets/token',
@@ -17,5 +16,4 @@ members = [
     'pallets/validator-set',
     'pallets/staking',
     'pallets/rewards',
-    'pallets/lotteries',
 ]

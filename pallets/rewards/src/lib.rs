@@ -6,7 +6,7 @@ use frame_support::{
 	dispatch, ensure,
 	Parameter,
 	traits::{Currency, Get, FindAuthor},
-	// weights::Weight,
+	weights::Weight,
 };
 use frame_system::{ensure_signed, ensure_root};
 
@@ -23,7 +23,13 @@ use sp_runtime::{
 
 use codec::Codec;
 use sp_std::prelude::*;
-// use frame_support::{debug};
+
+pub mod default_weights;
+
+pub trait WeightInfo {
+	fn claim() -> Weight;
+}
+
 
 pub type BalanceOf<T> =
 	<<T as Trait>::Currency as Currency<<T as frame_system::Trait>::AccountId>>::Balance;
@@ -44,7 +50,7 @@ pub trait Trait: pallet_aura::Trait + pallet_session::Trait {
 	type MiningCap: Get<BalanceOf<Self>>;
 
 	type AccountIdOf: Convert<Self::ValidatorId, Option<AccountId<Self>>>;
-	type ConvertNumberToBalance: Convert<Self::BlockNumber, BalanceOf<Self>>;
+	type WeightInfo: WeightInfo;
 }
 
 
@@ -93,7 +99,7 @@ decl_module! {
 			Ok(())
 		}
 
-		#[weight = 10_000]
+		#[weight = <T as Trait>::WeightInfo::claim()]
 		pub fn claim(origin) -> dispatch::DispatchResult {
 			let who = ensure_signed(origin)?;
 			let mut rewards = Self::mature_rewards(&who);
@@ -135,11 +141,8 @@ decl_module! {
 			if let Some(index) = pallet_aura::Module::<T>::find_author(digest) {
 				let validator = pallet_session::Module::<T>::validators()[index as usize].clone();
 				if let Some(account) = T::AccountIdOf::convert(validator) {
-
 					let pre_year = now.saturating_sub(One::one()) / T::BlocksPerYear::get() + One::one();
 					let year = now / T::BlocksPerYear::get() + One::one();
-					frame_support::debug::info!("pre_year = {:?}", pre_year);
-					frame_support::debug::info!("year = {:?}", year);
 
 					if pre_year + One::one() == year {
 						let numerator = BalanceOf::<T>::from(8);

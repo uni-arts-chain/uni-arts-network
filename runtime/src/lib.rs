@@ -126,7 +126,7 @@ pub fn native_version() -> NativeVersion {
 
 // Module accounts of runtime
 parameter_types! {
-	pub const UniArtsTreasuryModuleId: ModuleId = ModuleId(*b"art/trsy");
+	pub const UniArtsTreasuryModuleId: ModuleId = ModuleId(*b"py/trsry");
 	pub const StakingModuleId: ModuleId = ModuleId(*b"staking_");
 	pub const UniArtsNftModuleId: ModuleId = ModuleId(*b"art/nftb");
 	pub const LotteryModuleId: ModuleId = ModuleId(*b"art/lotb");
@@ -705,7 +705,7 @@ parameter_types! {
 	pub const BountyDepositPayoutDelay: BlockNumber = 4 * DAYS;
 	pub const BountyUpdatePeriod: BlockNumber = 90 * DAYS;
 	pub const BountyCuratorDeposit: Permill = Permill::from_percent(50);
-	pub const BountyValueMinimum: Balance = 2 * UART;
+	pub const BountyValueMinimum: Balance = 10 * UART;
 	pub const MaximumReasonLength: u32 = 16384;
 }
 

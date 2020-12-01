@@ -2,7 +2,7 @@ use sp_core::{Pair, Public, crypto::UncheckedInto, sr25519};
 
 use uart_runtime::{
 	get_all_module_accounts,
-	AccountId, BalancesConfig, GenesisConfig, SessionConfig, ValidatorSetConfig, VestingConfig,
+	AccountId, BalancesConfig, GenesisConfig, ValidatorSetConfig, VestingConfig,
 	SudoConfig, SystemConfig, CouncilMembershipConfig, TechnicalMembershipConfig,
 	WASM_BINARY, Signature, Balance, constants::currency::*, opaque::SessionKeys
 };
@@ -252,13 +252,14 @@ fn testnet_genesis(
 			validators: initial_authorities.iter().map(|x| x.0.clone()).collect::<Vec<_>>(),
 		}),
 		pallet_balances_Instance1: None,
-		pallet_session: Some(SessionConfig {
-			keys: initial_authorities.iter().map(|x| (
-				x.0.clone(),
-				x.1.clone(),
-				session_keys(x.2.clone(), x.3.clone()),
-			)).collect::<Vec<_>>(),
-		}),
+		// pallet_session: Some(SessionConfig {
+		// 	keys: initial_authorities.iter().map(|x| (
+		// 		x.0.clone(),
+		// 		x.1.clone(),
+		// 		session_keys(x.2.clone(), x.3.clone()),
+		// 	)).collect::<Vec<_>>(),
+		// }),
+		pallet_session: None,
 		pallet_aura: None,
 		pallet_grandpa: None,
 		pallet_sudo: Some(SudoConfig {

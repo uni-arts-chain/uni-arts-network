@@ -60,7 +60,7 @@ pub use primitives::{
 };
 
 /// Import pallets.
-pub use pallet_certificate;
+// pub use pallet_certificate;
 pub use pallet_assets;
 pub use pallet_nft;
 pub use pallet_nicks;
@@ -481,10 +481,10 @@ impl pallet_sudo::Trait for Runtime {
 	type Call = Call;
 }
 
-impl pallet_certificate::Trait for Runtime {
-	type Event = Event;
-	type WorkId = u32;
-}
+// impl pallet_certificate::Trait for Runtime {
+// 	type Event = Event;
+// 	type WorkId = u32;
+// }
 
 impl pallet_assets::Trait for Runtime {
 	type Event = Event;
@@ -990,7 +990,6 @@ construct_runtime!(
 		TransactionPayment: pallet_transaction_payment::{Module, Storage},
 		Sudo: pallet_sudo::{Module, Call, Config<T>, Storage, Event<T>},
 
-		Certificate: pallet_certificate::{Module, Call, Storage, Event<T>},
 		Assets: pallet_assets::{Module, Call, Storage, Event<T>},
 		Names: pallet_names::{Module, Call, Storage, Event<T>},
 		Nft: pallet_nft::{Module, Call, Storage, Event<T>},

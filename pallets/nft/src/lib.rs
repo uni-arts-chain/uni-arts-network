@@ -256,6 +256,7 @@ decl_event!(
         Created(u64, u8, AccountId),
         ItemCreated(u64, u64),
         ItemDestroyed(u64, u64),
+        ItemTransfer(u64, u64, u64, AccountId, AccountId),
         ItemOrderCreated(u64, u64, u64, u64),
         ItemOrderCancel(u64, u64),
         ItemOrderSucceed(u64, u64),
@@ -647,11 +648,14 @@ decl_module! {
 
             match target_collection.mode
             {
-                CollectionMode::NFT(_) => Self::transfer_nft(collection_id, item_id, sender.clone(), recipient)?,
-                CollectionMode::Fungible(_)  => Self::transfer_fungible(collection_id, item_id, value, sender.clone(), recipient)?,
-                CollectionMode::ReFungible(_, _)  => Self::transfer_refungible(collection_id, item_id, value, sender.clone(), recipient)?,
+                CollectionMode::NFT(_) => Self::transfer_nft(collection_id, item_id, sender.clone(), recipient.clone())?,
+                CollectionMode::Fungible(_)  => Self::transfer_fungible(collection_id, item_id, value, sender.clone(), recipient.clone())?,
+                CollectionMode::ReFungible(_, _)  => Self::transfer_refungible(collection_id, item_id, value, sender.clone(), recipient.clone())?,
                 _ => ()
             };
+
+            // call event
+            Self::deposit_event(RawEvent::ItemTransfer(collection_id, item_id, value, sender, recipient));
 
             Ok(())
         }

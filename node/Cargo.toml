@@ -2,11 +2,11 @@
 name = "uart"
 version = "2.0.0"
 authors = ["yxf4559@gmail.com"]
-description = ""
+description = "Uni-Arts node implementation in Rust"
 edition = "2018"
-license = "Unlicense"
+license = "GPL-3.0"
 build = "build.rs"
-homepage = "https://github.com/uni-arts-chain/uni-arts-network"
+homepage = "https://uniarts.me"
 repository = "https://github.com/uni-arts-chain/uni-arts-network"
 
 [package.metadata.docs.rs]

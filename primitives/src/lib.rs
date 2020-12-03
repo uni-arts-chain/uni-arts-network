@@ -49,7 +49,7 @@ pub enum CurrencyId {
     Token(TokenSymbol),
 }
 
-
+#[ignore]
 #[test]
 fn print_module_account() {
     // --- substrate ---
@@ -78,7 +78,6 @@ fn print_module_account() {
     // art/soci:
     // 5EYCAe5fj5zwiqofZc6Q2cXmZSJQm9kW7Q5e1np77Fyog5DQ
     // 6d6f646c6172742f736f63690000000000000000000000000000000000000000 (5EYCAe5f...)
-
     account_of(*b"art/soci", SubstrateAccount);
 
     // art/phre:

@@ -20,6 +20,11 @@ use sp_runtime::{
 use sp_runtime::{traits::{Hash}};
 use ethereum_types::{H64, H128, H160, U256, H256, H512};
 
+#[derive(Encode, Decode)]
+pub struct RpcUrl {
+	url: Vec<u8>,
+}
+
 ///information about a erc20 transfer.
 #[derive(Clone, Encode, Decode)]
 pub struct TransferInfo {
@@ -79,17 +84,26 @@ decl_storage! {
 		/// Current synchronization block height.
 		pub SyncBlockNumber get(fn sync_block_number): Option<U256>;
 
+		/// Ethereum Erc20 Token Name
+		pub Erc20TokenName get(fn erc20_token_name): Option<Option<Vec<u8>>>;
+
 		/// Ethereum Erc20 Token Address
 		pub Erc20TokenAddress get(fn erc20_token_address): Option<H160>;
 
 		/// Mapping Token hash
-		pub MappingTokenHash get(fn sync_block_number): Option<Hash>;
+		pub MappingTokenHash get(fn mapping_token_hash): Option<Hash>;
+
+		/// Start synchronization block height
+		pub SyncBeginBlockHeight get(fn sync_begin_block_heigh): Option<U256>;
 
 		/// We store full information about the erc20 transfer
 		pub Erc20TransferList get(fn transfer_id): double_map hasher(blake2_128_concat) H256, hasher(blake2_128_concat) u64 => TransferInfo;
 
 		/// All erc20 transfer information in a transaction
 		pub AllTransferByTxHash get(fn all_transfer): map hasher(twox_64_concat) U256 => Vec<TransferInfo>;
+
+		/// RpcUrls set by anyone
+		pub RpcUrls get(fn rpc_urls): map hasher(twox_64_concat) T::AccountId => Option<RpcUrl>;
 	}
 }
 
@@ -106,6 +120,30 @@ decl_module! {
 
 		// Events must be initialized if they are used by the pallet.
 		fn deposit_event() = default;
+
+		#[weight = 0]
+		fn init(
+			origin,
+			erc20_token_name: Vec<u8>,
+			erc20_token_address: H160,
+			mapping_token_hash: Hash,
+			sync_begin_block_heigh: U256,
+			rpc_urls: RpcUrl,
+		) {
+			let _signer = ensure_signed(origin)?;
+			ensure!(Self::erc20_token_name().is_none(), "Already initialized");
+			ensure!(Self::erc20_token_address().is_none(), "Already initialized");
+			ensure!(Self::mapping_token_hash().is_none(), "Already initialized");
+			ensure!(Self::sync_begin_block_heigh().is_none(), "Already initialized");
+			ensure!(Self::rpc_urls().is_none(), "Already initialized");
+
+
+			<Erc20TokenName>::set(Some(erc20_token_name));
+			<Erc20TokenAddress>::set(Some(erc20_token_address));
+			<MappingTokenHash>::set(Some(mapping_token_hash));
+			<SyncBeginBlockHeight>::set(Some(sync_begin_block_heigh));
+			<RpcUrls>::set(Some(rpc_urls));
+		}
 
 		/// Offchain Worker entry point.
 		///

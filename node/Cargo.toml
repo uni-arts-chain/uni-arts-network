@@ -1,6 +1,6 @@
 [package]
 name = "uart"
-version = "2.0.0"
+version = "1.0.0"
 authors = ["yxf4559@gmail.com"]
 description = "Uni-Arts node implementation in Rust"
 edition = "2018"

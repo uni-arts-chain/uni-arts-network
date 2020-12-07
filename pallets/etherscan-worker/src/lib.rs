@@ -16,6 +16,7 @@ use sp_runtime::{
 		ValidTransaction, TransactionValidity, TransactionSource,
 		TransactionPriority,
 	},
+	offchain::{http},
 };
 use sp_runtime::{traits::{Hash}};
 use ethereum_types::{H64, H128, H160, U256, H256, H512};
@@ -85,7 +86,7 @@ decl_storage! {
 		pub SyncBlockNumber get(fn sync_block_number): Option<U256>;
 
 		/// Ethereum Erc20 Token Name
-		pub Erc20TokenName get(fn erc20_token_name): Option<Option<Vec<u8>>>;
+		pub Erc20TokenName get(fn erc20_token_name): Option<Vec<u8>>;
 
 		/// Ethereum Erc20 Token Address
 		pub Erc20TokenAddress get(fn erc20_token_address): Option<H160>;
@@ -96,6 +97,9 @@ decl_storage! {
 		/// Start synchronization block height
 		pub SyncBeginBlockHeight get(fn sync_begin_block_heigh): Option<U256>;
 
+		/// We store block erc20 transfer tx hash
+		pub BlockTransfers get(fn block_number_transfers): map hasher(blake2_128_concat) U256 => H160;
+
 		/// We store full information about the erc20 transfer
 		pub Erc20TransferList get(fn transfer_id): double_map hasher(blake2_128_concat) H256, hasher(blake2_128_concat) u64 => TransferInfo;
 
@@ -104,6 +108,7 @@ decl_storage! {
 
 		/// RpcUrls set by anyone
 		pub RpcUrls get(fn rpc_urls): map hasher(twox_64_concat) T::AccountId => Option<RpcUrl>;
+
 	}
 }
 
@@ -172,6 +177,51 @@ decl_module! {
 			let parent_hash = <system::Module<T>>::block_hash(block_number - 1.into());
 			debug::debug!("Current block: {:?} (parent hash: {:?})", block_number, parent_hash);
 		}
+	}
+}
+
+impl<T: Trait> Module<T> {
+	fn fetch_block_header(block_number: U256) -> Result<types::BlockHeader, http::Error> {
+		// Make a post request to etherscan
+		let url = format!("https://api-cn.etherscan.com/api?module=account&action=tokentx&contractaddress=0x9f8f72aa9304c8b593d555f12ef6589cc3a579a2&startblock={}&endblock={}&sort=asc&apikey={}", block_number, block_number, "YourApiKeyToken");
+		let request: http::Request = http::Request::get(url);
+		let pending = request.send().unwrap();
+
+		// wait indefinitely for response (TODO: timeout)
+		let mut response = pending.wait().unwrap();
+		let headers = response.headers().into_iter();
+		assert_eq!(headers.current(), None);
+
+		// and collect the body
+		let body = response.body().collect::<Vec<u8>>();
+		let body_str = sp_std::str::from_utf8(&body).map_err(|_| {
+			debug::warn!("No UTF8 body");
+			http::Error::Unknown
+		}).unwrap();
+		// decode JSON into object
+		let val: JsonValue = lite_json::parse_json(&body_str).unwrap();
+		let header: Vec<TransferInfo> = Self::json_to_rlp(val);
+		Ok(header)
+	}
+
+	pub fn json_to_rlp(json: JsonValue) -> Vec<TransferInfo> {
+		// get { "result": VAL }
+		let transfers = vec!();
+		let transfer: Option<Vec<(Vec<char>, JsonValue)>> = match json {
+			JsonValue::Object(obj) => {
+				obj.into_iter()
+					.find(|(k, _)| k.iter().map(|c| *c as u8).collect::<Vec<u8>>() == b"result".to_vec())
+					.and_then(|v| {
+						match v.1 {
+							JsonValue::Object(transfer) => Some(transfer),
+							_ => None,
+						}
+					})
+			},
+			_ => None
+		};
+
+		transfers
 	}
 }
 

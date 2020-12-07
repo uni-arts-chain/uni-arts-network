@@ -257,9 +257,9 @@ decl_event!(
         ItemCreated(u64, u64),
         ItemDestroyed(u64, u64),
         ItemTransfer(u64, u64, u64, AccountId, AccountId),
-        ItemOrderCreated(u64, u64, u64, u64),
+        ItemOrderCreated(u64, u64, u64, u64, AccountId),
         ItemOrderCancel(u64, u64),
-        ItemOrderSucceed(u64, u64),
+        ItemOrderSucceed(u64, u64, AccountId),
     }
 );
 
@@ -787,14 +787,14 @@ decl_module! {
                 collection_id: collection_id,
                 item_id: item_id,
                 value: value,
-                owner: sender,
+                owner: sender.clone(),
                 price: price,
             };
 
             <SaleOrderList<T>>::insert(collection_id, item_id, order);
 
             // call event
-            Self::deposit_event(RawEvent::ItemOrderCreated(collection_id, item_id, value, price));
+            Self::deposit_event(RawEvent::ItemOrderCreated(collection_id, item_id, value, price, sender));
             Ok(())
         }
 
@@ -856,16 +856,16 @@ decl_module! {
             // Moves nft from locker account into the buyer's account
             match target_collection.mode
             {
-                CollectionMode::NFT(_) => Self::transfer_nft(collection_id, item_id, sender.clone(), locker)?,
-                CollectionMode::Fungible(_)  => Self::transfer_fungible(collection_id, item_id, target_sale_order.value, sender.clone(), locker)?,
-                CollectionMode::ReFungible(_, _)  => Self::transfer_refungible(collection_id, item_id, target_sale_order.value, sender.clone(), locker)?,
+                CollectionMode::NFT(_) => Self::transfer_nft(collection_id, item_id, locker, sender.clone())?,
+                CollectionMode::Fungible(_)  => Self::transfer_fungible(collection_id, item_id, target_sale_order.value, locker, sender.clone())?,
+                CollectionMode::ReFungible(_, _)  => Self::transfer_refungible(collection_id, item_id, target_sale_order.value, locker, sender.clone())?,
                 _ => ()
             };
 
             <SaleOrderList<T>>::remove(collection_id, item_id);
 
             // call event
-            Self::deposit_event(RawEvent::ItemOrderSucceed(collection_id, item_id));
+            Self::deposit_event(RawEvent::ItemOrderSucceed(collection_id, item_id, sender));
             Ok(())
         }
 

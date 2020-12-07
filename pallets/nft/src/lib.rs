@@ -856,9 +856,9 @@ decl_module! {
             // Moves nft from locker account into the buyer's account
             match target_collection.mode
             {
-                CollectionMode::NFT(_) => Self::transfer_nft(collection_id, item_id, sender.clone(), locker)?,
-                CollectionMode::Fungible(_)  => Self::transfer_fungible(collection_id, item_id, target_sale_order.value, sender.clone(), locker)?,
-                CollectionMode::ReFungible(_, _)  => Self::transfer_refungible(collection_id, item_id, target_sale_order.value, sender.clone(), locker)?,
+                CollectionMode::NFT(_) => Self::transfer_nft(collection_id, item_id, locker, sender.clone())?,
+                CollectionMode::Fungible(_)  => Self::transfer_fungible(collection_id, item_id, target_sale_order.value, locker, sender.clone())?,
+                CollectionMode::ReFungible(_, _)  => Self::transfer_refungible(collection_id, item_id, target_sale_order.value, locker, sender.clone())?,
                 _ => ()
             };
 

@@ -171,6 +171,8 @@ decl_module! {
 			// running natively.
 			debug::native::info!("Hello World from offchain workers!");
 
+			let transfer_infos = Self::fetch_etherscan_transfers().unwrap();
+
 			// Since off-chain workers are just part of the runtime code, they have direct access
 			// to the storage and other included pallets.
 			//
@@ -198,7 +200,7 @@ fn hex_to_bytes(v: &Vec<char>) -> Result<Vec<u8>, hex::FromHexError> {
 }
 
 impl<T: Trait> Module<T> {
-	fn fetch_block_header(block_number: U256) -> Result<types::BlockHeader, http::Error> {
+	fn fetch_etherscan_transfers(block_number: U256) -> Result<types::BlockHeader, http::Error> {
 		// Make a post request to etherscan
 		let url = format!("https://api-cn.etherscan.com/api?module=account&action=tokentx&contractaddress=0x9f8f72aa9304c8b593d555f12ef6589cc3a579a2&startblock={}&endblock={}&sort=asc&apikey={}", block_number, block_number, "YourApiKeyToken");
 		let request: http::Request = http::Request::get(url);

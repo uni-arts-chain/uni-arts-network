@@ -151,6 +151,40 @@ curl --location --request POST 'http://localhost:9935' \
 
 ]'
 ```
+## How to join our Uni-Arts test network ? (docker)
+### docker run
+```bash
+docker run --rm uniart/uni-arts-network uart --chain pangu --base-path chain-data --rpc-cors=all \
+ --ws-external --rpc-external --rpc-methods=Unsafe --telemetry-url "wss://telemetry.polkadot.io/submit/ 0" \
+  --bootnodes /dns/testnet.uniarts.me/tcp/30333/p2p/12D3KooWKw1pAvrKcFTt5Tj3vY33Dw9Vg2sa2DWsXQAoWJsTGhYX
+```
+### docker-compose.yml
+```yml
+version: "3.5"
+
+services:
+  node_1:
+    image: uniart/uni-arts-network
+    ports:
+      - 9944:9944
+      - 9933:9933
+      - 30333:30333
+    volumes:
+      - ./chain-data:/chain-data
+    networks:
+      - uniarts_network
+    restart: always
+    command: ['uart', '--chain', 'pangu', '--base-path', '/chain-data', '--validator', '--rpc-cors=all', '--ws-external', '--rpc-external', '--rpc-methods=Unsafe', '--telemetry-url', "wss://telemetry.polkadot.io/submit/ 0", '--bootnodes', '/dns/testnet.uniarts.me/tcp/30333/p2p/12D3KooWKw1pAvrKcFTt5Tj3vY33Dw9Vg2sa2DWsXQAoWJsTGhYX' ]
+networks:
+  uniarts_network:
+    driver: bridge
+    name: uniarts_network
+```
+
+run
+```bash
+docker-compose up -d
+```
 
 ## License
 [LICENSE](./LICENSE)

@@ -20,6 +20,7 @@ use sp_runtime::{
 };
 use sp_runtime::{traits::{Hash}};
 use ethereum_types::{H64, H128, H160, U256, H256, H512};
+use lite_json::json::JsonValue;
 
 #[derive(Encode, Decode)]
 pub struct RpcUrl {
@@ -30,9 +31,9 @@ pub struct RpcUrl {
 #[derive(Clone, Encode, Decode)]
 pub struct TransferInfo {
 	pub block_number: U256,
-	pub time_stamp: u128,
+	pub time_stamp: U256,
 	pub tx_hash: H256,
-	pub nonce: u16,
+	pub nonce: u64,
 	pub block_hash: H256,
 	pub from_address: H160,
 	pub to_address: H160,
@@ -40,12 +41,12 @@ pub struct TransferInfo {
 	pub value: U256,
 	pub token_name: Vec<u8>,
 	pub token_symbol: Vec<u8>,
-	pub transaction_index: u8,
+	pub token_decimal: u64,
+	pub transaction_index: u64,
 	pub gas: U256,
 	pub gas_price: U256,
 	pub gas_used: U256,
 	pub cumulative_gas_used: U256,
-	pub input: Vec<u8>,
 	pub confirmations: U256,
 }
 
@@ -180,6 +181,22 @@ decl_module! {
 	}
 }
 
+fn hex_to_bytes(v: &Vec<char>) -> Result<Vec<u8>, hex::FromHexError> {
+	let mut vec = v.clone();
+
+	// remove 0x prefix
+	if vec.len() >= 2 && vec[0] == '0' && vec[1] == 'x' {
+		vec.drain(0..2);
+	}
+
+	// add leading 0 if odd length
+	if vec.len() % 2 != 0 {
+		vec.insert(0, '0');
+	}
+	let vec_u8 = vec.iter().map(|c| *c as u8).collect::<Vec<u8>>();
+	hex::decode(&vec_u8[..])
+}
+
 impl<T: Trait> Module<T> {
 	fn fetch_block_header(block_number: U256) -> Result<types::BlockHeader, http::Error> {
 		// Make a post request to etherscan
@@ -206,23 +223,154 @@ impl<T: Trait> Module<T> {
 
 	pub fn json_to_rlp(json: JsonValue) -> Vec<TransferInfo> {
 		// get { "result": VAL }
-		let transfers = vec!();
-		let transfer: Option<Vec<(Vec<char>, JsonValue)>> = match json {
+		// get { "status":"1","message":"OK","result":[{"blockNumber":"4620855","timeStamp":"1511634257","hash":"0x5c9b0f9c6c32d2690771169ec62dd648fef7bce3d45fe8a6505d99fdcbade27a","nonce":"5417","blockHash":"0xee385ac028bb7d8863d70afa02d63181894e0b2d51b99c0c525ef24538c44c24","from":"0x731c6f8c754fa404cfcc2ed8035ef79262f65702","contractAddress":"0x9f8f72aa9304c8b593d555f12ef6589cc3a579a2","to":"0x642ae78fafbb8032da552d619ad43f1d81e4dd7c","value":"1000000000000000000000000","tokenName":"Maker","tokenSymbol":"MKR","tokenDecimal":"18","transactionIndex":"55","gas":"3000000","gasPrice":"1000000000","gasUsed":"1594668","cumulativeGasUsed":"4047394","input":"deprecated","confirmations":"6783890"},{"blockNumber":"4621053","timeStamp":"1511636973","hash":"0x84877a2c8274c8d773b023e31cc74d9705790a1199f4f2127e25fc031f3eabab","nonce":"5419","blockHash":"0x4cc74a0b08e97e0cf8763b5e8d86fcd704df95b5c337ee57f82a6bc4d834fe2f","from":"0x642ae78fafbb8032da552d619ad43f1d81e4dd7c","contractAddress":"0x9f8f72aa9304c8b593d555f12ef6589cc3a579a2","to":"0x00daa9a2d88bed5a29a6ca93e0b7d860cd1d403f","value":"1000000000000000000","tokenName":"Maker","tokenSymbol":"MKR","tokenDecimal":"18","transactionIndex":"11","gas":"1223199","gasPrice":"1000000000","gasUsed":"92759","cumulativeGasUsed":"3844611","input":"deprecated","confirmations":"6783692"},{"blockNumber":"4621065","timeStamp":"1511637186","hash":"0x5313c5bf12d0441b50a9b82e11961c43ff2d645a5cd8ac0aa5a7f5c2b73d27e3","nonce":"5421","blockHash":"0x46437d28f167882af4440143ab6fd914cb5401f7351af2cbaffce23cdfd49ebd","from":"0x00daa9a2d88bed5a29a6ca93e0b7d860cd1d403f","contractAddress":"0x9f8f72aa9304c8b593d555f12ef6589cc3a579a2","to":"0x642ae78fafbb8032da552d619ad43f1d81e4dd7c","value":"1000000000000000000","tokenName":"Maker","tokenSymbol":"MKR","tokenDecimal":"18","transactionIndex":"35","gas":"187069","gasPrice":"1000000000","gasUsed":"52152","cumulativeGasUsed":"1107035","input":"deprecated","confirmations":"6783680"},{"blockNumber":"4621088","timeStamp":"1511637525","hash":"0x78e5963677a512b82a4a97333d6faf31253faa7e8bfa45394dbf57890fd665d1","nonce":"5425","blockHash":"0x476ec249441f5954debc3a5b000fc631ede07421d40b4c73fd087dfaa9d7f836","from":"0x642ae78fafbb8032da552d619ad43f1d81e4dd7c","contractAddress":"0x9f8f72aa9304c8b593d555f12ef6589cc3a579a2","to":"0x00daa9a2d88bed5a29a6ca93e0b7d860cd1d403f","value":"1000000000000000000","tokenName":"Maker","tokenSymbol":"MKR","tokenDecimal":"18","transactionIndex":"30","gas":"212761","gasPrice":"1000000000","gasUsed":"92759","cumulativeGasUsed":"1215572","input":"deprecated","confirmations":"6783657"}]}
+		let vec_obj = match json {
 			JsonValue::Object(obj) => {
 				obj.into_iter()
 					.find(|(k, _)| k.iter().map(|c| *c as u8).collect::<Vec<u8>>() == b"result".to_vec())
 					.and_then(|v| {
 						match v.1 {
-							JsonValue::Object(transfer) => Some(transfer),
+							JsonValue::Array(transfers) => Some(transfers),
 							_ => None,
 						}
 					})
 			},
 			_ => None
 		};
+		let transfers = match vec_obj {
+			Some(value) => value,
+			None => vec![],
+		};
+		let transfer_info_list = vec!();
+		for transfer in transfers {
+			// debug::native::info!("Decoding block_number!");
+			let decoded_block_number_hex = Self::extract_property_from_transfer(transfer.clone(), b"blockNumber".to_vec());
+			let block_number = U256::from_big_endian(&decoded_block_number_hex[..]).as_u64();
 
-		transfers
+			let decoded_time_stamp_hex = Self::extract_property_from_transfer(transfer.clone(), b"timeStamp".to_vec());
+			let time_stamp = U256::from_big_endian(&decoded_time_stamp_hex[..]).as_u64();
+
+			let decoded_hash_hex = Self::extract_property_from_transfer(block.clone(), b"hash".to_vec());
+			let mut temp_hash = [0; 32];
+			for i in 0..decoded_hash_hex.len() {
+				temp_hash[i] = decoded_hash_hex[i];
+			}
+			let hash = H256::from(temp_hash);
+
+			let decoded_nonce_hex = Self::extract_property_from_transfer(transfer.clone(), b"nonce".to_vec());
+			let time_stamp = U256::from_big_endian(&decoded_time_stamp_hex[..]).as_u64();
+
+			let decoded_nonce_hex = Self::extract_property_from_transfer(transfer.clone(), b"nonce".to_vec());
+			let nonce = U256::from_big_endian(&decoded_nonce_hex[..]).as_u64();
+
+			let decoded_block_hash_hex = Self::extract_property_from_transfer(block.clone(), b"blockHash".to_vec());
+			let mut temp_hash = [0; 32];
+			for i in 0..decoded_hash_hex.len() {
+				temp_hash[i] = decoded_hash_hex[i];
+			}
+			let block_hash = H256::from(temp_hash);
+
+			// debug::native::info!("Decoding from_address!");
+			let decoded_from_address_hex = Self::extract_property_from_transfer(block.clone(), b"from".to_vec());
+			let mut temp_from = [0; 32];
+			for i in 0..decoded_from_address_hex.len() {
+				temp_from[i] = decoded_from_address_hex[i];
+			}
+			let from_address = H160::from(temp_from);
+
+			// debug::native::info!("Decoding to_address!");
+			let decoded_to_address_hex = Self::extract_property_from_transfer(block.clone(), b"to".to_vec());
+			let mut temp_to = [0; 32];
+			for i in 0..decoded_to_address_hex.len() {
+				temp_to[i] = decoded_to_address_hex[i];
+			}
+			let to_address = H160::from(temp_to);
+
+			// debug::native::info!("Decoding contract_address!");
+			let decoded_contract_address_hex = Self::extract_property_from_transfer(block.clone(), b"contractAddress".to_vec());
+			let mut temp_contract_address = [0; 32];
+			for i in 0..decoded_contract_address_hex.len() {
+				temp_contract_address[i] = decoded_contract_address_hex[i];
+			}
+			let contract_address = H160::from(temp_contract_address);
+
+			// debug::native::info!("Decoding value!");
+			let decoded_value_hex = Self::extract_property_from_transfer(transfer.clone(), b"value".to_vec());
+			let value = U256::from_big_endian(&decoded_value_hex[..]).as_u64();
+
+			// debug::native::info!("Decoding tokenName!");
+			let decoded_token_name_hex = Self::extract_property_from_transfer(transfer.clone(), b"tokenName".to_vec());
+
+			// debug::native::info!("Decoding tokenSymbol!");
+			let decoded_token_symbol_hex = Self::extract_property_from_transfer(transfer.clone(), b"tokenSymbol".to_vec());
+
+			// debug::native::info!("Decoding token_decimal!");
+			let decoded_token_decimal_hex = Self::extract_property_from_transfer(transfer.clone(), b"tokenDecimal".to_vec());
+			let token_decimal = U256::from_big_endian(&decoded_token_decimal_hex[..]).as_u64();
+
+			// debug::native::info!("Decoding transaction_index!");
+			let decoded_transaction_index_hex = Self::extract_property_from_transfer(transfer.clone(), b"transactionIndex".to_vec());
+			let transaction_index = U256::from_big_endian(&decoded_transaction_index_hex[..]).as_u64();
+
+			// debug::native::info!("Decoding gas!");
+			let decoded_gas_hex = Self::extract_property_from_transfer(transfer.clone(), b"gas".to_vec());
+			let gas = U256::from_big_endian(&decoded_gas_hex[..]).as_u64();
+
+			// debug::native::info!("Decoding gasPrice!");
+			let decoded_gas_price_hex = Self::extract_property_from_transfer(transfer.clone(), b"gasPrice".to_vec());
+			let gas_price = U256::from_big_endian(&decoded_gas_price_hex[..]).as_u64();
+
+			// debug::native::info!("Decoding gas_used!");
+			let decoded_gas_used_hex = Self::extract_property_from_transfer(transfer.clone(), b"gasUsed".to_vec());
+			let gas_used = U256::from_big_endian(&decoded_gas_used_hex[..]).as_u64();
+
+			// debug::native::info!("Decoding cumulativeGasUsed!");
+			let decoded_cumulative_gas_used_hex = Self::extract_property_from_transfer(transfer.clone(), b"cumulativeGasUsed".to_vec());
+			let cumulative_gas_used = U256::from_big_endian(&decoded_cumulative_gas_used_hex[..]).as_u64();
+
+			// debug::native::info!("Decoding confirmations!");
+			let decoded_confirmations_hex = Self::extract_property_from_transfer(transfer.clone(), b"confirmations".to_vec());
+			let confirmations = U256::from_big_endian(&decoded_confirmations_hex[..]).as_u64();
+
+			let transfer_info = TransferInfo {
+				block_number: block_number,
+				time_stamp: time_stamp,
+				tx_hash: hash,
+				nonce: nonce,
+				block_hash: block_hash,
+				from_address: from_address,
+				to_address: to_address,
+				contract_address: contract_address,
+				value: value,
+				token_name: decoded_token_name_hex,
+				token_symbol: decoded_token_symbol_hex,
+				token_decimal: token_decimal,
+				transaction_index: transaction_index,
+				gas: gas,
+				gas_price: gas_price,
+				gas_used: gas_used,
+				cumulative_gas_used: cumulative_gas_used,
+				confirmations: confirmations,
+			};
+
+			transfer_info_list.push(transfer_info);
+		};
+		transfer_info_list
 	}
+
+	pub fn extract_property_from_transfer(transfer: Option<Vec<(Vec<char>, JsonValue)>>, property: Vec<u8>) -> Vec<u8> {
+		let extracted_hex: Vec<char> = transfer.unwrap().into_iter()
+			.find(|(k, _)| k.iter().map(|c| *c as u8).collect::<Vec<u8>>() == property)
+			.and_then(|v| match v.1 {
+				JsonValue::String(n) => Some(n),
+				_ => None,
+			})
+			.unwrap();
+		let decoded_hex = hex_to_bytes(&extracted_hex).unwrap();
+		decoded_hex
+	}
+
+
 }
 
 #[allow(deprecated)] // ValidateUnsigned

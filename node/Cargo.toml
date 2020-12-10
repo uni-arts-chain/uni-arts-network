@@ -57,6 +57,11 @@ pallet-staking-rpc = { path = "../pallets/staking/rpc" }
 
 [build-dependencies]
 substrate-build-script-utils = { version = "2.0.0" }
+# frame-benchmarking-cli = { version = '2.0.0', optional = true }
+
 
 [features]
 default = []
+runtime-benchmarks = [
+	"uart-runtime/runtime-benchmarks",
+]

@@ -71,6 +71,13 @@ pallet-trade = { path = "../pallets/trade", default-features = false }
 # pallet-lotteries = { path = "../pallets/lotteries", default-features = false }
 primitives = { package = "uniarts-primitives", path = "../primitives", default-features = false }
 
+
+# Used for runtime benchmarking
+frame-benchmarking = { version = "2.0.0", default-features = false, optional = true }
+frame-system-benchmarking = { version = "2.0.0", default-features = false, optional = true }
+hex-literal = { version = "0.3.1", optional = true }
+
+
 [build-dependencies]
 wasm-builder-runner = { version = "1.0.5", package = "substrate-wasm-builder-runner" }
 
@@ -104,6 +111,7 @@ std = [
 	"pallet-token/std",
 	"pallet-trade/std",
 	"pallet-staking/std",
+	"pallet-rewards/std",
 	"pallet-staking-rpc-runtime-api/std",
 	"pallet-multisig/std",
 	"pallet-proxy/std",
@@ -126,4 +134,18 @@ std = [
 	"frame-system/std",
   	"frame-system-rpc-runtime-api/std",
 	"primitives/std",
+]
+
+runtime-benchmarks = [
+	"sp-runtime/runtime-benchmarks",
+	"frame-benchmarking",
+	"frame-support/runtime-benchmarks",
+	"frame-system-benchmarking",
+	"hex-literal",
+	"frame-system/runtime-benchmarks",
+	"pallet-collective/runtime-benchmarks",
+	"pallet-society/runtime-benchmarks",
+	"pallet-balances/runtime-benchmarks",
+	"pallet-timestamp/runtime-benchmarks",
+	"pallet-rewards/runtime-benchmarks",
 ]

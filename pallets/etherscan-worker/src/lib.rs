@@ -215,12 +215,23 @@ decl_module! {
 				}
 			};
 
+			if let Some(c) = call {
+			    let result = signer.send_signed_transaction(|_acct| c.clone());
+			    // Display error if the signed tx fails.
+			    if let Some((acc, res)) = result {
+			        if res.is_err() {
+			            debug::error!("failure: offchain_signed_tx: tx sent: {:?}", acc.id);
+			        }
+			        // Transaction is sent successfully
+			    }
+			}
+
 			// Since off-chain workers are just part of the runtime code, they have direct access
 			// to the storage and other included pallets.
 			//
 			// We can easily import `frame_system` and retrieve a block hash of the parent block.
-			let parent_hash = <system::Module<T>>::block_hash(block_number - 1.into());
-			debug::debug!("Current block: {:?} (parent hash: {:?})", block_number, parent_hash);
+			// let parent_hash = <system::Module<T>>::block_hash(block_number - 1.into());
+			// debug::debug!("Current block: {:?} (parent hash: {:?})", block_number, parent_hash);
 		}
 	}
 }

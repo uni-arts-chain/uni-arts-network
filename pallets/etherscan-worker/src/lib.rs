@@ -98,14 +98,20 @@ decl_storage! {
 		/// Start synchronization block height
 		pub SyncBeginBlockHeight get(fn sync_begin_block_heigh): Option<U256>;
 
+		/// Sync block height
+		pub SyncBlockHeight get(fn sync_block_heigh): Option<U256>;
+
+		/// Current block height
+		pub CurrentBlockHeight get(fn current_block_heigh): Option<U256>;
+
 		/// We store block erc20 transfer tx hash
 		pub BlockTransfers get(fn block_number_transfers): map hasher(blake2_128_concat) U256 => H160;
 
 		/// We store full information about the erc20 transfer
-		pub Erc20TransferList get(fn transfer_id): double_map hasher(blake2_128_concat) H256, hasher(blake2_128_concat) u64 => TransferInfo;
+		pub TxHashTransferList get(fn transfer_id): double_map hasher(blake2_128_concat) H256, hasher(blake2_128_concat) u64,  => TransferInfo;
 
-		/// All erc20 transfer information in a transaction
-		pub AllTransferByTxHash get(fn all_transfer): map hasher(twox_64_concat) U256 => Vec<TransferInfo>;
+		/// All erc20 transfer information in a block
+		pub BlockTransferList get(fn all_transfer): hasher(blake2_128_concat) U256, hasher(blake2_128_concat) u64 => TransferInfo;
 
 		/// RpcUrls set by anyone
 		pub RpcUrls get(fn rpc_urls): map hasher(twox_64_concat) T::AccountId => Option<RpcUrl>;
@@ -151,6 +157,32 @@ decl_module! {
 			<RpcUrls>::set(Some(rpc_urls));
 		}
 
+		#[weight = 0]
+		pub fn add_erc20_transfers(
+			origin,
+			transfers: Vec<TransferInfo>,
+		) {
+			let _signer = ensure_signed(origin)?;
+
+			let index: u64 = 0;
+			for transfer in transfers {
+				let erc20_transfer: TransferInfo = rlp::decode(transfer.as_slice()).unwrap();
+				if let Some(sync_begin_block_heigh) = Self::infos(Self::sync_begin_block_heigh()) {
+					let block_number = U256::from(transfer.block_number);
+					let tx_hash = H256::from(transfer.tx_hash);
+
+					if block_number > sync_begin_block_heigh {
+						// Record full information about this header.
+						<TxHashTransferList>::insert(tx_hash, index, transfer.clone());
+						<BlockTransferList>::insert(block_number, index, transfer.clone());
+						index = index + 1;
+					}
+
+					Self::current_block_heigh(block_number);
+				}
+			}
+		}
+
 		/// Offchain Worker entry point.
 		///
 		/// By implementing `fn offchain_worker` within `decl_module!` you declare a new offchain
@@ -170,8 +202,18 @@ decl_module! {
 			// in WASM or use `debug::native` namespace to produce logs only when the worker is
 			// running natively.
 			debug::native::info!("Hello World from offchain workers!");
+			let sync_block_number = Self::last_block_number()
+			let transfer_infos = Self::fetch_etherscan_transfers(sync_block_number).unwrap();
 
-			let transfer_infos = Self::fetch_etherscan_transfers().unwrap();
+			let call = if Self::initialized() {
+				if sync_block_number > Self::last_block_number() {
+					debug::native::info!("Adding erc20 transfer at block number #: {:?}!", sync_block_number);
+					Some(Call::add_erc20_transfers(transfer_infos.clone()))
+				} else {
+					debug::native::info!("Skipping adding #: {:?}, already added!", sync_block_number);
+					None
+				}
+			};
 
 			// Since off-chain workers are just part of the runtime code, they have direct access
 			// to the storage and other included pallets.
@@ -200,6 +242,10 @@ fn hex_to_bytes(v: &Vec<char>) -> Result<Vec<u8>, hex::FromHexError> {
 }
 
 impl<T: Trait> Module<T> {
+	pub fn initialized() -> bool {
+		Self::erc20_token_address().is_some()
+	}
+
 	fn fetch_etherscan_transfers(block_number: U256) -> Result<types::BlockHeader, http::Error> {
 		// Make a post request to etherscan
 		let url = format!("https://api-cn.etherscan.com/api?module=account&action=tokentx&contractaddress=0x9f8f72aa9304c8b593d555f12ef6589cc3a579a2&startblock={}&endblock={}&sort=asc&apikey={}", block_number, block_number, "YourApiKeyToken");
@@ -243,7 +289,7 @@ impl<T: Trait> Module<T> {
 			Some(value) => value,
 			None => vec![],
 		};
-		let transfer_info_list = vec!();
+		let mut transfer_info_list = vec!();
 		for transfer in transfers {
 			// debug::native::info!("Decoding block_number!");
 			let decoded_block_number_hex = Self::extract_property_from_transfer(transfer.clone(), b"blockNumber".to_vec());

@@ -10,3 +10,4 @@ pub mod pallet_balances;
 pub mod pallet_elections_phragmen;
 pub mod pallet_treasury;
 pub mod pallet_identity;
+pub mod pallet_rewards;

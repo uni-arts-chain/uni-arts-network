@@ -22,12 +22,13 @@ use sp_runtime::{
 };
 
 use codec::Codec;
-use sp_std::prelude::*;
 
 pub mod default_weights;
+mod benchmarking;
 
 pub trait WeightInfo {
 	fn claim() -> Weight;
+	fn on_finalize() -> Weight;
 }
 
 

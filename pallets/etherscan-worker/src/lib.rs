@@ -116,10 +116,10 @@ decl_storage! {
 		pub BlockTransfers get(fn block_number_transfers): map hasher(blake2_128_concat) U256 => H160;
 
 		/// We store full information about the erc20 transfer
-		pub TxHashTransferList get(fn transfer_id): double_map hasher(blake2_128_concat) H256, hasher(blake2_128_concat) u64 => TransferInfo;
+		pub TxHashTransferList get(fn transfer_id): double_map hasher(blake2_128_concat) H256, hasher(blake2_128_concat) u64 => Option<TransferInfo>;
 
 		/// All erc20 transfer information in a block
-		pub BlockTransferList get(fn all_transfer): double_map hasher(blake2_128_concat) U256, hasher(blake2_128_concat) u64 => TransferInfo;
+		pub BlockTransferList get(fn all_transfer): double_map hasher(blake2_128_concat) U256, hasher(blake2_128_concat) u64 => Option<TransferInfo>;
 
 		/// RpcUrls set by anyone
 		pub RpcUrls get(fn rpc_urls): Option<RpcUrl>;

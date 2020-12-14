@@ -31,7 +31,7 @@ use rlp::{
 };
 use rlp_derive::{RlpDecodable as RlpDecodableDerive, RlpEncodable as RlpEncodableDerive};
 
-#[derive(Encode, Decode)]
+#[derive(Debug, Clone, Encode, Decode)]
 pub struct RpcUrl {
 	url: Vec<u8>,
 }
@@ -104,7 +104,7 @@ decl_storage! {
 		pub MappingTokenHash get(fn mapping_token_hash): Option<H256>;
 
 		/// Start synchronization block height
-		pub SyncBeginBlockHeight get(fn sync_begin_block_heigh): U256;
+		pub SyncBeginBlockHeight get(fn sync_begin_block_heigh): Option<U256>;
 
 		/// Sync block height
 		pub SyncBlockHeight get(fn sync_block_heigh): U256;
@@ -147,7 +147,7 @@ decl_module! {
 			erc20_token_name: Vec<u8>,
 			erc20_token_address: H160,
 			mapping_token_hash: H256,
-			sync_begin_block_heigh: U256,
+			sync_begin_block_heigh: Option<U256>,
 			rpc_urls: RpcUrl,
 		) {
 			let _signer = ensure_signed(origin)?;
@@ -161,7 +161,7 @@ decl_module! {
 			<Erc20TokenName>::set(Some(erc20_token_name));
 			<Erc20TokenAddress>::set(Some(erc20_token_address));
 			<MappingTokenHash>::set(Some(mapping_token_hash));
-			<SyncBeginBlockHeight>::set(sync_begin_block_heigh);
+			<SyncBeginBlockHeight>::set(Some(sync_begin_block_heigh));
 			<RpcUrls>::set(Some(rpc_urls));
 		}
 
@@ -174,7 +174,7 @@ decl_module! {
 
 			let index: u64 = 0;
 			for transfer in transfers {
-				if let sync_begin_block_heigh = Self::sync_begin_block_heigh() {
+				if let Some(sync_begin_block_heigh) = Self::sync_begin_block_heigh() {
 					let block_number = U256::from(transfer.block_number);
 					let tx_hash = H256::from(transfer.tx_hash);
 
@@ -216,7 +216,7 @@ decl_module! {
 			let call = if Self::initialized() {
 				if sync_block_number > Self::current_block_heigh() {
 					debug::native::info!("Adding erc20 transfer at block number #: {:?}!", sync_block_number);
-					Some(Call::add_erc20_transfers(&transfer_infos))
+					Some(Call::add_erc20_transfers(transfer_infos))
 				} else {
 					debug::native::info!("Skipping adding #: {:?}, already added!", sync_block_number);
 					None
@@ -228,7 +228,7 @@ decl_module! {
 					Some(H160::from(b"0x0000".to_vec())),
 					Some(H160::from("0x0000".to_vec())),
 					U256::from(10),
-					Some(b"https://api-cn.etherscan.com/api?module=account&action=tokentx&contractaddress=0x9f8f72aa9304c8b593d555f12ef6589cc3a579a2&".to_vec())
+					Some(RpcUrl{ url: b"https://api-cn.etherscan.com/api?module=account&action=tokentx&contractaddress=0x9f8f72aa9304c8b593d555f12ef6589cc3a579a2&".to_vec() })
 				))
 			};
 
@@ -321,7 +321,7 @@ impl<T: Trait> Module<T> {
 		for transfer in transfers {
 			// debug::native::info!("Decoding block_number!");
 			let decoded_block_number_hex = Self::extract_property_from_transfer(transfer.clone(), b"blockNumber".to_vec());
-			let block_number = U256::from_big_endian(&decoded_block_number_hex[..]).as_u64();
+			let block_number: U256 = U256::from_big_endian(&decoded_block_number_hex[..]);
 
 			let decoded_time_stamp_hex = Self::extract_property_from_transfer(transfer.clone(), b"timeStamp".to_vec());
 			let time_stamp = U256::from_big_endian(&decoded_time_stamp_hex[..]).as_u64();
@@ -334,7 +334,7 @@ impl<T: Trait> Module<T> {
 			let hash = H256::from(temp_hash);
 
 			let decoded_nonce_hex = Self::extract_property_from_transfer(transfer.clone(), b"nonce".to_vec());
-			let time_stamp = U256::from_big_endian(&decoded_time_stamp_hex[..]).as_u64();
+			let time_stamp: U256 = U256::from_big_endian(&decoded_time_stamp_hex[..]);
 
 			let decoded_nonce_hex = Self::extract_property_from_transfer(transfer.clone(), b"nonce".to_vec());
 			let nonce = U256::from_big_endian(&decoded_nonce_hex[..]).as_u64();
@@ -372,7 +372,7 @@ impl<T: Trait> Module<T> {
 
 			// debug::native::info!("Decoding value!");
 			let decoded_value_hex = Self::extract_property_from_transfer(transfer.clone(), b"value".to_vec());
-			let value = U256::from_big_endian(&decoded_value_hex[..]).as_u64();
+			let value: U256 = U256::from_big_endian(&decoded_value_hex[..]);
 
 			// debug::native::info!("Decoding tokenName!");
 			let decoded_token_name_hex = Self::extract_property_from_transfer(transfer.clone(), b"tokenName".to_vec());
@@ -390,23 +390,23 @@ impl<T: Trait> Module<T> {
 
 			// debug::native::info!("Decoding gas!");
 			let decoded_gas_hex = Self::extract_property_from_transfer(transfer.clone(), b"gas".to_vec());
-			let gas = U256::from_big_endian(&decoded_gas_hex[..]).as_u64();
+			let gas: U256 = U256::from_big_endian(&decoded_gas_hex[..]);
 
 			// debug::native::info!("Decoding gasPrice!");
 			let decoded_gas_price_hex = Self::extract_property_from_transfer(transfer.clone(), b"gasPrice".to_vec());
-			let gas_price = U256::from_big_endian(&decoded_gas_price_hex[..]).as_u64();
+			let gas_price: U256 = U256::from_big_endian(&decoded_gas_price_hex[..]);
 
 			// debug::native::info!("Decoding gas_used!");
 			let decoded_gas_used_hex = Self::extract_property_from_transfer(transfer.clone(), b"gasUsed".to_vec());
-			let gas_used = U256::from_big_endian(&decoded_gas_used_hex[..]).as_u64();
+			let gas_used: U256 = U256::from_big_endian(&decoded_gas_used_hex[..]);
 
 			// debug::native::info!("Decoding cumulativeGasUsed!");
 			let decoded_cumulative_gas_used_hex = Self::extract_property_from_transfer(transfer.clone(), b"cumulativeGasUsed".to_vec());
-			let cumulative_gas_used = U256::from_big_endian(&decoded_cumulative_gas_used_hex[..]).as_u64();
+			let cumulative_gas_used: U256 = U256::from_big_endian(&decoded_cumulative_gas_used_hex[..]);
 
 			// debug::native::info!("Decoding confirmations!");
 			let decoded_confirmations_hex = Self::extract_property_from_transfer(transfer.clone(), b"confirmations".to_vec());
-			let confirmations = U256::from_big_endian(&decoded_confirmations_hex[..]).as_u64();
+			let confirmations: U256 = U256::from_big_endian(&decoded_confirmations_hex[..]);
 
 			let transfer_info = TransferInfo {
 				block_number: block_number,

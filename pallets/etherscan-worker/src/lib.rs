@@ -147,7 +147,7 @@ decl_module! {
 			erc20_token_name: Vec<u8>,
 			erc20_token_address: H160,
 			mapping_token_hash: H256,
-			sync_begin_block_heigh: Option<U256>,
+			sync_begin_block_heigh: U256,
 			rpc_urls: RpcUrl,
 		) {
 			let _signer = ensure_signed(origin)?;
@@ -224,11 +224,11 @@ decl_module! {
 			} else {
 				debug::native::info!("Initializing!");
 				Some(Call::init(
-					Some(b"USDT".to_vec()),
-					Some(H160::from(b"0x0000".to_vec())),
-					Some(H160::from("0x0000".to_vec())),
+					b"USDT".to_vec(),
+					H160::from(b"0x0000".to_vec()),
+					H256::from("0x0000".to_vec()),
 					U256::from(10),
-					Some(RpcUrl{ url: b"https://api-cn.etherscan.com/api?module=account&action=tokentx&contractaddress=0x9f8f72aa9304c8b593d555f12ef6589cc3a579a2&".to_vec() })
+					RpcUrl{ url: b"https://api-cn.etherscan.com/api?module=account&action=tokentx&contractaddress=0x9f8f72aa9304c8b593d555f12ef6589cc3a579a2&".to_vec() }
 				))
 			};
 
@@ -348,7 +348,7 @@ impl<T: Trait> Module<T> {
 
 			// debug::native::info!("Decoding from_address!");
 			let decoded_from_address_hex = Self::extract_property_from_transfer(transfer.clone(), b"from".to_vec());
-			let mut temp_from = [0; 32];
+			let mut temp_from = [0; 20];
 			for i in 0..decoded_from_address_hex.len() {
 				temp_from[i] = decoded_from_address_hex[i];
 			}
@@ -356,7 +356,7 @@ impl<T: Trait> Module<T> {
 
 			// debug::native::info!("Decoding to_address!");
 			let decoded_to_address_hex = Self::extract_property_from_transfer(transfer.clone(), b"to".to_vec());
-			let mut temp_to = [0; 32];
+			let mut temp_to = [0; 20];
 			for i in 0..decoded_to_address_hex.len() {
 				temp_to[i] = decoded_to_address_hex[i];
 			}

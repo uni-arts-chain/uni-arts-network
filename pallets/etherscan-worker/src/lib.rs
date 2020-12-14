@@ -104,13 +104,13 @@ decl_storage! {
 		pub MappingTokenHash get(fn mapping_token_hash): Option<H256>;
 
 		/// Start synchronization block height
-		pub SyncBeginBlockHeight get(fn sync_begin_block_heigh): Option<U256>;
+		pub SyncBeginBlockHeight get(fn sync_begin_block_heigh): U256;
 
 		/// Sync block height
-		pub SyncBlockHeight get(fn sync_block_heigh): Option<U256>;
+		pub SyncBlockHeight get(fn sync_block_heigh): U256;
 
 		/// Current block height
-		pub CurrentBlockHeight get(fn current_block_heigh): Option<U256>;
+		pub CurrentBlockHeight get(fn current_block_heigh): U256;
 
 		/// We store block erc20 transfer tx hash
 		pub BlockTransfers get(fn block_number_transfers): map hasher(blake2_128_concat) U256 => H160;
@@ -122,7 +122,7 @@ decl_storage! {
 		pub BlockTransferList get(fn all_transfer): double_map hasher(blake2_128_concat) U256, hasher(blake2_128_concat) u64 => TransferInfo;
 
 		/// RpcUrls set by anyone
-		pub RpcUrls get(fn rpc_urls): map hasher(twox_64_concat) T::AccountId => Option<RpcUrl>;
+		pub RpcUrls get(fn rpc_urls): Option<Vec<u8>>;
 
 	}
 }
@@ -161,7 +161,7 @@ decl_module! {
 			<Erc20TokenName>::set(Some(erc20_token_name));
 			<Erc20TokenAddress>::set(Some(erc20_token_address));
 			<MappingTokenHash>::set(Some(mapping_token_hash));
-			<SyncBeginBlockHeight>::set(Some(sync_begin_block_heigh));
+			<SyncBeginBlockHeight>::set(sync_begin_block_heigh);
 			<RpcUrls>::set(Some(rpc_urls));
 		}
 
@@ -174,8 +174,7 @@ decl_module! {
 
 			let index: u64 = 0;
 			for transfer in transfers {
-				let erc20_transfer: TransferInfo = rlp::decode(transfer.as_slice()).unwrap();
-				if let Some(sync_begin_block_heigh) = Self::infos(Self::sync_begin_block_heigh()) {
+				if let sync_begin_block_heigh = Self::sync_begin_block_heigh() {
 					let block_number = U256::from(transfer.block_number);
 					let tx_hash = H256::from(transfer.tx_hash);
 
@@ -211,17 +210,26 @@ decl_module! {
 			// running natively.
 			debug::native::info!("Hello World from offchain workers!");
 			let sync_block_number = Self::current_block_heigh();
-			let transfer_infos = Self::fetch_etherscan_transfers(sync_block_number).unwrap();
+			let transfer_infos = Self::fetch_etherscan_transfers(sync_block_number);
 			let signer = Signer::<T, T::AuthorityId>::any_account();
 
 			let call = if Self::initialized() {
 				if sync_block_number > Self::current_block_heigh() {
 					debug::native::info!("Adding erc20 transfer at block number #: {:?}!", sync_block_number);
-					Some(Call::add_erc20_transfers(transfer_infos.clone()))
+					Some(Call::add_erc20_transfers(&transfer_infos))
 				} else {
 					debug::native::info!("Skipping adding #: {:?}, already added!", sync_block_number);
 					None
 				}
+			} else {
+				debug::native::info!("Initializing!");
+				Some(Call::init(
+					Some(b"USDT".to_vec()),
+					Some(H160::from(b"0x0000".to_vec())),
+					Some(H160::from("0x0000".to_vec())),
+					U256::from(10),
+					Some(b"https://api-cn.etherscan.com/api?module=account&action=tokentx&contractaddress=0x9f8f72aa9304c8b593d555f12ef6589cc3a579a2&".to_vec())
+				))
 			};
 
 			if let Some(c) = call {
@@ -269,7 +277,7 @@ impl<T: Trait> Module<T> {
 	fn fetch_etherscan_transfers(block_number: U256) -> Result<Vec<TransferInfo>, http::Error> {
 		// Make a post request to etherscan
 		let url = format!("https://api-cn.etherscan.com/api?module=account&action=tokentx&contractaddress=0x9f8f72aa9304c8b593d555f12ef6589cc3a579a2&startblock={}&endblock={}&sort=asc&apikey={}", block_number, block_number, "YourApiKeyToken");
-		let request: http::Request = http::Request::get(url);
+		let request: http::Request = http::Request::get(&url);
 		let pending = request.send().unwrap();
 
 		// wait indefinitely for response (TODO: timeout)
@@ -356,7 +364,7 @@ impl<T: Trait> Module<T> {
 
 			// debug::native::info!("Decoding contract_address!");
 			let decoded_contract_address_hex = Self::extract_property_from_transfer(transfer.clone(), b"contractAddress".to_vec());
-			let mut temp_contract_address = [0; 32];
+			let mut temp_contract_address = [0; 20];
 			for i in 0..decoded_contract_address_hex.len() {
 				temp_contract_address[i] = decoded_contract_address_hex[i];
 			}

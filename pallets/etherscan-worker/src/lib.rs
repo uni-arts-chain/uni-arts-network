@@ -426,15 +426,21 @@ impl<T: Trait> Module<T> {
 		transfer_info_list
 	}
 
-	pub fn extract_property_from_transfer(transfer: Option<Vec<(Vec<char>, JsonValue)>>, property: Vec<u8>) -> Vec<u8> {
-		let extracted_hex: Vec<char> = transfer.unwrap().into_iter()
-			.find(|(k, _)| k.iter().map(|c| *c as u8).collect::<Vec<u8>>() == property)
-			.and_then(|v| match v.1 {
-				JsonValue::String(n) => Some(n),
-				_ => None,
-			})
-			.unwrap();
-		let decoded_hex = hex_to_bytes(&extracted_hex).unwrap();
+	pub fn extract_property_from_transfer(block: JsonValue, property: Vec<u8>) -> Vec<u8> {
+		let objs = match block {
+			JsonValue::Object(obj) => {
+				obj.into_iter()
+					.find(|(k, _)| k.iter().map(|c| *c as u8).collect::<Vec<u8>>() == property)
+					.and_then(|v| {
+						match v.1 {
+							JsonValue::String(n) => Some(n),
+							_ => None,
+						}
+					})
+			},
+			_ => None
+		};
+		let decoded_hex = hex_to_bytes(&objs.unwrap()).unwrap();
 		decoded_hex
 	}
 

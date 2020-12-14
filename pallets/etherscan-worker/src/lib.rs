@@ -122,7 +122,7 @@ decl_storage! {
 		pub BlockTransferList get(fn all_transfer): double_map hasher(blake2_128_concat) U256, hasher(blake2_128_concat) u64 => TransferInfo;
 
 		/// RpcUrls set by anyone
-		pub RpcUrls get(fn rpc_urls): Option<Vec<u8>>;
+		pub RpcUrls get(fn rpc_urls): Option<RpcUrl>;
 
 	}
 }
@@ -225,8 +225,8 @@ decl_module! {
 				debug::native::info!("Initializing!");
 				Some(Call::init(
 					b"USDT".to_vec(),
-					H160::from(b"0x0000".to_vec()),
-					H256::from("0x0000".to_vec()),
+					H160::from_low_u64_be(0),
+					H256::from_low_u64_be(0),
 					U256::from(10),
 					RpcUrl{ url: b"https://api-cn.etherscan.com/api?module=account&action=tokentx&contractaddress=0x9f8f72aa9304c8b593d555f12ef6589cc3a579a2&".to_vec() }
 				))

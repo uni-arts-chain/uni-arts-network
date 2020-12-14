@@ -59,6 +59,20 @@ pub struct TransferInfo {
 	pub confirmations: U256,
 }
 
+impl TransferInfo {
+	pub fn token_name(&self) -> H256 {
+		let mut data = [0u8; 32];
+		data.copy_from_slice(self.token_name.as_slice());
+		H256(data.into())
+	}
+
+	pub fn token_symbol(&self) -> H256 {
+		let mut data = [0u8; 32];
+		data.copy_from_slice(self.token_symbol.as_slice());
+		H256(data.into())
+	}
+}
+
 /// This pallet's configuration trait
 pub trait Trait: CreateSignedTransaction<Call<Self>> {
 	/// The identifier type for an offchain worker.

@@ -1,17 +1,21 @@
 #![cfg_attr(not(feature = "std"), no_std)]
 
+use sp_std::prelude::*;
+use codec::{Encode, Decode};
 use frame_system::{
-	self as system,
+	self as system, ensure_signed,
 	offchain::{
-		AppCrypto, CreateSignedTransaction,
-	}
+		AppCrypto, CreateSignedTransaction, Signer,
+		SigningTypes, SignedPayload, SendSignedTransaction,
+	},
 };
 use frame_support::{
-	debug, decl_module, decl_storage, decl_event,
+	debug, decl_module, decl_storage, decl_event, ensure, decl_error,
 	traits::Get,
 };
 use sp_core::crypto::KeyTypeId;
 use sp_runtime::{
+	RuntimeDebug,
 	transaction_validity::{
 		ValidTransaction, TransactionValidity, TransactionSource,
 		TransactionPriority,
@@ -21,6 +25,11 @@ use sp_runtime::{
 use sp_runtime::{traits::{Hash}};
 use ethereum_types::{H64, H128, H160, U256, H256, H512};
 use lite_json::json::JsonValue;
+use rlp::{
+	Decodable as RlpDecodable, DecoderError as RlpDecoderError, Encodable as RlpEncodable, Rlp,
+	RlpStream,
+};
+use rlp_derive::{RlpDecodable as RlpDecodableDerive, RlpEncodable as RlpEncodableDerive};
 
 #[derive(Encode, Decode)]
 pub struct RpcUrl {
@@ -28,7 +37,7 @@ pub struct RpcUrl {
 }
 
 ///information about a erc20 transfer.
-#[derive(Clone, Encode, Decode)]
+#[derive(Debug, Clone, Encode, Decode)]
 pub struct TransferInfo {
 	pub block_number: U256,
 	pub time_stamp: U256,
@@ -83,7 +92,6 @@ pub trait Trait: CreateSignedTransaction<Call<Self>> {
 
 decl_storage! {
 	trait Store for Module<T: Trait> as EtherscanWorkerModule {
-		/// Current synchronization block height.
 		pub SyncBlockNumber get(fn sync_block_number): Option<U256>;
 
 		/// Ethereum Erc20 Token Name
@@ -93,7 +101,7 @@ decl_storage! {
 		pub Erc20TokenAddress get(fn erc20_token_address): Option<H160>;
 
 		/// Mapping Token hash
-		pub MappingTokenHash get(fn mapping_token_hash): Option<Hash>;
+		pub MappingTokenHash get(fn mapping_token_hash): Option<H256>;
 
 		/// Start synchronization block height
 		pub SyncBeginBlockHeight get(fn sync_begin_block_heigh): Option<U256>;
@@ -108,10 +116,10 @@ decl_storage! {
 		pub BlockTransfers get(fn block_number_transfers): map hasher(blake2_128_concat) U256 => H160;
 
 		/// We store full information about the erc20 transfer
-		pub TxHashTransferList get(fn transfer_id): double_map hasher(blake2_128_concat) H256, hasher(blake2_128_concat) u64,  => TransferInfo;
+		pub TxHashTransferList get(fn transfer_id): double_map hasher(blake2_128_concat) H256, hasher(blake2_128_concat) u64 => TransferInfo;
 
 		/// All erc20 transfer information in a block
-		pub BlockTransferList get(fn all_transfer): hasher(blake2_128_concat) U256, hasher(blake2_128_concat) u64 => TransferInfo;
+		pub BlockTransferList get(fn all_transfer): double_map hasher(blake2_128_concat) U256, hasher(blake2_128_concat) u64 => TransferInfo;
 
 		/// RpcUrls set by anyone
 		pub RpcUrls get(fn rpc_urls): map hasher(twox_64_concat) T::AccountId => Option<RpcUrl>;
@@ -138,7 +146,7 @@ decl_module! {
 			origin,
 			erc20_token_name: Vec<u8>,
 			erc20_token_address: H160,
-			mapping_token_hash: Hash,
+			mapping_token_hash: H256,
 			sync_begin_block_heigh: U256,
 			rpc_urls: RpcUrl,
 		) {
@@ -178,7 +186,7 @@ decl_module! {
 						index = index + 1;
 					}
 
-					Self::current_block_heigh(block_number);
+					<CurrentBlockHeight>::set(block_number);
 				}
 			}
 		}
@@ -202,11 +210,12 @@ decl_module! {
 			// in WASM or use `debug::native` namespace to produce logs only when the worker is
 			// running natively.
 			debug::native::info!("Hello World from offchain workers!");
-			let sync_block_number = Self::last_block_number()
+			let sync_block_number = Self::current_block_heigh();
 			let transfer_infos = Self::fetch_etherscan_transfers(sync_block_number).unwrap();
+			let signer = Signer::<T, T::AuthorityId>::any_account();
 
 			let call = if Self::initialized() {
-				if sync_block_number > Self::last_block_number() {
+				if sync_block_number > Self::current_block_heigh() {
 					debug::native::info!("Adding erc20 transfer at block number #: {:?}!", sync_block_number);
 					Some(Call::add_erc20_transfers(transfer_infos.clone()))
 				} else {
@@ -257,7 +266,7 @@ impl<T: Trait> Module<T> {
 		Self::erc20_token_address().is_some()
 	}
 
-	fn fetch_etherscan_transfers(block_number: U256) -> Result<types::BlockHeader, http::Error> {
+	fn fetch_etherscan_transfers(block_number: U256) -> Result<Vec<TransferInfo>, http::Error> {
 		// Make a post request to etherscan
 		let url = format!("https://api-cn.etherscan.com/api?module=account&action=tokentx&contractaddress=0x9f8f72aa9304c8b593d555f12ef6589cc3a579a2&startblock={}&endblock={}&sort=asc&apikey={}", block_number, block_number, "YourApiKeyToken");
 		let request: http::Request = http::Request::get(url);
@@ -309,7 +318,7 @@ impl<T: Trait> Module<T> {
 			let decoded_time_stamp_hex = Self::extract_property_from_transfer(transfer.clone(), b"timeStamp".to_vec());
 			let time_stamp = U256::from_big_endian(&decoded_time_stamp_hex[..]).as_u64();
 
-			let decoded_hash_hex = Self::extract_property_from_transfer(block.clone(), b"hash".to_vec());
+			let decoded_hash_hex = Self::extract_property_from_transfer(transfer.clone(), b"hash".to_vec());
 			let mut temp_hash = [0; 32];
 			for i in 0..decoded_hash_hex.len() {
 				temp_hash[i] = decoded_hash_hex[i];
@@ -322,7 +331,7 @@ impl<T: Trait> Module<T> {
 			let decoded_nonce_hex = Self::extract_property_from_transfer(transfer.clone(), b"nonce".to_vec());
 			let nonce = U256::from_big_endian(&decoded_nonce_hex[..]).as_u64();
 
-			let decoded_block_hash_hex = Self::extract_property_from_transfer(block.clone(), b"blockHash".to_vec());
+			let decoded_block_hash_hex = Self::extract_property_from_transfer(transfer.clone(), b"blockHash".to_vec());
 			let mut temp_hash = [0; 32];
 			for i in 0..decoded_hash_hex.len() {
 				temp_hash[i] = decoded_hash_hex[i];
@@ -330,7 +339,7 @@ impl<T: Trait> Module<T> {
 			let block_hash = H256::from(temp_hash);
 
 			// debug::native::info!("Decoding from_address!");
-			let decoded_from_address_hex = Self::extract_property_from_transfer(block.clone(), b"from".to_vec());
+			let decoded_from_address_hex = Self::extract_property_from_transfer(transfer.clone(), b"from".to_vec());
 			let mut temp_from = [0; 32];
 			for i in 0..decoded_from_address_hex.len() {
 				temp_from[i] = decoded_from_address_hex[i];
@@ -338,7 +347,7 @@ impl<T: Trait> Module<T> {
 			let from_address = H160::from(temp_from);
 
 			// debug::native::info!("Decoding to_address!");
-			let decoded_to_address_hex = Self::extract_property_from_transfer(block.clone(), b"to".to_vec());
+			let decoded_to_address_hex = Self::extract_property_from_transfer(transfer.clone(), b"to".to_vec());
 			let mut temp_to = [0; 32];
 			for i in 0..decoded_to_address_hex.len() {
 				temp_to[i] = decoded_to_address_hex[i];
@@ -346,7 +355,7 @@ impl<T: Trait> Module<T> {
 			let to_address = H160::from(temp_to);
 
 			// debug::native::info!("Decoding contract_address!");
-			let decoded_contract_address_hex = Self::extract_property_from_transfer(block.clone(), b"contractAddress".to_vec());
+			let decoded_contract_address_hex = Self::extract_property_from_transfer(transfer.clone(), b"contractAddress".to_vec());
 			let mut temp_contract_address = [0; 32];
 			for i in 0..decoded_contract_address_hex.len() {
 				temp_contract_address[i] = decoded_contract_address_hex[i];

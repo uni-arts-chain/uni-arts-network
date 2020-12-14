@@ -24,6 +24,9 @@ frame-system = { version = "2.0.0", default-features = false }
 pallet-timestamp = { version = "2.0.0", default-features = false }
 lite-json = { version = "0.1", default-features = false }
 ethereum-types = { version = "0.9", default-features = false }
+rlp = { version = "0.4", default-features = false }
+rlp-derive = { version = "0.1.0", default-features = false }
+hex = { version = "0.4", default-features = false }
 
 [features]
 default = ['std']
@@ -40,4 +43,5 @@ std = [
 	"pallet-timestamp/std",
 	"lite-json/std",
 	"ethereum-types/std",
+	"rlp/std",
 ]

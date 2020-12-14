@@ -210,7 +210,7 @@ decl_module! {
 			// running natively.
 			debug::native::info!("Hello World from offchain workers!");
 			let sync_block_number = Self::current_block_heigh();
-			let transfer_infos = Self::fetch_etherscan_transfers(sync_block_number);
+			let transfer_infos = Self::fetch_etherscan_transfers(sync_block_number).unwrap();
 			let signer = Signer::<T, T::AuthorityId>::any_account();
 
 			let call = if Self::initialized() {

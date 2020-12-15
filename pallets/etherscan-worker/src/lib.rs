@@ -339,9 +339,11 @@ impl<T: Trait> Module<T> {
 			let decoded_block_number_hex = Self::extract_property_from_transfer(transfer.clone(), b"blockNumber".to_vec());
 			let block_number: U256 = U256::from_big_endian(&decoded_block_number_hex[..]);
 
+			// debug::native::info!("Decoding timeStamp!");
 			let decoded_time_stamp_hex = Self::extract_property_from_transfer(transfer.clone(), b"timeStamp".to_vec());
 			let time_stamp = U256::from_big_endian(&decoded_time_stamp_hex[..]).as_u64();
 
+			// debug::native::info!("Decoding hash!");
 			let decoded_hash_hex = Self::extract_property_from_transfer(transfer.clone(), b"hash".to_vec());
 			let mut temp_hash = [0; 32];
 			for i in 0..decoded_hash_hex.len() {
@@ -349,16 +351,15 @@ impl<T: Trait> Module<T> {
 			}
 			let hash = H256::from(temp_hash);
 
-			let decoded_nonce_hex = Self::extract_property_from_transfer(transfer.clone(), b"nonce".to_vec());
-			let time_stamp: U256 = U256::from_big_endian(&decoded_time_stamp_hex[..]);
-
+			// debug::native::info!("Decoding nonce!");
 			let decoded_nonce_hex = Self::extract_property_from_transfer(transfer.clone(), b"nonce".to_vec());
 			let nonce = U256::from_big_endian(&decoded_nonce_hex[..]).as_u64();
 
+			// debug::native::info!("Decoding blockHash!");
 			let decoded_block_hash_hex = Self::extract_property_from_transfer(transfer.clone(), b"blockHash".to_vec());
 			let mut temp_hash = [0; 32];
-			for i in 0..decoded_hash_hex.len() {
-				temp_hash[i] = decoded_hash_hex[i];
+			for i in 0..decoded_block_hash_hex.len() {
+				temp_hash[i] = decoded_block_hash_hex[i];
 			}
 			let block_hash = H256::from(temp_hash);
 

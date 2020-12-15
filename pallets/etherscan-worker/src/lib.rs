@@ -3,18 +3,16 @@
 use sp_std::prelude::*;
 use codec::{Encode, Decode};
 use frame_system::{
-	self as system, ensure_signed,
+	ensure_signed,
 	offchain::{
-		AppCrypto, CreateSignedTransaction, Signer,
-		SigningTypes, SignedPayload, SendSignedTransaction,
+		AppCrypto, CreateSignedTransaction, Signer, SendSignedTransaction,
 	},
 };
 use frame_support::{
-	debug, decl_module, decl_storage, decl_event, ensure, decl_error,
-	traits::Get,
+	debug, decl_module, decl_storage, decl_event, ensure,
+	traits::Get, dispatch::fmt::*,
 };
 use sp_runtime::{
-	RuntimeDebug,
 	transaction_validity::{
 		ValidTransaction, TransactionValidity, TransactionSource,
 		TransactionPriority,
@@ -24,13 +22,13 @@ use sp_runtime::{
 use ethereum_types::{H160, U256, H256};
 use lite_json::json::JsonValue;
 
-#[derive(Debug, Clone, Encode, Decode)]
+#[derive(Debug, Clone, Encode, Decode, PartialEq)]
 pub struct RpcUrl {
 	url: Vec<u8>,
 }
 
 ///information about a erc20 transfer.
-#[derive(Debug, Clone, Encode, Decode)]
+#[derive(Debug, Clone, Encode, Decode, PartialEq)]
 pub struct TransferInfo {
 	pub block_number: U256,
 	pub time_stamp: U256,
@@ -179,9 +177,9 @@ decl_module! {
 		) {
 			let _signer = ensure_signed(origin)?;
 
-			let index: u64 = 0;
+			let mut index: u64 = 0;
 			let current_block_number = Self::current_block_heigh();
-			let block_number = U256::from(0);
+			let mut block_number = U256::from(0);
 			for transfer in transfers {
 				if let Some(sync_begin_block_heigh) = Self::sync_begin_block_heigh() {
 					block_number = U256::from(transfer.block_number);

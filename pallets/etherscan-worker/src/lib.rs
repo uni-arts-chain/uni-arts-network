@@ -341,7 +341,7 @@ impl<T: Trait> Module<T> {
 
 			// debug::native::info!("Decoding timeStamp!");
 			let decoded_time_stamp_hex = Self::extract_property_from_transfer(transfer.clone(), b"timeStamp".to_vec());
-			let time_stamp = U256::from_big_endian(&decoded_time_stamp_hex[..]).as_u64();
+			let time_stamp = U256::from_big_endian(&decoded_time_stamp_hex[..]);
 
 			// debug::native::info!("Decoding hash!");
 			let decoded_hash_hex = Self::extract_property_from_transfer(transfer.clone(), b"hash".to_vec());

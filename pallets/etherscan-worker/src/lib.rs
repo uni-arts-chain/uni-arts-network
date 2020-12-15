@@ -10,7 +10,7 @@ use frame_system::{
 };
 use frame_support::{
 	debug, decl_module, decl_storage, decl_event, ensure,
-	traits::Get, dispatch::fmt::*,
+	traits::Get,
 };
 use sp_runtime::{
 	transaction_validity::{
@@ -219,7 +219,7 @@ decl_module! {
 			// in WASM or use `debug::native` namespace to produce logs only when the worker is
 			// running natively.
 			debug::native::info!("Hello World from offchain workers!");
-			let sync_block_number = Self::current_block_heigh();
+			let sync_block_number = Self::current_block_heigh() + 1;
 			let transfer_infos = Self::fetch_etherscan_transfers(sync_block_number).unwrap();
 			let signer = Signer::<T, T::AuthorityId>::any_account();
 
@@ -286,7 +286,13 @@ impl<T: Trait> Module<T> {
 
 	fn fetch_etherscan_transfers(block_number: U256) -> Result<Vec<TransferInfo>, http::Error> {
 		// Make a post request to etherscan
-		let url = format!("https://api-cn.etherscan.com/api?module=account&action=tokentx&contractaddress=0x9f8f72aa9304c8b593d555f12ef6589cc3a579a2&startblock={}&endblock={}&sort=asc&apikey={}", block_number, block_number, "YourApiKeyToken");
+		let block_number= block_number.as_u64().to_be_bytes().to_vec();
+		let url_base = "https://api-cn.etherscan.com/api?module=account&action=tokentx&contractaddress=0x9f8f72aa9304c8b593d555f12ef6589cc3a579a2&startblock=".as_bytes();
+		let url_mid = "&endblock=".as_bytes();
+		let url_end= "&sort=asc&apikey=YG4V33TFHKW2EVKB1IEA5B8FPRJSKV6F3J".as_bytes();
+		let url_vec = vec![url_base, &block_number, url_mid, &block_number, url_end].concat();
+		let url = sp_std::str::from_utf8(&url_vec).unwrap();
+
 		let request: http::Request = http::Request::get(&url);
 		let pending = request.send().unwrap();
 
@@ -461,8 +467,6 @@ impl<T: Trait> Module<T> {
 		let decoded_hex = hex_to_bytes(&objs.unwrap()).unwrap();
 		decoded_hex
 	}
-
-
 }
 
 #[allow(deprecated)] // ValidateUnsigned

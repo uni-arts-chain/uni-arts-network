@@ -13,7 +13,6 @@ use frame_support::{
 	debug, decl_module, decl_storage, decl_event, ensure, decl_error,
 	traits::Get,
 };
-use sp_core::crypto::KeyTypeId;
 use sp_runtime::{
 	RuntimeDebug,
 	transaction_validity::{
@@ -22,14 +21,8 @@ use sp_runtime::{
 	},
 	offchain::{http},
 };
-use sp_runtime::{traits::{Hash}};
-use ethereum_types::{H64, H128, H160, U256, H256, H512};
+use ethereum_types::{H160, U256, H256};
 use lite_json::json::JsonValue;
-use rlp::{
-	Decodable as RlpDecodable, DecoderError as RlpDecoderError, Encodable as RlpEncodable, Rlp,
-	RlpStream,
-};
-use rlp_derive::{RlpDecodable as RlpDecodableDerive, RlpEncodable as RlpEncodableDerive};
 
 #[derive(Debug, Clone, Encode, Decode)]
 pub struct RpcUrl {
@@ -187,20 +180,25 @@ decl_module! {
 			let _signer = ensure_signed(origin)?;
 
 			let index: u64 = 0;
+			let current_block_number = Self::current_block_heigh();
+			let block_number = U256::from(0);
 			for transfer in transfers {
 				if let Some(sync_begin_block_heigh) = Self::sync_begin_block_heigh() {
-					let block_number = U256::from(transfer.block_number);
+					block_number = U256::from(transfer.block_number);
 					let tx_hash = H256::from(transfer.tx_hash);
 
-					if block_number > sync_begin_block_heigh {
+					if block_number > sync_begin_block_heigh && block_number >= current_block_number {
 						// Record full information about this header.
 						<TxHashTransferList>::insert(tx_hash, index, transfer.clone());
 						<BlockTransferList>::insert(block_number, index, transfer.clone());
 						index = index + 1;
 					}
 
-					<CurrentBlockHeight>::set(block_number);
+
 				}
+			}
+			if block_number > current_block_number {
+				<CurrentBlockHeight>::set(block_number);
 			}
 		}
 

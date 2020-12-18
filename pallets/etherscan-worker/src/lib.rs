@@ -1,6 +1,7 @@
 #![cfg_attr(not(feature = "std"), no_std)]
 
 use sp_std::prelude::*;
+use sp_core::crypto::KeyTypeId;
 use codec::{Encode, Decode};
 use frame_system::{
 	ensure_signed,
@@ -11,13 +12,35 @@ use frame_system::{
 use frame_support::{debug, decl_module, decl_storage, decl_event, ensure, traits::Get};
 use sp_runtime::{
 	transaction_validity::{
-		ValidTransaction, TransactionValidity, TransactionSource,
+		InvalidTransaction, ValidTransaction, TransactionValidity, TransactionSource,
 		TransactionPriority,
 	},
 	offchain::{http},
 };
 use ethereum_types::{H160, U256, H256, U128};
 use lite_json::json::JsonValue;
+
+pub const KEY_TYPE: KeyTypeId = KeyTypeId(*b"eth!");
+
+// Based on the above `KeyTypeId` we need to generate a pallet-specific crypto type wrappers.
+/// We can use from supported crypto kinds (`sr25519`, `ed25519` and `ecdsa`) and augment
+/// the types with this pallet-specific identifier.
+pub mod crypto {
+	use super::KEY_TYPE;
+	use sp_runtime::{
+		app_crypto::{app_crypto, sr25519},
+		traits::Verify,
+	};
+	use sp_core::sr25519::Signature as Sr25519Signature;
+	app_crypto!(sr25519, KEY_TYPE);
+
+	pub struct AuthId;
+	impl frame_system::offchain::AppCrypto<<Sr25519Signature as Verify>::Signer, Sr25519Signature> for AuthId {
+		type RuntimeAppPublic = Public;
+		type GenericSignature = sp_core::sr25519::Signature;
+		type GenericPublic = sp_core::sr25519::Public;
+	}
+}
 
 #[derive(Debug, Clone, Encode, Decode, PartialEq)]
 pub struct RpcUrl {
@@ -236,17 +259,21 @@ decl_module! {
 				))
 			};
 
-			if let Some(c) = call {
-			    let result = signer.send_signed_transaction(|_acct| c.clone());
-			    // Display error if the signed tx fails.
-			    if let Some((acc, res)) = result {
-			        if res.is_err() {
-			        	debug::native::info!("failure: offchain_signed_tx: tx sent: {:?}", acc.id);
-			            debug::error!("failure: offchain_signed_tx: tx sent: {:?}", acc.id);
-			        }
-			        debug::native::info!("+++++++++++++++++ Transaction is sent successfully");
-			        // Transaction is sent successfully
-			    }
+			if signer.can_sign() {
+				if let Some(c) = call {
+					let result = signer.send_signed_transaction(|_acct| c.clone());
+					// Display error if the signed tx fails.
+					if let Some((acc, res)) = result {
+						if res.is_err() {
+							debug::native::info!("failure: offchain_signed_tx: tx sent: {:?}", acc.id);
+							debug::error!("failure: offchain_signed_tx: tx sent: {:?}", acc.id);
+						}
+						debug::native::info!("+++++++++++++++++ Transaction is sent successfully");
+						// Transaction is sent successfully
+					}
+				}
+			} else {
+				debug::native::info!("[etherscan-offchainwork] use `author_insertKey` rpc to insert key to enable worker");
 			}
 
 			// Since off-chain workers are just part of the runtime code, they have direct access
@@ -496,23 +523,25 @@ impl<T: Trait> frame_support::unsigned::ValidateUnsigned for Module<T> {
 	/// are being whitelisted and marked as valid.
 	fn validate_unsigned(
 		_source: TransactionSource,
-		_call: &Self::Call,
+		call: &Self::Call,
 	) -> TransactionValidity {
-		ValidTransaction::with_tag_prefix("EtherscanWorker")
-			// We set base priority to 2**20 and hope it's included before any other
-			// transactions in the pool. Next we tweak the priority depending on how much
-			// it differs from the current average. (the more it differs the more priority it
-			// has).
+		let valid_tx = |provide| ValidTransaction::with_tag_prefix("EtherscanWorker")
 			.priority(T::UnsignedPriority::get())
-			// The transaction is only valid for next 5 blocks. After that it's
-			// going to be revalidated by the pool.
+			.and_provides([&provide])
 			.longevity(5)
-			// It's fine to propagate that transaction to other peers, which means it can be
-			// created even by nodes that don't produce blocks.
-			// Note that sometimes it's better to keep it for yourself (if you are the block
-			// producer), since for instance in some schemes others may copy your solution and
-			// claim a reward.
 			.propagate(true)
-			.build()
+			.build();
+
+		match call {
+			Call::init(
+				_erc20_token_name,
+				_erc20_token_address,
+				_mapping_token_hash,
+				_sync_begin_block_heigh,
+				_rpc_urls
+			) => valid_tx(b"init".to_vec()),
+			// -- snip --
+			_ => InvalidTransaction::Call.into(),
+		}
 	}
 }

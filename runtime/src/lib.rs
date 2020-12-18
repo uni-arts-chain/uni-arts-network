@@ -19,9 +19,10 @@ use sp_runtime::{
 	ApplyExtrinsicResult, generic, create_runtime_str, impl_opaque_keys, RuntimeDebug,
 	transaction_validity::{TransactionValidity, TransactionSource}
 };
+use sp_runtime::generic::Era;
 use sp_runtime::traits::{
 	BlakeTwo256, Block as BlockT, IdentityLookup, NumberFor, Saturating, ConvertInto, AccountIdConversion,
-	Convert, OpaqueKeys, SaturatedConversion, Bounded
+	Convert, OpaqueKeys, SaturatedConversion, Bounded, Verify
 };
 use frame_system::{EnsureOneOf, EnsureRoot};
 use sp_api::impl_runtime_apis;
@@ -44,7 +45,7 @@ pub use sp_runtime::{Permill, Perbill, Percent, ModuleId};
 pub use pallet_timestamp::Call as TimestampCall;
 pub use pallet_balances::Call as BalancesCall;
 pub use frame_support::{
-	construct_runtime, parameter_types, StorageValue, ConsensusEngineId,
+	construct_runtime, parameter_types, StorageValue, ConsensusEngineId, debug,
 	traits::{OnUnbalanced, ChangeMembers, KeyOwnerProofSystem, Randomness, StorageMapShim, Currency, Imbalance,
 			 Contains, ContainsLengthBound, InstanceFilter, LockIdentifier, SplitTwoWays, FindAuthor
 	},
@@ -290,7 +291,6 @@ impl<BlockNumber, Balance: Bounded + core::convert::From<BlockNumber>> Convert<B
 	}
 }
 
-
 impl pallet_rewards::Trait for Runtime {
 	type AccountIdOf = AccountIdOf;
 	type Balance = Balance;
@@ -302,8 +302,6 @@ impl pallet_rewards::Trait for Runtime {
 	type Event = Event;
 	type WeightInfo = weights::pallet_rewards::WeightInfo<Runtime>;
 }
-
-
 
 impl pallet_staking::Trait for Runtime {
 	type ModuleId = StakingModuleId;
@@ -483,6 +481,107 @@ impl pallet_sudo::Trait for Runtime {
 // 	type Event = Event;
 // 	type WorkId = u32;
 // }
+
+impl<LocalCall> frame_system::offchain::CreateSignedTransaction<LocalCall> for Runtime
+	where
+		Call: From<LocalCall>,
+{
+	fn create_transaction<C: frame_system::offchain::AppCrypto<Self::Public, Self::Signature>>(
+		call: Call,
+		public: <Signature as Verify>::Signer,
+		account: AccountId,
+		nonce: Index,
+	) -> Option<(Call, <UncheckedExtrinsic as sp_runtime::traits::Extrinsic>::SignaturePayload)> {
+		let tip = 0;
+		// take the biggest period possible.
+		let period = BlockHashCount::get()
+			.checked_next_power_of_two()
+			.map(|c| c / 2)
+			.unwrap_or(2) as u64;
+		let current_block = System::block_number()
+			.saturated_into::<u64>()
+			// The `System::block_number` is initialized with `n+1`,
+			// so the actual block number is `n`.
+			.saturating_sub(1);
+		let era = Era::mortal(period, current_block);
+		let extra = (
+			frame_system::CheckSpecVersion::<Runtime>::new(),
+			frame_system::CheckTxVersion::<Runtime>::new(),
+			frame_system::CheckGenesis::<Runtime>::new(),
+			frame_system::CheckEra::<Runtime>::from(era),
+			frame_system::CheckNonce::<Runtime>::from(nonce),
+			frame_system::CheckWeight::<Runtime>::new(),
+			pallet_transaction_payment::ChargeTransactionPayment::<Runtime>::from(tip),
+		);
+		let raw_payload = SignedPayload::new(call, extra)
+			.map_err(|e| {
+				debug::warn!("Unable to create signed payload: {:?}", e);
+			})
+			.ok()?;
+		let signature = raw_payload
+			.using_encoded(|payload| {
+				C::sign(payload, public)
+			})?;
+		let address = account;
+		let (call, extra, _) = raw_payload.deconstruct();
+		Some((call, (address, signature.into(), extra)))
+	}
+}
+
+impl frame_system::offchain::SigningTypes for Runtime {
+	type Public = <Signature as Verify>::Signer;
+	type Signature = Signature;
+}
+
+impl<C> frame_system::offchain::SendTransactionTypes<C> for Runtime where
+	Call: From<C>,
+{
+	type Extrinsic = UncheckedExtrinsic;
+	type OverarchingCall = Call;
+}
+
+pub mod report {
+	use super::{Signature, Verify};
+	use frame_system::offchain::AppCrypto;
+	use sp_core::crypto::{key_types, KeyTypeId};
+
+	/// Key type for the reporting module. Used for reporting BABE and GRANDPA
+	/// equivocations.
+	pub const KEY_TYPE: KeyTypeId = key_types::REPORTING;
+
+	pub mod app {
+		use sp_application_crypto::{app_crypto, sr25519};
+		app_crypto!(sr25519, super::KEY_TYPE);
+	}
+
+	/// Identity of the equivocation/misbehavior reporter.
+	pub type ReporterId = app::Public;
+
+	/// An `AppCrypto` type to allow submitting signed transactions using the reporting
+	/// application key as signer.
+	pub struct ReporterAppCrypto;
+
+	impl AppCrypto<<Signature as Verify>::Signer, Signature> for ReporterAppCrypto {
+		type RuntimeAppPublic = ReporterId;
+		type GenericSignature = sp_core::sr25519::Signature;
+		type GenericPublic = sp_core::sr25519::Public;
+	}
+}
+
+parameter_types! {
+	pub const GracePeriod: u32 = 5;
+	pub const UnsignedInterval: u32 = 128;
+	pub const UnsignedPriority: u32 = 1 << 20;
+}
+
+impl pallet_etherscan_worker::Trait for Runtime {
+	type Event = Event;
+	type AuthorityId = report::ReporterAppCrypto;
+	type Call = Call;
+	type GracePeriod = GracePeriod;
+	type UnsignedInterval = UnsignedInterval;
+	type UnsignedPriority = UnsignedPriority;
+}
 
 impl pallet_assets::Trait for Runtime {
 	type Event = Event;
@@ -997,6 +1096,7 @@ construct_runtime!(
 		Proxy: pallet_proxy::{Module, Call, Storage, Event<T>},
 		Multisig: pallet_multisig::{Module, Call, Storage, Event<T>},
 		Recovery: pallet_recovery::{Module, Call, Storage, Event<T>},
+		EtherscanWorker: pallet_etherscan_worker::{Module, Call, Storage, Event<T>, ValidateUnsigned},
 	}
 );
 
@@ -1024,6 +1124,8 @@ pub type SignedExtra = (
 pub type UncheckedExtrinsic = generic::UncheckedExtrinsic<Address, Call, Signature, SignedExtra>;
 /// Extrinsic type that has already been checked.
 pub type CheckedExtrinsic = generic::CheckedExtrinsic<AccountId, Call, SignedExtra>;
+/// The payload being signed in transactions.
+pub type SignedPayload = generic::SignedPayload<Call, SignedExtra>;
 /// Executive: handles dispatch to the various modules.
 pub type Executive = frame_executive::Executive<
 	Runtime,

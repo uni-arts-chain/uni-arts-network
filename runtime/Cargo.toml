@@ -71,6 +71,8 @@ pallet-trade = { path = "../pallets/trade", default-features = false }
 # pallet-lotteries = { path = "../pallets/lotteries", default-features = false }
 primitives = { package = "uniarts-primitives", path = "../primitives", default-features = false }
 
+sp-application-crypto = { version = "2.0.0", default-features = false }
+pallet-etherscan-worker = { version = "2.0.0", default-features = false, path = "../pallets/etherscan-worker" }
 
 # Used for runtime benchmarking
 frame-benchmarking = { version = "2.0.0", default-features = false, optional = true }
@@ -118,6 +120,7 @@ std = [
 	"pallet-utility/std",
 	"pallet-indices/std",
 	"pallet-recovery/std",
+	"pallet-etherscan-worker/std",
 	"serde",
 	"sp-api/std",
 	"sp-block-builder/std",

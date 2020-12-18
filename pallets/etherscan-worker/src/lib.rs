@@ -8,10 +8,7 @@ use frame_system::{
 		AppCrypto, CreateSignedTransaction, Signer, SendSignedTransaction,
 	},
 };
-use frame_support::{
-	debug, decl_module, decl_storage, decl_event, ensure,
-	traits::Get,
-};
+use frame_support::{debug, decl_module, decl_storage, decl_event, ensure, traits::Get};
 use sp_runtime::{
 	transaction_validity::{
 		ValidTransaction, TransactionValidity, TransactionSource,
@@ -19,7 +16,7 @@ use sp_runtime::{
 	},
 	offchain::{http},
 };
-use ethereum_types::{H160, U256, H256};
+use ethereum_types::{H160, U256, H256, U128};
 use lite_json::json::JsonValue;
 
 #[derive(Debug, Clone, Encode, Decode, PartialEq)]
@@ -30,7 +27,7 @@ pub struct RpcUrl {
 ///information about a erc20 transfer.
 #[derive(Debug, Clone, Encode, Decode, PartialEq)]
 pub struct TransferInfo {
-	pub block_number: U256,
+	pub block_number: u32,
 	pub time_stamp: U256,
 	pub tx_hash: H256,
 	pub nonce: u64,
@@ -97,7 +94,7 @@ pub trait Trait: CreateSignedTransaction<Call<Self>> {
 
 decl_storage! {
 	trait Store for Module<T: Trait> as EtherscanWorkerModule {
-		pub SyncBlockNumber get(fn sync_block_number): Option<U256>;
+		pub SyncBlockNumber get(fn sync_block_number): Option<u32>;
 
 		/// Ethereum Erc20 Token Name
 		pub Erc20TokenName get(fn erc20_token_name): Option<Vec<u8>>;
@@ -109,22 +106,22 @@ decl_storage! {
 		pub MappingTokenHash get(fn mapping_token_hash): Option<H256>;
 
 		/// Start synchronization block height
-		pub SyncBeginBlockHeight get(fn sync_begin_block_heigh): Option<U256>;
+		pub SyncBeginBlockHeight get(fn sync_begin_block_heigh): Option<u32>;
 
 		/// Sync block height
-		pub SyncBlockHeight get(fn sync_block_heigh): U256;
+		pub SyncBlockHeight get(fn sync_block_heigh): u32;
 
 		/// Current block height
-		pub CurrentBlockHeight get(fn current_block_heigh): U256;
+		pub CurrentBlockHeight get(fn current_block_heigh): u32;
 
 		/// We store block erc20 transfer tx hash
-		pub BlockTransfers get(fn block_number_transfers): map hasher(blake2_128_concat) U256 => H160;
+		pub BlockTransfers get(fn block_number_transfers): map hasher(blake2_128_concat) u32 => H160;
 
 		/// We store full information about the erc20 transfer
-		pub TxHashTransferList get(fn transfer_id): double_map hasher(blake2_128_concat) H256, hasher(blake2_128_concat) u64 => Option<TransferInfo>;
+		pub TxHashTransferList get(fn transfer_id): double_map hasher(blake2_128_concat) H256, hasher(blake2_128_concat) u32 => Option<TransferInfo>;
 
 		/// All erc20 transfer information in a block
-		pub BlockTransferList get(fn all_transfer): double_map hasher(blake2_128_concat) U256, hasher(blake2_128_concat) u64 => Option<TransferInfo>;
+		pub BlockTransferList get(fn all_transfer): double_map hasher(blake2_128_concat) u32, hasher(blake2_128_concat) u32 => Option<TransferInfo>;
 
 		/// RpcUrls set by anyone
 		pub RpcUrls get(fn rpc_urls): Option<RpcUrl>;
@@ -152,7 +149,7 @@ decl_module! {
 			erc20_token_name: Vec<u8>,
 			erc20_token_address: H160,
 			mapping_token_hash: H256,
-			sync_begin_block_heigh: U256,
+			sync_begin_block_heigh: u32,
 			rpc_urls: RpcUrl,
 		) {
 			let _signer = ensure_signed(origin)?;
@@ -161,7 +158,6 @@ decl_module! {
 			ensure!(Self::mapping_token_hash().is_none(), "Already initialized");
 			ensure!(Self::sync_begin_block_heigh().is_none(), "Already initialized");
 			ensure!(Self::rpc_urls().is_none(), "Already initialized");
-
 
 			<Erc20TokenName>::set(Some(erc20_token_name));
 			<Erc20TokenAddress>::set(Some(erc20_token_address));
@@ -177,12 +173,12 @@ decl_module! {
 		) {
 			let _signer = ensure_signed(origin)?;
 
-			let mut index: u64 = 0;
+			let mut index: u32 = 0;
 			let current_block_number = Self::current_block_heigh();
-			let mut block_number = U256::from(0);
+			let mut block_number = 0u32;
 			for transfer in transfers {
 				if let Some(sync_begin_block_heigh) = Self::sync_begin_block_heigh() {
-					block_number = U256::from(transfer.block_number);
+					block_number = transfer.block_number;
 					let tx_hash = H256::from(transfer.tx_hash);
 
 					if block_number > sync_begin_block_heigh && block_number >= current_block_number {
@@ -191,8 +187,6 @@ decl_module! {
 						<BlockTransferList>::insert(block_number, index, transfer.clone());
 						index = index + 1;
 					}
-
-
 				}
 			}
 			if block_number > current_block_number {
@@ -237,7 +231,7 @@ decl_module! {
 					b"USDT".to_vec(),
 					H160::from_low_u64_be(0),
 					H256::from_low_u64_be(0),
-					U256::from(10),
+					10u32,
 					RpcUrl{ url: b"https://api-cn.etherscan.com/api?module=account&action=tokentx&contractaddress=0x9f8f72aa9304c8b593d555f12ef6589cc3a579a2&".to_vec() }
 				))
 			};
@@ -247,8 +241,10 @@ decl_module! {
 			    // Display error if the signed tx fails.
 			    if let Some((acc, res)) = result {
 			        if res.is_err() {
+			        	debug::native::info!("failure: offchain_signed_tx: tx sent: {:?}", acc.id);
 			            debug::error!("failure: offchain_signed_tx: tx sent: {:?}", acc.id);
 			        }
+			        debug::native::info!("+++++++++++++++++ Transaction is sent successfully");
 			        // Transaction is sent successfully
 			    }
 			}
@@ -284,14 +280,15 @@ impl<T: Trait> Module<T> {
 		Self::erc20_token_address().is_some()
 	}
 
-	fn fetch_etherscan_transfers(block_number: U256) -> Result<Vec<TransferInfo>, http::Error> {
+	fn fetch_etherscan_transfers(block_number: u32) -> Result<Vec<TransferInfo>, http::Error> {
 		// Make a post request to etherscan
-		let block_number= block_number.as_u64().to_be_bytes().to_vec();
+		let url_block_number = Self::u32_basen_to_u8(block_number);
 		let url_base = "https://api-cn.etherscan.com/api?module=account&action=tokentx&contractaddress=0x9f8f72aa9304c8b593d555f12ef6589cc3a579a2&startblock=".as_bytes();
 		let url_mid = "&endblock=".as_bytes();
 		let url_end= "&sort=asc&apikey=YG4V33TFHKW2EVKB1IEA5B8FPRJSKV6F3J".as_bytes();
-		let url_vec = vec![url_base, &block_number, url_mid, &block_number, url_end].concat();
+		let url_vec = vec![url_base, &url_block_number, url_mid, &url_block_number, url_end].concat();
 		let url = sp_std::str::from_utf8(&url_vec).unwrap();
+		debug::native::info!("{:?}",url);
 
 		let request: http::Request = http::Request::get(&url);
 		let pending = request.send().unwrap();
@@ -337,7 +334,7 @@ impl<T: Trait> Module<T> {
 		for transfer in transfers {
 			// debug::native::info!("Decoding block_number!");
 			let decoded_block_number_hex = Self::extract_property_from_transfer(transfer.clone(), b"blockNumber".to_vec());
-			let block_number: U256 = U256::from_big_endian(&decoded_block_number_hex[..]);
+			let block_number: u32 = U256::from_big_endian(&decoded_block_number_hex[..]).as_u32();
 
 			// debug::native::info!("Decoding timeStamp!");
 			let decoded_time_stamp_hex = Self::extract_property_from_transfer(transfer.clone(), b"timeStamp".to_vec());
@@ -468,6 +465,24 @@ impl<T: Trait> Module<T> {
 		let decoded_hex = hex_to_bytes(&objs.unwrap()).unwrap();
 		decoded_hex
 	}
+
+	pub fn u32_basen_to_u8(value: u32) -> Vec<u8> {
+		let mut x = value.clone();
+		// will panic if you use a bad radix (< 2 or > 36).
+		let radix = 10;
+		let mut result = vec![];
+
+		loop {
+			let m = x % radix;
+			x = x / radix;
+			result.push((m as u8) + 48);
+			if x == 0 {
+				break;
+			}
+		}
+		result.reverse();
+		result
+	}
 }
 
 #[allow(deprecated)] // ValidateUnsigned
@@ -484,20 +499,20 @@ impl<T: Trait> frame_support::unsigned::ValidateUnsigned for Module<T> {
 		_call: &Self::Call,
 	) -> TransactionValidity {
 		ValidTransaction::with_tag_prefix("EtherscanWorker")
-		// We set base priority to 2**20 and hope it's included before any other
-		// transactions in the pool. Next we tweak the priority depending on how much
-		// it differs from the current average. (the more it differs the more priority it
-		// has).
-		.priority(T::UnsignedPriority::get())
-		// The transaction is only valid for next 5 blocks. After that it's
-		// going to be revalidated by the pool.
-		.longevity(5)
-		// It's fine to propagate that transaction to other peers, which means it can be
-		// created even by nodes that don't produce blocks.
-		// Note that sometimes it's better to keep it for yourself (if you are the block
-		// producer), since for instance in some schemes others may copy your solution and
-		// claim a reward.
-		.propagate(true)
-		.build()
+			// We set base priority to 2**20 and hope it's included before any other
+			// transactions in the pool. Next we tweak the priority depending on how much
+			// it differs from the current average. (the more it differs the more priority it
+			// has).
+			.priority(T::UnsignedPriority::get())
+			// The transaction is only valid for next 5 blocks. After that it's
+			// going to be revalidated by the pool.
+			.longevity(5)
+			// It's fine to propagate that transaction to other peers, which means it can be
+			// created even by nodes that don't produce blocks.
+			// Note that sometimes it's better to keep it for yourself (if you are the block
+			// producer), since for instance in some schemes others may copy your solution and
+			// claim a reward.
+			.propagate(true)
+			.build()
 	}
 }

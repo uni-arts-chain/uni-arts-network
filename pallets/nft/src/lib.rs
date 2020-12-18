@@ -191,6 +191,17 @@ pub struct SaleOrder<AccountId> {
     pub price: u64, // maker order's price\
 }
 
+#[derive(Encode, Decode, Default, Clone, PartialEq)]
+pub struct SaleOrderHistory<AccountId, BlockNumber> {
+    pub collection_id: u64,
+    pub item_id: u64,
+    pub value: u64,
+    pub seller: AccountId,
+    pub buyer: AccountId,
+    pub price: u64,
+    pub buy_time: BlockNumber,
+}
+
 #[derive(Debug, Eq, PartialEq)]
 pub enum TransferFromAccountError {
     InsufficientBalance,
@@ -245,6 +256,9 @@ decl_storage! {
 
         /// Consignment
         pub SaleOrderList get(fn nft_trade_id): double_map hasher(blake2_128_concat) u64, hasher(blake2_128_concat) u64 => SaleOrder<T::AccountId>;
+
+        /// Sales history
+        pub SaleOrderHistoryList get(fn nft_trade_history_id): double_map hasher(blake2_128_concat) u64, hasher(blake2_128_concat) u64 => SaleOrderHistory<T::AccountId, T::BlockNumber>;
     }
 }
 
@@ -836,6 +850,7 @@ decl_module! {
             let target_sale_order = <SaleOrderList<T>>::get(collection_id, item_id);
             let nft_owner = target_sale_order.owner;
             let price = target_sale_order.price;
+            let buy_time = <system::Module<T>>::block_number();
 
 
             let target_collection = <Collection<T>>::get(collection_id);
@@ -861,6 +876,18 @@ decl_module! {
                 CollectionMode::ReFungible(_, _)  => Self::transfer_refungible(collection_id, item_id, target_sale_order.value, locker, sender.clone())?,
                 _ => ()
             };
+
+            // Create order history
+            let order_history = SaleOrderHistory {
+                collection_id: collection_id,
+                item_id: item_id,
+                value: price,
+                seller: nft_owner.clone(),
+                buyer: sender.clone(),
+                price: price,
+                buy_time: buy_time,
+            };
+            <SaleOrderHistoryList<T>>::insert(collection_id, item_id, order_history);
 
             <SaleOrderList<T>>::remove(collection_id, item_id);
 

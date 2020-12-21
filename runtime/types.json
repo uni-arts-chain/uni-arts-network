@@ -132,7 +132,7 @@
     "owner": "AccountId",
     "price": "u64"
   },
-  "HistorySaleOrderList": {
+  "SaleOrderHistory": {
     "collection_id": "u64",
     "item_id": "u64",
     "value": "u64",

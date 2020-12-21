@@ -34,7 +34,6 @@ use sp_runtime::{
     FixedPointOperand, FixedU128,
 };
 use sp_std::prelude::*;
-use core::convert::TryInto;
 
 mod default_weight;
 
@@ -856,7 +855,7 @@ decl_module! {
 
             let target_collection = <Collection<T>>::get(collection_id);
             let locker = Self::nft_account_id();
-            let balance_price = CurrencyBalanceOf::<T>::from(price.try_into().unwrap());
+            let balance_price = CurrencyBalanceOf::<T>::saturated_from(price.into());
 
             // Moves funds from buyer account into the owner's account
             // We don't use T::Currency::transfer() to prevent fees being incurred.
@@ -872,7 +871,7 @@ decl_module! {
             // Moves nft from locker account into the buyer's account
             match target_collection.mode
             {
-                CollectionMode::NFT(_) => Self::transfer_nft(collection_id, item_id, locker, c.clone())?,
+                CollectionMode::NFT(_) => Self::transfer_nft(collection_id, item_id, locker, sender.clone())?,
                 CollectionMode::Fungible(_)  => Self::transfer_fungible(collection_id, item_id, target_sale_order.value, locker, sender.clone())?,
                 CollectionMode::ReFungible(_, _)  => Self::transfer_refungible(collection_id, item_id, target_sale_order.value, locker, sender.clone())?,
                 _ => ()

@@ -258,7 +258,7 @@ decl_storage! {
         pub SaleOrderList get(fn nft_trade_id): double_map hasher(blake2_128_concat) u64, hasher(blake2_128_concat) u64 => SaleOrder<T::AccountId>;
 
         /// Sales history
-        pub SaleOrderHistoryList get(fn nft_trade_history_id): double_map hasher(blake2_128_concat) u64, hasher(blake2_128_concat) u64 => Vec<SaleOrderHistory<T::AccountId, T::BlockNumber>>;
+        pub HistorySaleOrderList get(fn nft_trade_history_id): double_map hasher(blake2_128_concat) u64, hasher(blake2_128_concat) u64 => Vec<SaleOrderHistory<T::AccountId, T::BlockNumber>>;
     }
 }
 
@@ -888,15 +888,15 @@ decl_module! {
                 buy_time: buy_time,
             };
 
-            let list_exists = <SaleOrderHistoryList<T>>::contains_key(collection_id, item_id);
+            let list_exists = <HistorySaleOrderList<T>>::contains_key(collection_id, item_id);
             if list_exists {
-                let mut list = <SaleOrderHistoryList<T>>::get(collection_id, item_id);
+                let mut list = <HistorySaleOrderList<T>>::get(collection_id, item_id);
                 list.push(order_history);
-                <SaleOrderHistoryList<T>>::insert(collection_id, item_id, list);
+                <HistorySaleOrderList<T>>::insert(collection_id, item_id, list);
             } else {
                 let mut list = Vec::new();
                 list.push(order_history);
-                <SaleOrderHistoryList<T>>::insert(collection_id, item_id, list);
+                <HistorySaleOrderList<T>>::insert(collection_id, item_id, list);
             }
 
             <SaleOrderList<T>>::remove(collection_id, item_id);

@@ -34,7 +34,6 @@ use sp_runtime::{
     FixedPointOperand, FixedU128,
 };
 use sp_std::prelude::*;
-use core::convert::TryInto;
 
 mod default_weight;
 
@@ -192,6 +191,7 @@ pub struct SaleOrder<AccountId> {
 }
 
 #[derive(Encode, Decode, Default, Clone, PartialEq)]
+#[cfg_attr(feature = "std", derive(Debug))]
 pub struct SaleOrderHistory<AccountId, BlockNumber> {
     pub collection_id: u64,
     pub item_id: u64,
@@ -258,7 +258,7 @@ decl_storage! {
         pub SaleOrderList get(fn nft_trade_id): double_map hasher(blake2_128_concat) u64, hasher(blake2_128_concat) u64 => SaleOrder<T::AccountId>;
 
         /// Sales history
-        pub SaleOrderHistoryList get(fn nft_trade_history_id): double_map hasher(blake2_128_concat) u64, hasher(blake2_128_concat) u64 => SaleOrderHistory<T::AccountId, T::BlockNumber>;
+        pub HistorySaleOrderList get(fn nft_trade_history_id): double_map hasher(blake2_128_concat) u64, hasher(blake2_128_concat) u64 => Vec<SaleOrderHistory<T::AccountId, T::BlockNumber>>;
     }
 }
 
@@ -855,7 +855,7 @@ decl_module! {
 
             let target_collection = <Collection<T>>::get(collection_id);
             let locker = Self::nft_account_id();
-            let balance_price = CurrencyBalanceOf::<T>::from(price.try_into().unwrap());
+            let balance_price = CurrencyBalanceOf::<T>::saturated_from(price.into());
 
             // Moves funds from buyer account into the owner's account
             // We don't use T::Currency::transfer() to prevent fees being incurred.
@@ -887,7 +887,17 @@ decl_module! {
                 price: price,
                 buy_time: buy_time,
             };
-            <SaleOrderHistoryList<T>>::insert(collection_id, item_id, order_history);
+
+            let list_exists = <HistorySaleOrderList<T>>::contains_key(collection_id, item_id);
+            if list_exists {
+                let mut list = <HistorySaleOrderList<T>>::get(collection_id, item_id);
+                list.push(order_history);
+                <HistorySaleOrderList<T>>::insert(collection_id, item_id, list);
+            } else {
+                let mut list = Vec::new();
+                list.push(order_history);
+                <HistorySaleOrderList<T>>::insert(collection_id, item_id, list);
+            }
 
             <SaleOrderList<T>>::remove(collection_id, item_id);
 

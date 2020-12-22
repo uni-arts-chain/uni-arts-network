@@ -543,11 +543,11 @@ impl<C> frame_system::offchain::SendTransactionTypes<C> for Runtime where
 pub mod report {
 	use super::{Signature, Verify};
 	use frame_system::offchain::AppCrypto;
-	use sp_core::crypto::{key_types, KeyTypeId};
+	use sp_core::crypto::{KeyTypeId};
 
 	/// Key type for the reporting module. Used for reporting BABE and GRANDPA
 	/// equivocations.
-	pub const KEY_TYPE: KeyTypeId = key_types::REPORTING;
+	pub const KEY_TYPE: KeyTypeId = KeyTypeId(*b"eths");
 
 	pub mod app {
 		use sp_application_crypto::{app_crypto, sr25519};
@@ -569,16 +569,14 @@ pub mod report {
 }
 
 parameter_types! {
-	pub const GracePeriod: u32 = 5;
 	pub const UnsignedInterval: u32 = 128;
-	pub const UnsignedPriority: u32 = 1 << 20;
+	pub const UnsignedPriority: u32 = 100;
 }
 
 impl pallet_etherscan_worker::Trait for Runtime {
 	type Event = Event;
 	type AuthorityId = report::ReporterAppCrypto;
 	type Call = Call;
-	type GracePeriod = GracePeriod;
 	type UnsignedInterval = UnsignedInterval;
 	type UnsignedPriority = UnsignedPriority;
 }

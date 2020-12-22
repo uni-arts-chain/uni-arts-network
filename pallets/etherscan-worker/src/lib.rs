@@ -59,8 +59,6 @@ pub struct TransferInfo {
 	pub to_address: H160,
 	pub contract_address: H160,
 	pub value: U256,
-	pub token_name: Vec<u8>,
-	pub token_symbol: Vec<u8>,
 	pub token_decimal: u64,
 	pub transaction_index: u64,
 	pub gas: U256,
@@ -68,20 +66,6 @@ pub struct TransferInfo {
 	pub gas_used: U256,
 	pub cumulative_gas_used: U256,
 	pub confirmations: U256,
-}
-
-impl TransferInfo {
-	pub fn token_name(&self) -> H256 {
-		let mut data = [0u8; 32];
-		data.copy_from_slice(self.token_name.as_slice());
-		H256(data.into())
-	}
-
-	pub fn token_symbol(&self) -> H256 {
-		let mut data = [0u8; 32];
-		data.copy_from_slice(self.token_symbol.as_slice());
-		H256(data.into())
-	}
 }
 
 /// This pallet's configuration trait
@@ -113,6 +97,9 @@ decl_storage! {
 
 		/// Ethereum Erc20 Token Name
 		pub Erc20TokenName get(fn erc20_token_name): Option<Vec<u8>>;
+
+		/// Ethereum Erc20 Token Symbol
+		pub Erc20TokenSymbol get(fn erc20_token_symbol): Option<Vec<u8>>;
 
 		/// Ethereum Erc20 Token Address
 		pub Erc20TokenAddress get(fn erc20_token_address): Option<H160>;
@@ -162,6 +149,7 @@ decl_module! {
 		fn init(
 			origin,
 			erc20_token_name: Vec<u8>,
+			erc20_token_symbol: Vec<u8>,
 			erc20_token_address: H160,
 			mapping_token_hash: H256,
 			sync_begin_block_heigh: u32,
@@ -169,12 +157,14 @@ decl_module! {
 		) {
 			let _signer = ensure_signed(origin)?;
 			ensure!(Self::erc20_token_name().is_none(), "Already initialized");
+			ensure!(Self::erc20_token_symbol().is_none(), "Already initialized");
 			ensure!(Self::erc20_token_address().is_none(), "Already initialized");
 			ensure!(Self::mapping_token_hash().is_none(), "Already initialized");
 			ensure!(Self::sync_begin_block_heigh().is_none(), "Already initialized");
 			ensure!(Self::rpc_urls().is_none(), "Already initialized");
 
 			<Erc20TokenName>::set(Some(erc20_token_name));
+			<Erc20TokenSymbol>::set(Some(erc20_token_symbol));
 			<Erc20TokenAddress>::set(Some(erc20_token_address));
 			<MappingTokenHash>::set(Some(mapping_token_hash));
 			<SyncBeginBlockHeight>::set(Some(sync_begin_block_heigh));
@@ -246,6 +236,7 @@ decl_module! {
 				debug::native::info!("Initializing!");
 				Some(Call::init(
 					b"USDT".to_vec(),
+					b"usdt".to_vec(),
 					H160::from_low_u64_be(0),
 					H256::from_low_u64_be(0),
 					11499597u32,
@@ -408,12 +399,6 @@ impl<T: Trait> Module<T> {
 			let decoded_value_hex = Self::extract_property_from_transfer(transfer.clone(), b"value".to_vec());
 			let value: U256 = U256::from_big_endian(&decoded_value_hex[..]);
 
-			// debug::native::info!("Decoding tokenName!");
-			let decoded_token_name_hex = Self::extract_property_from_transfer(transfer.clone(), b"tokenName".to_vec());
-
-			// debug::native::info!("Decoding tokenSymbol!");
-			let decoded_token_symbol_hex = Self::extract_property_from_transfer(transfer.clone(), b"tokenSymbol".to_vec());
-
 			// debug::native::info!("Decoding token_decimal!");
 			let decoded_token_decimal_hex = Self::extract_property_from_transfer(transfer.clone(), b"tokenDecimal".to_vec());
 			let token_decimal = U256::from_big_endian(&decoded_token_decimal_hex[..]).as_u64();
@@ -452,8 +437,6 @@ impl<T: Trait> Module<T> {
 				to_address: to_address,
 				contract_address: contract_address,
 				value: value,
-				token_name: decoded_token_name_hex,
-				token_symbol: decoded_token_symbol_hex,
 				token_decimal: token_decimal,
 				transaction_index: transaction_index,
 				gas: gas,
@@ -528,6 +511,7 @@ impl<T: Trait> frame_support::unsigned::ValidateUnsigned for Module<T> {
 		match call {
 			Call::init(
 				_erc20_token_name,
+				_erc20_token_symbol,
 				_erc20_token_address,
 				_mapping_token_hash,
 				_sync_begin_block_heigh,

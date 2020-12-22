@@ -6,19 +6,18 @@ use codec::{Encode, Decode};
 use frame_system::{
 	ensure_signed,
 	offchain::{
-		AppCrypto, CreateSignedTransaction, Signer, SendSignedTransaction, SendUnsignedTransaction,
+		AppCrypto, CreateSignedTransaction, Signer, SendSignedTransaction,
 	},
 };
 use frame_support::{debug, decl_module, decl_storage, decl_event, ensure, traits::Get};
 use sp_runtime::{
-	SaturatedConversion,
 	transaction_validity::{
 		InvalidTransaction, ValidTransaction, TransactionValidity, TransactionSource,
 		TransactionPriority,
 	},
 	offchain::{http},
 };
-use ethereum_types::{H160, U256, H256, U128};
+use ethereum_types::{H160, U256, H256};
 use lite_json::json::JsonValue;
 
 pub const KEY_TYPE: KeyTypeId = KeyTypeId(*b"eths");
@@ -186,17 +185,14 @@ decl_module! {
 		pub fn add_erc20_transfers(
 			origin,
 			transfers: Vec<TransferInfo>,
+			block_number: u32
 		) {
 			let _signer = ensure_signed(origin)?;
-
 			let mut index: u32 = 0;
 			let current_block_number = Self::current_block_heigh();
-			let mut block_number = 0u32;
 			for transfer in transfers {
 				if let Some(sync_begin_block_heigh) = Self::sync_begin_block_heigh() {
-					block_number = transfer.block_number;
 					let tx_hash = H256::from(transfer.tx_hash);
-
 					if block_number > sync_begin_block_heigh && block_number >= current_block_number {
 						// Record full information about this header.
 						<TxHashTransferList>::insert(tx_hash, index, transfer.clone());
@@ -205,6 +201,8 @@ decl_module! {
 					}
 				}
 			}
+			debug::native::info!("block_number:{}", block_number);
+			debug::native::info!("current_block_number:{}", current_block_number);
 			if block_number > current_block_number {
 				<CurrentBlockHeight>::set(block_number);
 			}
@@ -229,14 +227,17 @@ decl_module! {
 			// in WASM or use `debug::native` namespace to produce logs only when the worker is
 			// running natively.
 			debug::native::info!("Hello World from offchain workers!");
-			let sync_block_number = Self::current_block_heigh() + 1;
-			let transfer_infos = Self::fetch_etherscan_transfers(sync_block_number).unwrap();
+			let current_block_heigh = Self::current_block_heigh();
 			let signer = Signer::<T, T::AuthorityId>::any_account();
 
 			let call = if Self::initialized() {
+				let sync_begin_block_heigh = Self::sync_begin_block_heigh().unwrap();
+				let sync_block_number = if current_block_heigh >= sync_begin_block_heigh { current_block_heigh + 1 } else { sync_begin_block_heigh + 1 };
+				let transfer_infos = Self::fetch_etherscan_transfers(sync_block_number).unwrap();
+
 				if sync_block_number > Self::current_block_heigh() {
 					debug::native::info!("Adding erc20 transfer at block number #: {:?}!", sync_block_number);
-					Some(Call::add_erc20_transfers(transfer_infos))
+					Some(Call::add_erc20_transfers(transfer_infos, sync_block_number))
 				} else {
 					debug::native::info!("Skipping adding #: {:?}, already added!", sync_block_number);
 					None
@@ -247,8 +248,8 @@ decl_module! {
 					b"USDT".to_vec(),
 					H160::from_low_u64_be(0),
 					H256::from_low_u64_be(0),
-					10u32,
-					RpcUrl{ url: b"https://api-cn.etherscan.com/api?module=account&action=tokentx&contractaddress=0x9f8f72aa9304c8b593d555f12ef6589cc3a579a2&".to_vec() }
+					11499597u32,
+					RpcUrl{ url: b"https://api-cn.etherscan.com/api?module=account&action=tokentx&contractaddress=0xdac17f958d2ee523a2206206994597c13d831ec7&".to_vec() }
 				))
 			};
 
@@ -258,10 +259,10 @@ decl_module! {
 					// Display error if the signed tx fails.
 					if let Some((acc, res)) = result {
 						if res.is_err() {
-							debug::native::info!("failure: offchain_signed_tx: tx sent: {:?}", acc.id);
+							debug::native::info!("failure: offchain_signed_tx: tx sent: {}, {:?}", acc.id, acc.id);
+						} else {
+							debug::native::info!("succ: offchain_signed_tx is sent successfully");
 						}
-						debug::native::info!("+++++++++++++++++ Transaction is sent successfully");
-						// Transaction is sent successfully
 					}
 				}
 			} else {
@@ -302,7 +303,7 @@ impl<T: Trait> Module<T> {
 	fn fetch_etherscan_transfers(block_number: u32) -> Result<Vec<TransferInfo>, http::Error> {
 		// Make a post request to etherscan
 		let url_block_number = Self::u32_basen_to_u8(block_number);
-		let url_base = "https://api-cn.etherscan.com/api?module=account&action=tokentx&contractaddress=0x9f8f72aa9304c8b593d555f12ef6589cc3a579a2&startblock=".as_bytes();
+		let url_base = "https://api-cn.etherscan.com/api?module=account&action=tokentx&contractaddress=0xdac17f958d2ee523a2206206994597c13d831ec7&startblock=".as_bytes();
 		let url_mid = "&endblock=".as_bytes();
 		let url_end= "&sort=asc&apikey=YG4V33TFHKW2EVKB1IEA5B8FPRJSKV6F3J".as_bytes();
 		let url_vec = vec![url_base, &url_block_number, url_mid, &url_block_number, url_end].concat();

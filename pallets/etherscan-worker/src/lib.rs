@@ -11,6 +11,7 @@ use frame_system::{
 };
 use frame_support::{debug, decl_module, decl_storage, decl_event, ensure, traits::Get};
 use sp_runtime::{
+	SaturatedConversion,
 	transaction_validity::{
 		InvalidTransaction, ValidTransaction, TransactionValidity, TransactionSource,
 		TransactionPriority,
@@ -20,7 +21,7 @@ use sp_runtime::{
 use ethereum_types::{H160, U256, H256, U128};
 use lite_json::json::JsonValue;
 
-pub const KEY_TYPE: KeyTypeId = KeyTypeId(*b"eth!");
+pub const KEY_TYPE: KeyTypeId = KeyTypeId(*b"eths");
 
 // Based on the above `KeyTypeId` we need to generate a pallet-specific crypto type wrappers.
 /// We can use from supported crypto kinds (`sr25519`, `ed25519` and `ecdsa`) and augment
@@ -95,14 +96,6 @@ pub trait Trait: CreateSignedTransaction<Call<Self>> {
 	type Call: From<Call<Self>>;
 
 	// Configuration parameters
-
-	/// A grace period after we send transaction.
-	///
-	/// To avoid sending too many transactions, we only attempt to send one
-	/// every `GRACE_PERIOD` blocks. We use Local Storage to coordinate
-	/// sending between distinct runs of this offchain worker.
-	type GracePeriod: Get<Self::BlockNumber>;
-
 	/// Number of blocks of cooldown after unsigned transaction is included.
 	///
 	/// This ensures that we only accept unsigned transactions once, every `UnsignedInterval` blocks.
@@ -266,7 +259,6 @@ decl_module! {
 					if let Some((acc, res)) = result {
 						if res.is_err() {
 							debug::native::info!("failure: offchain_signed_tx: tx sent: {:?}", acc.id);
-							debug::error!("failure: offchain_signed_tx: tx sent: {:?}", acc.id);
 						}
 						debug::native::info!("+++++++++++++++++ Transaction is sent successfully");
 						// Transaction is sent successfully

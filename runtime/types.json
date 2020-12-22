@@ -29,6 +29,24 @@
     "tickets": "BTreeMap<u32, AccountId>",
     "result": "Option<LottoResult<AccountId, Balance>>"
   },
+  "TransferInfo": {
+    "block_number": "u32",
+    "time_stamp": "U256",
+    "tx_hash": "H256",
+    "nonce": "u64",
+    "block_hash": "H256",
+    "from_address": "H160",
+    "to_address": "H160",
+    "contract_address": "H160",
+    "value": "U256",
+    "token_decimal": "u64",
+    "transaction_index": "u64",
+    "gas": "U256",
+    "gas_price": "U256",
+    "gas_used": "U256",
+    "cumulative_gas_used": "U256",
+    "confirmations": "U256"
+  },
   "NameData": {
     "value": "Value",
     "owner": "AccountId",

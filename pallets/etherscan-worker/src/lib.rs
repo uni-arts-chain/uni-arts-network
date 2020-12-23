@@ -257,7 +257,7 @@ decl_module! {
 					}
 				}
 			} else {
-				debug::native::info!("[etherscan-offchainwork] use `author_insertKey` rpc to insert key to enable worker");
+				debug::native::info!("[etherscan-offchainwork] use `author_insertKey` rpc to insert key [eths] to enable worker");
 			}
 
 			// Since off-chain workers are just part of the runtime code, they have direct access

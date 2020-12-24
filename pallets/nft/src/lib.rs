@@ -34,6 +34,8 @@ use sp_runtime::{
     FixedPointOperand, FixedU128,
 };
 use sp_std::prelude::*;
+use sp_core::H160;
+use sha3::{Digest, Keccak256};
 
 mod default_weight;
 
@@ -144,6 +146,7 @@ pub struct NftItemType<AccountId> {
     pub collection: u64,
     pub owner: AccountId,
     pub data: Vec<u8>,
+    pub item_hash: H160,
 }
 
 #[derive(Encode, Decode, Default, Clone, PartialEq)]
@@ -232,6 +235,9 @@ decl_storage! {
         ChainVersion: u64;
         ItemListIndex: map hasher(blake2_128_concat) u64 => u64;
 
+        /// Item Certificate number index
+        pub ItemHashIndex get(fn item_hash_index): u64;
+
         pub Collection get(fn collection): map hasher(identity) u64 => CollectionType<T::AccountId>;
         pub AdminList get(fn admin_list_collection): map hasher(identity) u64 => Vec<T::AccountId>;
         pub WhiteList get(fn white_list): map hasher(identity) u64 => Vec<T::AccountId>;
@@ -291,6 +297,7 @@ decl_module! {
             {
                 let value = NextCollectionID::get();
                 CreatedCollectionCount::put(value);
+                ItemHashIndex::put(value);
                 ChainVersion::put(2);
             }
 
@@ -569,11 +576,21 @@ decl_module! {
                     // check size
                     ensure!(target_collection.custom_data_size >= properties.len() as u32, "Size of item is too large");
 
+                    // Generate next hash index ID
+                    let hash_index_id = ItemHashIndex::get()
+                        .checked_add(1)
+                        .expect("hash index id error");
+
+                    ItemHashIndex::put(hash_index_id);
+                    let hasher = Keccak256::digest(&hash_index_id.to_be_bytes());
+                    let item_hash: H160 = H160::from_slice(&hasher.as_slice()[0 .. 20]);
+
                     // Create nft item
                     let item = NftItemType {
                         collection: collection_id,
                         owner: owner,
                         data: properties.clone(),
+                        item_hash: item_hash.clone(),
                     };
 
                     Self::add_nft_item(item)?;

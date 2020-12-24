@@ -3831,6 +3831,7 @@ dependencies = [
  "pallet-transaction-payment",
  "parity-scale-codec",
  "serde",
+ "sha3 0.8.2",
  "sp-core",
  "sp-io",
  "sp-runtime",

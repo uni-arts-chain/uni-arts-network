@@ -126,7 +126,8 @@
   "NftItemType": {
     "Collection": "u64",
     "Owner": "AccountId",
-    "Data": "Vec<u8>"
+    "Data": "Vec<u8>",
+    "item_hash": "H160"
   },
   "FungibleItemType": {
     "Collection": "u64",

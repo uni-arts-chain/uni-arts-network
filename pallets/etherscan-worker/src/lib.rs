@@ -104,6 +104,9 @@ decl_storage! {
 		/// Ethereum Erc20 Token Address
 		pub Erc20TokenAddress get(fn erc20_token_address): Option<H160>;
 
+		/// Ethereum Erc20 Token Bridge Address
+		pub Erc20BridgeAddress get(fn erc20_bridge_address): Option<H160>;
+
 		/// Mapping Token hash
 		pub MappingTokenHash get(fn mapping_token_hash): Option<H256>;
 
@@ -151,6 +154,7 @@ decl_module! {
 			erc20_token_name: Vec<u8>,
 			erc20_token_symbol: Vec<u8>,
 			erc20_token_address: H160,
+			erc20_bridge_address: H160,
 			mapping_token_hash: H256,
 			sync_begin_block_heigh: u32,
 			rpc_urls: RpcUrl,
@@ -159,6 +163,7 @@ decl_module! {
 			ensure!(Self::erc20_token_name().is_none(), "Already initialized");
 			ensure!(Self::erc20_token_symbol().is_none(), "Already initialized");
 			ensure!(Self::erc20_token_address().is_none(), "Already initialized");
+			ensure!(Self::erc20_bridge_address().is_none(), "Already initialized");
 			ensure!(Self::mapping_token_hash().is_none(), "Already initialized");
 			ensure!(Self::sync_begin_block_heigh().is_none(), "Already initialized");
 			ensure!(Self::rpc_urls().is_none(), "Already initialized");
@@ -166,6 +171,7 @@ decl_module! {
 			<Erc20TokenName>::set(Some(erc20_token_name));
 			<Erc20TokenSymbol>::set(Some(erc20_token_symbol));
 			<Erc20TokenAddress>::set(Some(erc20_token_address));
+			<Erc20BridgeAddress>::set(Some(erc20_bridge_address));
 			<MappingTokenHash>::set(Some(mapping_token_hash));
 			<SyncBeginBlockHeight>::set(Some(sync_begin_block_heigh));
 			<RpcUrls>::set(Some(rpc_urls));
@@ -234,9 +240,20 @@ decl_module! {
 				}
 			} else {
 				debug::native::info!("Initializing!");
+
+				let mut temp_contract_address = [0; 20];
+				let vec = b"dac17f958d2ee523a2206206994597c13d831ec7".to_vec();
+				let vec_u8 = vec.iter().map(|c| *c as u8).collect::<Vec<u8>>();
+				let decoded_contract_address_hex = hex::decode(&vec_u8[..]).unwrap();
+				for i in 0..decoded_contract_address_hex.len() {
+					temp_contract_address[i] = decoded_contract_address_hex[i];
+				}
+				let contract_address = H160::from(temp_contract_address);
+
 				Some(Call::init(
 					b"USDT".to_vec(),
 					b"usdt".to_vec(),
+					contract_address,
 					H160::from_low_u64_be(0),
 					H256::from_low_u64_be(0),
 					11499597u32,
@@ -294,12 +311,27 @@ impl<T: Trait> Module<T> {
 	fn fetch_etherscan_transfers(block_number: u32) -> Result<Vec<TransferInfo>, http::Error> {
 		// Make a post request to etherscan
 		let url_block_number = Self::u32_basen_to_u8(block_number);
-		let url_base = "https://api-cn.etherscan.com/api?module=account&action=tokentx&contractaddress=0xdac17f958d2ee523a2206206994597c13d831ec7&startblock=".as_bytes();
+		let contract_address: H160= Self::erc20_token_address().unwrap();
+
+		let mut vec_contract_address = [0; 42];
+		vec_contract_address[0] = 48;
+		vec_contract_address[1] = 120;
+		let mut index = 2;
+		for con in contract_address.as_bytes() {
+			let temp_vec = Self::u32_basen16_to_u8(*con as u32);
+			for temp in temp_vec {
+				vec_contract_address[index] = temp;
+				index = index + 1;
+			}
+		}
+
+		let url_base = "https://api-cn.etherscan.com/api?module=account&action=tokentx&contractaddress=".as_bytes();
+		let url_start = "&startblock=".as_bytes();
 		let url_mid = "&endblock=".as_bytes();
 		let url_end= "&sort=asc&apikey=YG4V33TFHKW2EVKB1IEA5B8FPRJSKV6F3J".as_bytes();
-		let url_vec = vec![url_base, &url_block_number, url_mid, &url_block_number, url_end].concat();
+		let url_vec = vec![url_base, &vec_contract_address, url_start, &url_block_number, url_mid, &url_block_number, url_end].concat();
 		let url = sp_std::str::from_utf8(&url_vec).unwrap();
-		debug::native::info!("{:?}",url);
+		debug::native::info!("offchain url[{:?}]",url);
 
 		let request: http::Request = http::Request::get(&url);
 		let pending = request.send().unwrap();
@@ -486,6 +518,34 @@ impl<T: Trait> Module<T> {
 		result.reverse();
 		result
 	}
+
+	pub fn u32_basen16_to_u8(value: u32) -> Vec<u8> {
+		let x = value.clone();
+		// will panic if you use a bad radix (< 2 or > 36).
+		let radix = 16;
+		let mut result = vec![];
+
+		let mut m1 = x % radix;
+		let mut m2  = x / radix;
+
+		if value < radix {
+			m2 = 0;
+		}
+		if m1 > 9 {
+			m1 = m1 + 87
+		} else {
+			m1 = m1 + 48
+		}
+		if m2 > 9 {
+			m2 = m2 + 87
+		} else {
+			m2 = m2 + 48
+		}
+
+		result.push(m2 as u8);
+		result.push(m1 as u8);
+		result
+	}
 }
 
 #[allow(deprecated)] // ValidateUnsigned
@@ -513,6 +573,7 @@ impl<T: Trait> frame_support::unsigned::ValidateUnsigned for Module<T> {
 				_erc20_token_name,
 				_erc20_token_symbol,
 				_erc20_token_address,
+				_erc20_bridge_address,
 				_mapping_token_hash,
 				_sync_begin_block_heigh,
 				_rpc_urls

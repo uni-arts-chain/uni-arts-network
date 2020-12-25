@@ -142,6 +142,14 @@
     "price": "u64",
     "buy_time": "BlockNumber"
   },
+  "SignatureAuthentication": {
+    "collection": "u64",
+    "item": "u64",
+    "names": "Name",
+    "names_owner": "AccountId",
+    "sign_time": "BlockNumber",
+    "expiration": "Option<BlockNumber>"
+  },
   "Ownership": {
     "owner": "AccountId",
     "fraction": "u128"

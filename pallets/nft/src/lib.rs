@@ -4,7 +4,7 @@
 /// https://github.com/paritytech/substrate/blob/master/frame/example/src/lib.rs
 use codec::{Decode, Encode};
 pub use frame_support::{
-    construct_runtime, decl_event, decl_module, decl_storage,
+    construct_runtime, decl_event, decl_module, decl_storage, decl_error,
     dispatch::DispatchResult,
     ensure, parameter_types, Parameter,
     traits::{
@@ -68,6 +68,7 @@ pub trait WeightInfo {
     fn create_sale_order() -> Weight;
     fn cancel_sale_order() -> Weight;
     fn accept_sale_order() -> Weight;
+    fn add_signature() -> Weight;
 }
 
 #[derive(Encode, Decode, Debug, Eq, Clone, PartialEq)]
@@ -167,6 +168,17 @@ pub struct ReFungibleItemType<AccountId> {
 
 #[derive(Encode, Decode, Default, Clone, PartialEq)]
 #[cfg_attr(feature = "std", derive(Debug))]
+pub struct SignatureAuthentication<AccountId, BlockNumber, Name> {
+    pub collection: u64,
+    pub item: u64,
+    pub names: Name,
+    pub names_owner: AccountId,
+    pub sign_time: BlockNumber,
+    pub expiration: Option<BlockNumber>,
+}
+
+#[derive(Encode, Decode, Default, Clone, PartialEq)]
+#[cfg_attr(feature = "std", derive(Debug))]
 pub struct ApprovePermissions<AccountId> {
     pub approved: AccountId,
     pub amount: u64,
@@ -212,8 +224,9 @@ pub enum TransferFromAccountError {
 
 pub type CurrencyBalanceOf<T> = <<T as Trait>::Currency as Currency<<T as frame_system::Trait>::AccountId>>::Balance;
 pub type AccountId<T> = <T as frame_system::Trait>::AccountId;
+// pub type Name<T> = <T as frame_system::Trait>::Name;
 
-pub trait Trait: system::Trait {
+pub trait Trait: system::Trait + pallet_names::Trait {
     /// The NFT's module id, used for deriving its sovereign account ID.
     type ModuleId: Get<ModuleId>;
 
@@ -265,6 +278,9 @@ decl_storage! {
 
         /// Sales history
         pub HistorySaleOrderList get(fn nft_trade_history_id): double_map hasher(blake2_128_concat) u64, hasher(blake2_128_concat) u64 => Vec<SaleOrderHistory<T::AccountId, T::BlockNumber>>;
+
+        /// Signature history
+        pub SignatureList get(fn nft_signature_list): double_map hasher(blake2_128_concat) u64, hasher(blake2_128_concat) u64 => Vec<SignatureAuthentication<T::AccountId, T::BlockNumber, T::Name>>;
     }
 }
 
@@ -280,11 +296,21 @@ decl_event!(
         ItemOrderCreated(u64, u64, u64, u64, AccountId),
         ItemOrderCancel(u64, u64),
         ItemOrderSucceed(u64, u64, AccountId),
+        ItemAddSignature(u64, u64, AccountId),
     }
 );
 
+decl_error! {
+	pub enum Error for Module<T: Trait> {
+		NamesNotExists,
+		NamesOwnerInvalid,
+	}
+}
+
 decl_module! {
     pub struct Module<T: Trait> for enum Call where origin: T::Origin {
+        // Errors must be initialized if they are used by the pallet.
+		type Error = Error<T>;
 
         /// The NFT's module id, used for deriving its sovereign account ID.
 		const ModuleId: ModuleId = T::ModuleId::get();
@@ -876,14 +902,14 @@ decl_module! {
 
             // Moves funds from buyer account into the owner's account
             // We don't use T::Currency::transfer() to prevent fees being incurred.
-            let negative_imbalance = T::Currency::withdraw(
+            let negative_imbalance = <T as Trait>::Currency::withdraw(
                 &sender,
                 balance_price,
                 WithdrawReasons::all(),
                 ExistenceRequirement::AllowDeath,
-            ).unwrap();
+            )?;
 
-            T::Currency::resolve_creating(&nft_owner, negative_imbalance);
+            <T as Trait>::Currency::resolve_creating(&nft_owner, negative_imbalance);
 
             // Moves nft from locker account into the buyer's account
             match target_collection.mode
@@ -920,6 +946,39 @@ decl_module! {
 
             // call event
             Self::deposit_event(RawEvent::ItemOrderSucceed(collection_id, item_id, sender));
+            Ok(())
+        }
+
+        #[weight = T::WeightInfo::add_signature()]
+        pub fn add_signature(origin, collection_id: u64, item_id: u64, name: T::Name, expiration: u64) -> DispatchResult {
+            let sender = ensure_signed(origin)?;
+            let names = pallet_names::Module::<T>::lookup(name.clone());
+            let now_time = <system::Module<T>>::block_number();
+            ensure!(names.is_none(), Error::<T>::NamesNotExists);
+            if let Some(names_info) = names {
+                ensure!(names_info.owner == sender, Error::<T>::NamesOwnerInvalid);
+
+                let signature = SignatureAuthentication {
+                    collection: collection_id,
+                    item: item_id,
+                    names: name,
+                    names_owner: names_info.owner,
+                    sign_time: now_time,
+                    expiration: None,
+                };
+
+                let signature_exists = <SignatureList<T>>::contains_key(collection_id, item_id);
+                if signature_exists {
+                    let mut list = <SignatureList<T>>::get(collection_id, item_id);
+                    list.push(signature);
+                    <SignatureList<T>>::insert(collection_id, item_id, list);
+                } else {
+                    let mut list = Vec::new();
+                    list.push(signature);
+                    <SignatureList<T>>::insert(collection_id, item_id, list);
+                }
+
+            }
             Ok(())
         }
 

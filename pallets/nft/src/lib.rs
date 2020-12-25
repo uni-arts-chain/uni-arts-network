@@ -68,6 +68,7 @@ pub trait WeightInfo {
     fn create_sale_order() -> Weight;
     fn cancel_sale_order() -> Weight;
     fn accept_sale_order() -> Weight;
+    fn add_signature() -> Weight;
 }
 
 #[derive(Encode, Decode, Debug, Eq, Clone, PartialEq)]
@@ -163,6 +164,17 @@ pub struct ReFungibleItemType<AccountId> {
     pub collection: u64,
     pub owner: Vec<Ownership<AccountId>>,
     pub data: Vec<u8>,
+}
+
+#[derive(Encode, Decode, Default, Clone, PartialEq)]
+#[cfg_attr(feature = "std", derive(Debug))]
+pub struct SignatureAuthentication<AccountId, BlockNumber> {
+    pub collection: u64,
+    pub item: u64,
+    pub names: Vec<u8>,
+    pub names_owner: AccountId,
+    pub sign_time: BlockNumber,
+    pub expiration: Option<BlockNumber>,
 }
 
 #[derive(Encode, Decode, Default, Clone, PartialEq)]
@@ -280,6 +292,7 @@ decl_event!(
         ItemOrderCreated(u64, u64, u64, u64, AccountId),
         ItemOrderCancel(u64, u64),
         ItemOrderSucceed(u64, u64, AccountId),
+        ItemAddSignature(u64, u64, AccountId),
     }
 );
 
@@ -920,6 +933,12 @@ decl_module! {
 
             // call event
             Self::deposit_event(RawEvent::ItemOrderSucceed(collection_id, item_id, sender));
+            Ok(())
+        }
+
+        #[weight = T::WeightInfo::add_signature()]
+        pub fn add_signature(origin, collection_id: u64, item_id: u64, name: Vec<u8>, expiration: u64) -> DispatchResult {
+            // let sender = ensure_signed(origin)?;
             Ok(())
         }
 

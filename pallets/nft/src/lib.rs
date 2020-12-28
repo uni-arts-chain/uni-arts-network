@@ -982,6 +982,7 @@ decl_module! {
                 }
 
             }
+            Self::deposit_event(RawEvent::ItemAddSignature(collection_id, item_id, sender));
             Ok(())
         }
 

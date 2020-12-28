@@ -174,6 +174,7 @@ pub struct SignatureAuthentication<AccountId, BlockNumber, Name> {
     pub names: Name,
     pub names_owner: AccountId,
     pub sign_time: BlockNumber,
+    pub memo: Vec<u8>,
     pub expiration: Option<BlockNumber>,
 }
 
@@ -950,11 +951,12 @@ decl_module! {
         }
 
         #[weight = T::WeightInfo::add_signature()]
-        pub fn add_signature(origin, collection_id: u64, item_id: u64, name: T::Name, expiration: u64) -> DispatchResult {
+        pub fn add_signature(origin, collection_id: u64, item_id: u64, name: T::Name, memo: Vec<u8>, expiration: Option<T::BlockNumber>) -> DispatchResult {
             let sender = ensure_signed(origin)?;
             let names = pallet_names::Module::<T>::lookup(name.clone());
             let now_time = <system::Module<T>>::block_number();
             ensure!(!names.is_none(), Error::<T>::NamesNotExists);
+
             if let Some(names_info) = names {
                 ensure!(names_info.owner == sender, Error::<T>::NamesOwnerInvalid);
 
@@ -964,7 +966,8 @@ decl_module! {
                     names: name,
                     names_owner: names_info.owner,
                     sign_time: now_time,
-                    expiration: None,
+                    memo: memo,
+                    expiration: expiration,
                 };
 
                 let signature_exists = <SignatureList<T>>::contains_key(collection_id, item_id);

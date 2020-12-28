@@ -954,7 +954,7 @@ decl_module! {
             let sender = ensure_signed(origin)?;
             let names = pallet_names::Module::<T>::lookup(name.clone());
             let now_time = <system::Module<T>>::block_number();
-            ensure!(names.is_none(), Error::<T>::NamesNotExists);
+            ensure!(!names.is_none(), Error::<T>::NamesNotExists);
             if let Some(names_info) = names {
                 ensure!(names_info.owner == sender, Error::<T>::NamesOwnerInvalid);
 

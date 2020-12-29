@@ -1,5 +1,5 @@
 #![cfg_attr(not(feature = "std"), no_std)]
-
+#![recursion_limit="256"]
 /// For more guidance on Substrate FRAME, see the example pallet
 /// https://github.com/paritytech/substrate/blob/master/frame/example/src/lib.rs
 use codec::{Decode, Encode};
@@ -8,7 +8,7 @@ pub use frame_support::{
     dispatch::DispatchResult,
     ensure, parameter_types, Parameter,
     traits::{
-        Currency, ExistenceRequirement, Get, Imbalance, KeyOwnerProofSystem, OnUnbalanced,
+        Currency, LockableCurrency, ExistenceRequirement, Get, Imbalance, KeyOwnerProofSystem, OnUnbalanced,
         Randomness, WithdrawReason, WithdrawReasons
     },
     weights::{
@@ -34,15 +34,14 @@ use sp_runtime::{
     FixedPointOperand, FixedU128,
 };
 use sp_std::prelude::*;
-use core::convert::TryInto;
 
 mod default_weight;
 
-#[cfg(test)]
-mod mock;
+// #[cfg(test)]
+// mod mock;
 
-#[cfg(test)]
-mod tests;
+// #[cfg(test)]
+// mod tests;
 
 pub trait WeightInfo {
     fn create_collection() -> Weight;
@@ -202,6 +201,30 @@ pub struct SaleOrderHistory<AccountId, BlockNumber> {
     pub buy_time: BlockNumber,
 }
 
+#[derive(Encode, Decode, Default, Clone, PartialEq)]
+pub struct Auction<AccountId, BlockNumber> {
+    pub id: u64,
+    pub collection_id: u64,
+    pub item_id: u64,
+    pub value: u64,
+    pub owner: AccountId,
+    pub start_price: u64,
+    pub increment: u64,
+    pub current_price: u64,
+    pub start_time: BlockNumber,
+    pub end_time: BlockNumber,
+}
+
+#[derive(Encode, Decode, Default, Clone, PartialEq)]
+pub struct BidHistory<AccountId, BlockNumber> {
+    pub auction_id: u64,
+    pub bidder: AccountId,
+    pub bid_price: u64,
+    pub bid_time: BlockNumber,
+}
+
+
+
 #[derive(Debug, Eq, PartialEq)]
 pub enum TransferFromAccountError {
     InsufficientBalance,
@@ -210,12 +233,14 @@ pub enum TransferFromAccountError {
 pub type CurrencyBalanceOf<T> = <<T as Trait>::Currency as Currency<<T as frame_system::Trait>::AccountId>>::Balance;
 pub type AccountId<T> = <T as frame_system::Trait>::AccountId;
 
+
 pub trait Trait: system::Trait {
     /// The NFT's module id, used for deriving its sovereign account ID.
     type ModuleId: Get<ModuleId>;
 
     /// The transaction locking balance.
-    type Currency: Currency<AccountId<Self>> + Send + Sync;
+    // type Currency: Currency<AccountId<Self>> + Send + Sync;
+    type Currency: Currency<AccountId<Self>> + LockableCurrency<AccountId<Self>, Moment=Self::BlockNumber> + Send + Sync;
 
     type Event: From<Event<Self>> + Into<<Self as system::Trait>::Event>;
 
@@ -259,6 +284,15 @@ decl_storage! {
 
         /// Sales history
         pub SaleOrderHistoryList get(fn nft_trade_history_id): double_map hasher(blake2_128_concat) u64, hasher(blake2_128_concat) u64 => SaleOrderHistory<T::AccountId, T::BlockNumber>;
+
+        /// Next auction id
+        pub NextAuctionID: u64 = 1;
+
+        /// Auction
+        pub AuctionList get(fn get_auction): double_map hasher(blake2_128_concat) u64, hasher(blake2_128_concat) u64 => Auction<T::AccountId, T::BlockNumber>; 
+
+        /// Bid histories 
+        pub BidHistoryList get(fn bid_history_list): map hasher(identity) u64 => Vec<BidHistory<T::AccountId, T::BlockNumber>>;
     }
 }
 
@@ -271,9 +305,15 @@ decl_event!(
         ItemCreated(u64, u64),
         ItemDestroyed(u64, u64),
         ItemTransfer(u64, u64, u64, AccountId, AccountId),
+
         ItemOrderCreated(u64, u64, u64, u64, AccountId),
         ItemOrderCancel(u64, u64),
         ItemOrderSucceed(u64, u64, AccountId),
+
+        AuctionCreated(u64, u64, u64, u64, AccountId),
+        AuctionBid(u64, u64, u64, u64, AccountId),
+        AuctionSucceed(u64, u64, u64, u64, AccountId),
+        AuctionCancel(u64, u64),
     }
 );
 
@@ -855,7 +895,7 @@ decl_module! {
 
             let target_collection = <Collection<T>>::get(collection_id);
             let locker = Self::nft_account_id();
-            let balance_price = CurrencyBalanceOf::<T>::from(price.try_into().unwrap());
+            let balance_price = CurrencyBalanceOf::<T>::saturated_from(price.into());
 
             // Moves funds from buyer account into the owner's account
             // We don't use T::Currency::transfer() to prevent fees being incurred.
@@ -896,6 +936,187 @@ decl_module! {
             Ok(())
         }
 
+        #[weight = 1000000]
+        pub fn create_auction(origin, collection_id: u64, item_id: u64, value: u64, start_price: u64, increment: u64, start_time: T::BlockNumber, end_time: T::BlockNumber) -> DispatchResult {
+            let sender = ensure_signed(origin)?;
+                
+            let auction = Self::get_auction(collection_id, item_id);
+            ensure!(auction.id == 0, "The collection is on auction");
+
+            let is_owner = Self::is_item_owner(sender.clone(), collection_id, item_id);
+            ensure!(is_owner, "Not Owner");
+
+
+            let target_collection = <Collection<T>>::get(collection_id);
+            let recipient = Self::nft_account_id();
+
+            match target_collection.mode
+            {
+                CollectionMode::NFT(_) => Self::transfer_nft(collection_id, item_id, sender.clone(), recipient)?,
+                CollectionMode::Fungible(_)  => Self::transfer_fungible(collection_id, item_id, value, sender.clone(), recipient)?,
+                CollectionMode::ReFungible(_, _)  => Self::transfer_refungible(collection_id, item_id, value, sender.clone(), recipient)?,
+                _ => ()
+            };
+            
+            // Create auction
+            let auction = Auction {
+                id: NextAuctionID::get(),
+                collection_id: collection_id,
+                item_id: item_id,
+                value: value,
+                owner: sender.clone(),
+                start_price: start_price,
+                current_price: start_price,
+                increment: increment,
+                start_time: start_time,
+                end_time: end_time,
+            };
+
+            <AuctionList<T>>::insert(collection_id, item_id, auction);
+
+            NextAuctionID::mutate(|id| *id += 1);
+            
+            Self::deposit_event(RawEvent::AuctionCreated(collection_id, item_id, value, start_price, sender));
+
+            Ok(())
+        }
+
+        #[weight = 1000000]
+        pub fn bid(origin, collection_id: u64, item_id: u64) -> DispatchResult {
+            let sender = ensure_signed(origin)?;
+            let auction = Self::get_auction(collection_id, item_id);
+            ensure!(auction.id > 0, "The collection is not on auction");
+            let now = <system::Module<T>>::block_number();
+            ensure!(now >= auction.start_time, "Not start");
+            ensure!(now <= auction.end_time, "End");
+
+            let price = auction.current_price.saturating_add(auction.increment);
+
+            let balance_price = CurrencyBalanceOf::<T>::saturated_from(price.into());
+
+
+            let bid_history = BidHistory {
+                auction_id: auction.id,
+                bidder: sender.clone(),
+                bid_price: price,
+                bid_time: now,
+            };
+
+            <BidHistoryList<T>>::mutate(auction.id, |histories| {
+                histories.push(bid_history)
+            });
+
+            let lock_id = Self::auction_lock_id(auction.id);
+            T::Currency::extend_lock(lock_id, &sender, balance_price, WithdrawReasons::all());
+
+            <AuctionList<T>>::mutate(collection_id, item_id, |auction| {
+                auction.current_price = price;
+            });
+
+
+            Self::deposit_event(RawEvent::AuctionBid(collection_id, item_id, auction.value, price, sender));
+
+
+            Ok(())
+        }
+
+        #[weight = 1000000]
+        pub fn finish_auction(origin, collection_id: u64, item_id: u64) -> DispatchResult { 
+            let _ = ensure_signed(origin)?;
+            let auction = Self::get_auction(collection_id, item_id);
+            ensure!(auction.id > 0, "The collection is not on auction");
+
+            let now = <system::Module<T>>::block_number();
+            ensure!(now > auction.end_time, "Auction is not end");
+
+            let histories = Self::bid_history_list(auction.id);
+
+            let target_collection = <Collection<T>>::get(collection_id);
+            let locker = Self::nft_account_id();
+
+            if let Some(winner) =  histories.last() {
+                match target_collection.mode
+                {
+                    CollectionMode::NFT(_) => Self::transfer_nft(collection_id, item_id, locker.clone(), winner.bidder.clone())?,
+                    CollectionMode::Fungible(_)  => Self::transfer_fungible(collection_id, item_id, auction.value, locker.clone(), winner.bidder.clone())?,
+                    CollectionMode::ReFungible(_, _)  => Self::transfer_refungible(collection_id, item_id, auction.value, locker.clone(), winner.bidder.clone())?,
+                    _ => ()
+                };
+
+                let lock_id = Self::auction_lock_id(auction.id);
+                T::Currency::remove_lock(lock_id, &winner.bidder);
+                let balance = CurrencyBalanceOf::<T>::saturated_from(winner.bid_price.into());
+                let negative_imbalance = T::Currency::withdraw(
+                    &winner.bidder,
+                    balance,
+                    WithdrawReasons::all(),
+                    ExistenceRequirement::AllowDeath,
+                )?;
+
+                T::Currency::resolve_creating(&auction.owner, negative_imbalance);
+
+                for i in 0..(histories.len() - 2) {
+                    let h = &histories[i];
+                    T::Currency::remove_lock(lock_id, &h.bidder);
+                }
+
+                // Create order history
+                let order_history = SaleOrderHistory {
+                    collection_id: collection_id,
+                    item_id: item_id,
+                    value: auction.value,
+                    seller: auction.owner.clone(),
+                    buyer: winner.bidder.clone(),
+                    price: winner.bid_price,
+                    buy_time: winner.bid_time,
+                };
+                <SaleOrderHistoryList<T>>::insert(collection_id, item_id, order_history);
+
+                Self::deposit_event(RawEvent::AuctionSucceed(collection_id, item_id, auction.value, winner.bid_price, winner.bidder.clone()));
+
+            } else {
+                // Cancel the auction
+                match target_collection.mode
+                {
+                    CollectionMode::NFT(_) => Self::transfer_nft(collection_id, item_id, locker.clone(), auction.owner.clone())?,
+                    CollectionMode::Fungible(_)  => Self::transfer_fungible(collection_id, item_id, auction.value, locker.clone(), auction.owner.clone())?,
+                    CollectionMode::ReFungible(_, _)  => Self::transfer_refungible(collection_id, item_id, auction.value, locker.clone(), auction.owner.clone())?,
+                    _ => ()
+                };
+
+                Self::deposit_event(RawEvent::AuctionCancel(collection_id, item_id));
+            }
+
+            <AuctionList<T>>::remove(collection_id, item_id);
+
+            Ok(())
+        }
+
+        #[weight = 2000000]
+        pub fn cancel_auction(origin, collection_id: u64, item_id: u64) -> DispatchResult {
+            let sender = ensure_signed(origin)?;
+            let auction = Self::get_auction(collection_id, item_id);
+            ensure!(auction.id > 0, "The collection is not on auction");
+            ensure!(auction.owner == sender, "Not owner");
+            let histories = Self::bid_history_list(auction.id);
+            ensure!(histories.len() == 0, "Already bided");
+
+            let target_collection = <Collection<T>>::get(collection_id);
+            let locker = Self::nft_account_id();
+
+            // Moves nft from locker account into the owner's account
+            match target_collection.mode {
+                CollectionMode::NFT(_) => Self::transfer_nft(collection_id, item_id, locker, sender.clone())?,
+                CollectionMode::Fungible(_)  => Self::transfer_fungible(collection_id, item_id, auction.value, locker, sender.clone())?,
+                CollectionMode::ReFungible(_, _)  => Self::transfer_refungible(collection_id, item_id, auction.value, locker, sender.clone())?,
+                _ => (),
+            };
+
+            <AuctionList<T>>::remove(collection_id, item_id);
+
+            Self::deposit_event(RawEvent::AuctionCancel(collection_id, item_id));
+            Ok(())
+        }
     }
 }
 
@@ -1402,6 +1623,12 @@ impl<T: Trait> Module<T> {
         Self::add_token_index(collection_id, item_index, new_owner)?;
 
         Ok(())
+    }
+
+    fn auction_lock_id(id: u64) -> [u8; 8] {
+        let mut lock_id = id.to_be_bytes();
+        lock_id[0..3].copy_from_slice(&*b"nft");
+        lock_id
     }
 }
 

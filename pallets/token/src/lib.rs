@@ -73,6 +73,7 @@ decl_storage! {
         OwnedTokensIndex get(fn owned_token_index): map hasher(blake2_128_concat) T::AccountId => u64;
 
         Nonce get(fn nonce): u64;
+		AssetTokens get(fn asset_token): map hasher(blake2_128_concat) u64 => T::Hash;
     }
 }
 
@@ -117,6 +118,7 @@ impl<T: Trait> Module<T> {
 
         Nonce::mutate(|n| *n += 1);
         Tokens::<T>::insert(hash.clone(), token);
+        AssetTokens::<T>::insert(nonce, hash.clone());
         Owners::<T>::insert(hash.clone(), sender.clone());
         BalanceOf::<T>::insert((sender.clone(), hash.clone()), total_supply);
         FreeBalanceOf::<T>::insert((sender.clone(), hash.clone()), total_supply);

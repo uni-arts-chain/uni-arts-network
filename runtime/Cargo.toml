@@ -51,6 +51,9 @@ pallet-indices = { version = "2.0.0", default-features = false }
 pallet-recovery = { version = "2.0.0", default-features = false }
 pallet-society = { version = "2.0.0", default-features = false }
 pallet-elections-phragmen = { version = "2.0.0", default-features = false }
+pallet-contracts = { version = "2.0.0", default-features = false }
+pallet-contracts-primitives = { version = "2.0.0", default-features = false }
+pallet-contracts-rpc-runtime-api = { version = "0.8.0", default-features = false }
 
 # Used for RPCs
 frame-system-rpc-runtime-api = { version = "2.0.0", default-features = false }
@@ -104,6 +107,9 @@ std = [
 	"pallet-timestamp/std",
 	"pallet-transaction-payment/std",
   	"pallet-transaction-payment-rpc-runtime-api/std",
+	"pallet-contracts/std",
+	"pallet-contracts-primitives/std",
+	"pallet-contracts-rpc-runtime-api/std",
 	"uniarts-common/std",
 	"pallet-names/std",
 	"pallet-nft/std",

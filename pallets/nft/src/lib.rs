@@ -69,6 +69,10 @@ pub trait WeightInfo {
     fn cancel_sale_order() -> Weight;
     fn accept_sale_order() -> Weight;
     fn add_signature() -> Weight;
+    fn create_auction() -> Weight;
+    fn cancel_auction() -> Weight;
+    fn bid() -> Weight;
+    fn finish_auction() -> Weight;
 }
 
 #[derive(Encode, Decode, Debug, Eq, Clone, PartialEq)]
@@ -1025,7 +1029,7 @@ decl_module! {
             Ok(())
         }
 
-        #[weight = 1000000]
+        #[weight = T::WeightInfo::create_auction()]
         pub fn create_auction(origin, collection_id: u64, item_id: u64, value: u64, start_price: u64, increment: u64, start_time: T::BlockNumber, end_time: T::BlockNumber) -> DispatchResult {
             let sender = ensure_signed(origin)?;
                 
@@ -1070,7 +1074,7 @@ decl_module! {
             Ok(())
         }
 
-        #[weight = 1000000]
+        #[weight = T::WeightInfo::bid()]
         pub fn bid(origin, collection_id: u64, item_id: u64) -> DispatchResult {
             let sender = ensure_signed(origin)?;
             let auction = Self::get_auction(collection_id, item_id);
@@ -1109,7 +1113,7 @@ decl_module! {
             Ok(())
         }
 
-        #[weight = 1000000]
+        #[weight = T::WeightInfo::finish_auction()]
         pub fn finish_auction(origin, collection_id: u64, item_id: u64) -> DispatchResult { 
             let _ = ensure_signed(origin)?;
             let auction = Self::get_auction(collection_id, item_id);
@@ -1183,7 +1187,7 @@ decl_module! {
             Ok(())
         }
 
-        #[weight = 2000000]
+        #[weight = T::WeightInfo::cancel_auction()]
         pub fn cancel_auction(origin, collection_id: u64, item_id: u64) -> DispatchResult {
             let sender = ensure_signed(origin)?;
             let auction = Self::get_auction(collection_id, item_id);

@@ -63,18 +63,25 @@ contract ERC20 is ERC20Basic {
 
 
 contract BridgeSender {
+    address bridgeWalletAddress;
+
     using SafeMath for uint256;
 
-    event Bridgesended(uint256 total, address tokenAddress, string _uarts_address);
+    event Bridgesended(uint256 total, address tokenAddress, string uartsAddress);
+
+    // constructor
+    constructor(address bridge_wallet_address) public {
+        bridgeWalletAddress = bridge_wallet_address;
+    }
 
     function() public payable {}
 
-    function sendToken(address token, address _contributor, uint256 _balance, string _uarts_address) public payable {
+    function sendToken(address token, uint256 _balance, string _uarts_address) public payable {
         if (token == 0x000000000000000000000000000000000000bEEF){
-            sendEther(_contributor, _balance, _uarts_address);
+            sendEther(bridgeWalletAddress, _balance, _uarts_address);
         } else {
             ERC20 erc20token = ERC20(token);
-            erc20token.transferFrom(msg.sender, _contributor, _balance);
+            erc20token.transferFrom(msg.sender, bridgeWalletAddress, _balance);
             Bridgesended(_balance, token, _uarts_address);
         }
     }
@@ -83,5 +90,4 @@ contract BridgeSender {
         _contributor.transfer(_balance);
         Bridgesended(msg.value, 0x000000000000000000000000000000000000bEEF, _uarts_address);
     }
-
 }

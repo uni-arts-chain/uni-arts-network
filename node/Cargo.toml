@@ -54,6 +54,7 @@ frame-benchmarking-cli = { version = "2.0.0" }
 
 uart-runtime = { path = "../runtime" }
 pallet-staking-rpc = { path = "../pallets/staking/rpc" }
+pallet-contracts = { version = "2.0.0" }
 
 [build-dependencies]
 substrate-build-script-utils = { version = "2.0.0" }

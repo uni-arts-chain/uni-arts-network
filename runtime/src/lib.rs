@@ -31,6 +31,7 @@ use sp_core::{u32_trait::{_1, _2, _3, _5}, };
 use pallet_grandpa::{AuthorityId as GrandpaId, AuthorityList as GrandpaAuthorityList};
 use pallet_grandpa::fg_primitives;
 use sp_version::RuntimeVersion;
+use pallet_contracts_rpc_runtime_api::ContractExecResult;
 #[cfg(feature = "std")]
 use sp_version::NativeVersion;
 
@@ -72,6 +73,7 @@ pub use pallet_token;
 pub use pallet_trade;
 pub use uniarts_common::*;
 // pub use pallet_lotteries;
+pub use pallet_contracts::Gas;
 
 /// Opaque types. These are used by the CLI to instantiate machinery that don't need to know
 /// the specifics of the runtime. They can then be made to be agnostic over specific formats
@@ -101,7 +103,7 @@ pub const VERSION: RuntimeVersion = RuntimeVersion {
 	spec_name: create_runtime_str!("uart"),
 	impl_name: create_runtime_str!("uart"),
 	authoring_version: 1,
-	spec_version: 15,
+	spec_version: 19,
 	impl_version: 1,
 	apis: RUNTIME_API_VERSIONS,
 	transaction_version: 1,
@@ -868,6 +870,32 @@ impl pallet_scheduler::Trait for Runtime {
 	type WeightInfo = weights::pallet_scheduler::WeightInfo<Runtime>;
 }
 
+parameter_types! {
+    pub const TombstoneDeposit: Balance = 1 * UART;
+    pub const RentByteFee: Balance = 1 * UART;
+    pub const RentDepositOffset: Balance = 1000 * UART;
+    pub const SurchargeReward: Balance = 150 * UART;
+}
+
+impl pallet_contracts::Trait for Runtime {
+	type Time = Timestamp;
+	type Randomness = RandomnessCollectiveFlip;
+	type Currency = Uart;
+	type Event = Event;
+	type DetermineContractAddress = pallet_contracts::SimpleAddressDeterminer<Runtime>;
+	type TrieIdGenerator = pallet_contracts::TrieIdFromParentCounter<Runtime>;
+	type RentPayment = ();
+	type SignedClaimHandicap = pallet_contracts::DefaultSignedClaimHandicap;
+	type TombstoneDeposit = TombstoneDeposit;
+	type StorageSizeOffset = pallet_contracts::DefaultStorageSizeOffset;
+	type RentByteFee = RentByteFee;
+	type RentDepositOffset = RentDepositOffset;
+	type SurchargeReward = SurchargeReward;
+	type MaxDepth = pallet_contracts::DefaultMaxDepth;
+	type MaxValueSize = pallet_contracts::DefaultMaxValueSize;
+	type WeightPrice = pallet_transaction_payment::Module<Self>;
+}
+
 /// The type used to represent the kinds of proxying allowed.
 #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Encode, Decode, RuntimeDebug)]
 pub enum ProxyType {
@@ -920,7 +948,8 @@ impl InstanceFilter<Call> for ProxyType {
 				Call::Nicks(..) |
 				Call::Nft(..) |
 				Call::Token(..) |
-				Call::Trade(..)
+				Call::Trade(..) |
+				Call::Contracts(..)
 			),
 			ProxyType::Governance => matches!(
 				c,
@@ -1065,6 +1094,7 @@ construct_runtime!(
 
 		Nicks: pallet_nicks::{Module, Call, Storage, Event<T>},
 		Balances: pallet_balances::{Module, Call, Storage, Config<T>, Event<T>},
+		Contracts: pallet_contracts::{Module, Call, Storage, Event<T>, Config},
 		// Lotteries: pallet_lotteries::{Module, Call, Storage, Event<T>},
 		// Uart: pallet_balances::<Instance0>::{Module, Call, Storage, Config<T>, Event<T>},
 		Uink: pallet_balances::<Instance1>::{Module, Call, Storage, Config<T>, Event<T>},
@@ -1256,6 +1286,40 @@ impl_runtime_apis! {
 			TransactionPayment::query_info(uxt, len)
 		}
 	}
+
+	impl pallet_contracts_rpc_runtime_api::ContractsApi<Block, AccountId, Balance, BlockNumber> for Runtime {
+        fn call(
+            origin: AccountId,
+            dest: AccountId,
+            value: Balance,
+            gas_limit: u64,
+            input_data: Vec<u8>,
+        ) -> ContractExecResult {
+            let (exec_result, gas_consumed) =
+                Contracts::bare_call(origin, dest.into(), value, gas_limit, input_data);
+            match exec_result {
+                Ok(v) => ContractExecResult::Success {
+                    flags: v.flags.bits(),
+                    data: v.data,
+                    gas_consumed: gas_consumed,
+                },
+                Err(_) => ContractExecResult::Error,
+            }
+        }
+
+        fn get_storage(
+            address: AccountId,
+            key: [u8; 32],
+        ) -> pallet_contracts_primitives::GetStorageResult {
+            Contracts::get_storage(address, key)
+        }
+
+        fn rent_projection(
+            address: AccountId,
+        ) -> pallet_contracts_primitives::RentProjectionResult<BlockNumber> {
+            Contracts::rent_projection(address)
+        }
+    }
 
 	impl pallet_staking_rpc_runtime_api::StakingApi<Block, AccountId, Balance> for Runtime {
 		fn staking_module_account_id() -> AccountId {

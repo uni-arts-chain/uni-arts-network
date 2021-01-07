@@ -2,7 +2,7 @@ use sp_core::{Pair, Public, crypto::UncheckedInto, sr25519};
 
 use uart_runtime::{
 	get_all_module_accounts,
-	AccountId, BalancesConfig, GenesisConfig, SessionConfig, ValidatorSetConfig, VestingConfig,
+	AccountId, BalancesConfig, ContractsConfig, GenesisConfig, SessionConfig, ValidatorSetConfig, VestingConfig,
 	SudoConfig, SystemConfig, CouncilMembershipConfig, TechnicalMembershipConfig,
 	WASM_BINARY, Signature, Balance, constants::currency::*, opaque::SessionKeys
 };
@@ -263,7 +263,7 @@ fn testnet_genesis(
 	endowed_accounts: Vec<(AccountId, Balance)>,
 	council_members: Vec<AccountId>,
 	technical_members: Vec<AccountId>,
-	_enable_println: bool,
+	enable_println: bool,
 ) -> GenesisConfig {
 	GenesisConfig {
 		frame_system: Some(SystemConfig {
@@ -291,6 +291,12 @@ fn testnet_genesis(
 		pallet_sudo: Some(SudoConfig {
 			// Assign network admin rights.
 			key: root_key.clone(),
+		}),
+		pallet_contracts: Some(ContractsConfig {
+			current_schedule: pallet_contracts::Schedule {
+				enable_println, // this should only be enabled on development chains
+				..Default::default()
+			},
 		}),
 		pallet_vesting: Some(VestingConfig { vesting: vec![] }),
 		pallet_collective_Instance0: Some(Default::default()),

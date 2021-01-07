@@ -337,10 +337,10 @@ decl_event!(
         ItemOrderCancel(u64, u64),
         ItemOrderSucceed(u64, u64, AccountId),
         ItemAddSignature(u64, u64, AccountId),
-        AuctionCreated(u64, u64, u64, u64, AccountId),
-        AuctionBid(u64, u64, u64, u64, AccountId),
-        AuctionSucceed(u64, u64, u64, u64, AccountId),
-        AuctionCancel(u64, u64),
+        AuctionCreated(u64, u64, u64, u64, u64, AccountId),
+        AuctionBid(u64, u64, u64, u64, u64, AccountId),
+        AuctionSucceed(u64, u64, u64, u64, u64, AccountId),
+        AuctionCancel(u64, u64, u64),
     }
 );
 
@@ -1064,12 +1064,12 @@ decl_module! {
                 start_time: start_time,
                 end_time: end_time,
             };
-
+            let auction_id = auction.id;
             <AuctionList<T>>::insert(collection_id, item_id, auction);
 
             NextAuctionID::mutate(|id| *id += 1);
             
-            Self::deposit_event(RawEvent::AuctionCreated(collection_id, item_id, value, start_price, sender));
+            Self::deposit_event(RawEvent::AuctionCreated(auction_id, collection_id, item_id, value, start_price, sender));
 
             Ok(())
         }
@@ -1107,7 +1107,7 @@ decl_module! {
             });
 
 
-            Self::deposit_event(RawEvent::AuctionBid(collection_id, item_id, auction.value, price, sender));
+            Self::deposit_event(RawEvent::AuctionBid(auction.id, collection_id, item_id, auction.value, price, sender));
 
 
             Ok(())
@@ -1167,7 +1167,7 @@ decl_module! {
                     list.push(order_history);
                 });
 
-                Self::deposit_event(RawEvent::AuctionSucceed(collection_id, item_id, auction.value, winner.bid_price, winner.bidder.clone()));
+                Self::deposit_event(RawEvent::AuctionSucceed(auction.id, collection_id, item_id, auction.value, winner.bid_price, winner.bidder.clone()));
 
             } else {
                 // Cancel the auction
@@ -1179,7 +1179,7 @@ decl_module! {
                     _ => ()
                 };
 
-                Self::deposit_event(RawEvent::AuctionCancel(collection_id, item_id));
+                Self::deposit_event(RawEvent::AuctionCancel(auction.id, collection_id, item_id));
             }
 
             <AuctionList<T>>::remove(collection_id, item_id);
@@ -1209,7 +1209,7 @@ decl_module! {
 
             <AuctionList<T>>::remove(collection_id, item_id);
 
-            Self::deposit_event(RawEvent::AuctionCancel(collection_id, item_id));
+            Self::deposit_event(RawEvent::AuctionCancel(auction.id, collection_id, item_id));
             Ok(())
         }
     }

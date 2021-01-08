@@ -1032,6 +1032,8 @@ decl_module! {
         #[weight = T::WeightInfo::create_auction()]
         pub fn create_auction(origin, collection_id: u64, item_id: u64, value: u64, start_price: u64, increment: u64, start_time: T::BlockNumber, end_time: T::BlockNumber) -> DispatchResult {
             let sender = ensure_signed(origin)?;
+            let now = <system::Module<T>>::block_number();
+            ensure!(now < end_time, "Invalid end_time");
                 
             let auction = Self::get_auction(collection_id, item_id);
             ensure!(auction.id == 0, "The collection is on auction");
@@ -1081,11 +1083,14 @@ decl_module! {
             ensure!(auction.id > 0, "The collection is not on auction");
             let now = <system::Module<T>>::block_number();
             ensure!(now >= auction.start_time, "Not start");
-            ensure!(now <= auction.end_time, "End");
-
+            ensure!(now <= auction.end_time, "Ended");
             let price = auction.current_price.saturating_add(auction.increment);
-
             let balance_price = CurrencyBalanceOf::<T>::saturated_from(price.into());
+            let free_balance = <T as Trait>::Currency::free_balance(&sender);
+            ensure!(free_balance > balance_price, "Insufficient balance");
+
+            let lock_id = Self::auction_lock_id(auction.id);
+            <T as Trait>::Currency::extend_lock(lock_id, &sender, balance_price, WithdrawReasons::all());
 
 
             let bid_history = BidHistory {
@@ -1098,17 +1103,13 @@ decl_module! {
             <BidHistoryList<T>>::mutate(auction.id, |histories| {
                 histories.push(bid_history)
             });
-
-            let lock_id = Self::auction_lock_id(auction.id);
-            <T as Trait>::Currency::extend_lock(lock_id, &sender, balance_price, WithdrawReasons::all());
-
+            
             <AuctionList<T>>::mutate(collection_id, item_id, |auction| {
                 auction.current_price = price;
             });
 
 
             Self::deposit_event(RawEvent::AuctionBid(auction.id, collection_id, item_id, auction.value, price, sender));
-
 
             Ok(())
         }
@@ -1120,7 +1121,7 @@ decl_module! {
             ensure!(auction.id > 0, "The collection is not on auction");
 
             let now = <system::Module<T>>::block_number();
-            ensure!(now > auction.end_time, "Auction is not end");
+            ensure!(now > auction.end_time, "Auction is not over");
 
             let histories = Self::bid_history_list(auction.id);
 

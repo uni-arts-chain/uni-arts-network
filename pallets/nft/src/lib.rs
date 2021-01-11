@@ -347,6 +347,7 @@ decl_event!(
 decl_error! {
 	pub enum Error for Module<T: Trait> {
 		NamesNotExists,
+		SaleOrderNotExists,
 		NamesOwnerInvalid,
 	}
 }
@@ -933,6 +934,7 @@ decl_module! {
         #[weight = T::WeightInfo::accept_sale_order()]
         pub fn accept_sale_order(origin, collection_id: u64, item_id: u64) -> DispatchResult {
             let sender = ensure_signed(origin)?;
+            ensure!(<SaleOrderList<T>>::contains_key(collection_id, item_id), Error::<T>::SaleOrderNotExists);
 
             let target_sale_order = <SaleOrderList<T>>::get(collection_id, item_id);
             let nft_owner = target_sale_order.owner;

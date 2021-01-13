@@ -3642,6 +3642,26 @@ dependencies = [
 ]
 
 [[package]]
+name = "pallet-contracts-rpc"
+version = "0.8.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "ef28f226cba2527ee19b23501072d277d2cd8add5b8cdc055b7a4344503a696c"
+dependencies = [
+ "jsonrpc-core",
+ "jsonrpc-core-client",
+ "jsonrpc-derive",
+ "pallet-contracts-primitives",
+ "pallet-contracts-rpc-runtime-api",
+ "parity-scale-codec",
+ "serde",
+ "sp-api",
+ "sp-blockchain",
+ "sp-core",
+ "sp-rpc",
+ "sp-runtime",
+]
+
+[[package]]
 name = "pallet-contracts-rpc-runtime-api"
 version = "0.8.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -7782,6 +7802,7 @@ dependencies = [
  "jsonrpc-core",
  "log",
  "pallet-contracts",
+ "pallet-contracts-rpc",
  "pallet-staking-rpc",
  "pallet-transaction-payment-rpc",
  "sc-basic-authorship",

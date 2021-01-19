@@ -1,6 +1,6 @@
 use sp_core::{Pair, Public, crypto::UncheckedInto, sr25519};
 
-use uart_runtime::{
+use pangu_runtime::{
 	get_all_module_accounts,
 	AccountId, BalancesConfig, ContractsConfig, GenesisConfig, SessionConfig, ValidatorSetConfig, VestingConfig,
 	SudoConfig, SystemConfig, CouncilMembershipConfig, TechnicalMembershipConfig,

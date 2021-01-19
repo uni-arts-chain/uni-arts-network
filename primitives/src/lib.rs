@@ -3,8 +3,8 @@
 use codec::{Decode, Encode};
 use sp_runtime::{
     generic,
-    traits::{IdentifyAccount, Verify},
-    MultiSignature, RuntimeDebug,
+    traits::{IdentifyAccount, Verify, BlakeTwo256},
+    MultiSignature, RuntimeDebug, OpaqueExtrinsic,
 };
 
 #[cfg(feature = "std")]
@@ -35,6 +35,12 @@ pub type Hash = sp_core::H256;
 
 /// Digest item type.
 pub type DigestItem = generic::DigestItem<Hash>;
+
+/// Header type.
+pub type Header = generic::Header<BlockNumber, BlakeTwo256>;
+
+/// Block type.
+pub type OpaqueBlock = generic::Block<Header, OpaqueExtrinsic>;
 
 #[derive(Encode, Decode, Eq, PartialEq, Copy, Clone, RuntimeDebug, PartialOrd, Ord)]
 #[cfg_attr(feature = "std", derive(Serialize, Deserialize))]

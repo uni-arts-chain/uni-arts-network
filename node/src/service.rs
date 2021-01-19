@@ -3,7 +3,8 @@
 use std::sync::Arc;
 use std::time::Duration;
 use sc_client_api::{ExecutorProvider, RemoteBackend};
-use uart_runtime::{self, opaque::Block, RuntimeApi};
+use pangu_runtime::{self, RuntimeApi};
+use uniarts_primitives::{OpaqueBlock as Block};
 use sc_service::{error::Error as ServiceError, Configuration, TaskManager};
 use sp_inherents::InherentDataProviders;
 use sc_executor::native_executor_instance;
@@ -14,8 +15,8 @@ use sc_finality_grandpa::{FinalityProofProvider as GrandpaFinalityProofProvider,
 // Our native executor instance.
 native_executor_instance!(
 	pub Executor,
-	uart_runtime::api::dispatch,
-	uart_runtime::native_version,
+	pangu_runtime::api::dispatch,
+	pangu_runtime::native_version,
 	frame_benchmarking::benchmarking::HostFunctions,
 );
 

@@ -51,8 +51,10 @@ sc-telemetry = { version = "2.0.0" }
 frame-benchmarking = { version = "2.0.0" }
 frame-benchmarking-cli = { version = "2.0.0" }
 
+# Runtime
+pangu-runtime = { path = "../runtime/pangu" }
 
-uart-runtime = { path = "../runtime" }
+uniarts-primitives = { path = "../primitives" }
 pallet-staking-rpc = { path = "../pallets/staking/rpc" }
 pallet-contracts = { version = "2.0.0" }
 pallet-contracts-rpc = { version = "0.8.0" }
@@ -65,5 +67,5 @@ substrate-build-script-utils = { version = "2.0.0" }
 [features]
 default = []
 runtime-benchmarks = [
-	"uart-runtime/runtime-benchmarks",
+	"pangu-runtime/runtime-benchmarks",
 ]

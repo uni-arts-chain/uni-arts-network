@@ -19,7 +19,7 @@ use crate::{chain_spec, service};
 use crate::cli::{Cli, Subcommand};
 use sc_cli::{SubstrateCli, RuntimeVersion, Role, ChainSpec};
 use sc_service::PartialComponents;
-use uart_runtime::Block;
+use uniarts_primitives::{OpaqueBlock as Block};
 use log::info;
 
 impl SubstrateCli for Cli {
@@ -60,7 +60,7 @@ impl SubstrateCli for Cli {
 	}
 
 	fn native_runtime_version(_: &Box<dyn ChainSpec>) -> &'static RuntimeVersion {
-		&uart_runtime::VERSION
+		&pangu_runtime::VERSION
 	}
 }
 

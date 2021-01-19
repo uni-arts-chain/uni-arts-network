@@ -775,8 +775,8 @@ impl pallet_scheduler::Trait for Runtime {
 
 parameter_types! {
     pub const TombstoneDeposit: Balance = 1 * UART;
-    pub const RentByteFee: Balance = 1 * UART;
-    pub const RentDepositOffset: Balance = 1000 * UART;
+    pub const RentByteFee: Balance = 1 * MILLI;
+    pub const RentDepositOffset: Balance = 100 * UART;
     pub const SurchargeReward: Balance = 150 * UART;
 }
 

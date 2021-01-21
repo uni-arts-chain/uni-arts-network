@@ -23,6 +23,7 @@ use sc_cli::{SubstrateCli, RuntimeVersion, Role, ChainSpec};
 use sc_service::PartialComponents;
 use sp_core::crypto::Ss58AddressFormat;
 use uniarts_primitives::{OpaqueBlock as Block};
+use uniarts_service::{pangu_runtime, fuxi_runtime, IdentifyVariant};
 use log::info;
 
 impl SubstrateCli for Cli {
@@ -33,6 +34,8 @@ impl SubstrateCli for Cli {
 	fn impl_version() -> String {
 		env!("SUBSTRATE_CLI_IMPL_VERSION").into()
 	}
+
+	fn executable_name() -> String { "uniarts".into() }
 
 	fn description() -> String {
 		env!("CARGO_PKG_DESCRIPTION").into()

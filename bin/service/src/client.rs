@@ -61,7 +61,7 @@ impl<Api> RuntimeApiCollection for Api
         + sp_api::ApiExt<Block, Error = sp_blockchain::Error>
         + sp_api::Metadata<Block>
         + sp_block_builder::BlockBuilder<Block>
-        + sp_consensus_babe::BabeApi<Block>
+        + sp_consensus_aura::AuraApi<Block>
         + sp_finality_grandpa::GrandpaApi<Block>
         + sp_offchain::OffchainWorkerApi<Block>
         + sp_session::SessionKeys<Block>

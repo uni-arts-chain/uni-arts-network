@@ -10,16 +10,21 @@ pub use fuxi_runtime;
 use uniarts_primitives::{OpaqueBlock as Block};
 use uniarts_rpc::{FullDeps, LightDeps, RpcExtension};
 
+
 use std::sync::Arc;
 use std::time::Duration;
-use sc_client_api::{ExecutorProvider, RemoteBackend};
-use sc_service::{error::Error as ServiceError, Configuration, TaskManager, config::{KeystoreConfig, PrometheusConfig}};
+use sc_client_api::{ExecutorProvider, RemoteBackend, StateBackendFor};
+use sc_service::{error::Error as ServiceError, ChainSpec, Configuration, TaskManager, PartialComponents, config::{KeystoreConfig, PrometheusConfig}};
 use sp_inherents::InherentDataProviders;
 use sc_executor::native_executor_instance;
-pub use sc_executor::NativeExecutor;
+pub use sc_executor::{NativeExecutor, NativeExecutionDispatch};
+use sp_consensus::{
+    import_queue::BasicQueue, CanAuthorWithNativeVersion, DefaultImportQueue, NeverCanAuthor,
+};
 use sp_consensus_aura::sr25519::{AuthorityPair as AuraPair};
 use sc_finality_grandpa::{FinalityProofProvider as GrandpaFinalityProofProvider, SharedVoterState};
 use sp_api::ConstructRuntimeApi;
+use sp_runtime::traits::BlakeTwo256;
 
 type FullClient<RuntimeApi, Executor> = sc_service::TFullClient<Block, RuntimeApi, Executor>;
 type FullBackend = sc_service::TFullBackend<Block>;
@@ -77,20 +82,27 @@ fn set_prometheus_registry(config: &mut Configuration) -> Result<(), ServiceErro
     Ok(())
 }
 
-pub fn new_partial(config: &Configuration) -> Result<sc_service::PartialComponents<
-    FullClient, FullBackend, FullSelectChain,
-    sp_consensus::DefaultImportQueue<Block, FullClient>,
-    sc_transaction_pool::FullPool<Block, FullClient>,
+pub fn new_partial<RuntimeApi, Executor>(config: &mut Configuration) -> Result<sc_service::PartialComponents<
+    FullClient<RuntimeApi, Executor>,
+    FullBackend,
+    FullSelectChain,
+    sp_consensus::DefaultImportQueue<Block, FullClient<RuntimeApi, Executor>>,
+    sc_transaction_pool::FullPool<Block, FullClient<RuntimeApi, Executor>>,
     (
         sc_consensus_aura::AuraBlockImport<
             Block,
-            FullClient,
-            sc_finality_grandpa::GrandpaBlockImport<FullBackend, Block, FullClient, FullSelectChain>,
+            FullClient<RuntimeApi, Executor>,
+            sc_finality_grandpa::GrandpaBlockImport<FullBackend, Block, FullClient<RuntimeApi, Executor>, FullSelectChain>,
             AuraPair
         >,
-        sc_finality_grandpa::LinkHalf<Block, FullClient, FullSelectChain>
+        sc_finality_grandpa::LinkHalf<Block, FullClient<RuntimeApi, Executor>, FullSelectChain>
     )
->, ServiceError> {
+>, ServiceError>
+    where
+        Executor: 'static + NativeExecutionDispatch,
+        RuntimeApi: 'static + Send + Sync + ConstructRuntimeApi<Block, FullClient<RuntimeApi, Executor>>,
+        RuntimeApi::RuntimeApi: RuntimeApiCollection<StateBackend = StateBackendFor<FullBackend, Block>>,
+{
     set_prometheus_registry(config)?;
 
     let inherent_data_providers = sp_inherents::InherentDataProviders::new();
@@ -136,12 +148,17 @@ pub fn new_partial(config: &Configuration) -> Result<sc_service::PartialComponen
 }
 
 /// Builds a new service for a full client.
-pub fn new_full(config: Configuration) -> Result<TaskManager, ServiceError> {
+pub fn new_full<RuntimeApi, Executor>(mut config: Configuration) -> Result<(TaskManager, Arc<FullClient<RuntimeApi, Executor>>), ServiceError>
+    where
+        Executor: 'static + NativeExecutionDispatch,
+        RuntimeApi: 'static + Send + Sync + ConstructRuntimeApi<Block, FullClient<RuntimeApi, Executor>>,
+        RuntimeApi::RuntimeApi: RuntimeApiCollection<StateBackend = StateBackendFor<FullBackend, Block>>,
+{
     let sc_service::PartialComponents {
         client, backend, mut task_manager, import_queue, keystore, select_chain, transaction_pool,
         inherent_data_providers,
         other: (block_import, grandpa_link),
-    } = new_partial(&config)?;
+    } = new_partial(&mut config)?;
 
     let finality_proof_provider =
         GrandpaFinalityProofProvider::new_for_service(backend.clone(), client.clone());
@@ -272,18 +289,25 @@ pub fn new_full(config: Configuration) -> Result<TaskManager, ServiceError> {
         );
     } else {
         sc_finality_grandpa::setup_disabled_grandpa(
-            client,
+            client.clone(),
             &inherent_data_providers,
             network,
         )?;
     }
 
     network_starter.start_network();
-    Ok(task_manager)
+    Ok((task_manager, client))
 }
 
 /// Builds a new service for a light client.
-pub fn new_light(config: Configuration) -> Result<TaskManager, ServiceError> {
+pub fn new_light<RuntimeApi, Executor>(mut config: Configuration) -> Result<TaskManager, ServiceError>
+    where
+        Executor: 'static + NativeExecutionDispatch,
+        RuntimeApi:
+        'static + Send + Sync + ConstructRuntimeApi<Block, LightClient<RuntimeApi, Executor>>,
+        <RuntimeApi as ConstructRuntimeApi<Block, LightClient<RuntimeApi, Executor>>>::RuntimeApi:
+        RuntimeApiCollection<StateBackend = StateBackendFor<LightBackend, Block>>,
+{
     set_prometheus_registry(&mut config)?;
 
     let (client, backend, keystore, mut task_manager, on_demand) =

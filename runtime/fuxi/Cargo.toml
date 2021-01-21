@@ -1,10 +1,10 @@
 [package]
-name = "pangu-runtime"
+name = "fuxi-runtime"
 version = "2.0.0"
 authors = ["terry.tu <tuminfei1981@gmail.com>"]
 edition = "2018"
 build   = "build.rs"
-description = "Uniarts node runtime for pangu network"
+description = "Uniarts node runtime for fuxi network"
 
 
 [package.metadata.docs.rs]
@@ -157,3 +157,4 @@ runtime-benchmarks = [
 ]
 
 dev = []
+

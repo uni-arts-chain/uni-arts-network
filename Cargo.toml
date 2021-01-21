@@ -1,12 +1,12 @@
-  
+
 [profile.release]
 panic = 'unwind'
 
 [workspace]
 members = [
-    'runtime/pangu',
-    'node',
+    'bin',
     'primitives',
+    'runtime/pangu',
     'pallets/common',
     'pallets/assets',
     'pallets/names',

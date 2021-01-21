@@ -2,6 +2,11 @@
 
 /// Uniarts client abstraction, this super trait only pulls in functionality required for
 /// Uniarts internal crates.
+// --- crates ---
+pub use codec::Codec;
+use uniarts_primitives::{OpaqueBlock as Block, AccountId, Balance, Nonce, BlockNumber};
+use sp_runtime::traits::BlakeTwo256;
+
 pub trait UniartsClient<Block, Backend, Runtime>: Sized
     + Send
     + Sync
@@ -35,7 +40,6 @@ impl<Block, Backend, Runtime, Client> UniartsClient<Block, Backend, Runtime> for
 pub trait RuntimeApiCollection:
     sp_api::ApiExt<Block, Error = sp_blockchain::Error>
     + sp_api::Metadata<Block>
-    + sp_authority_discovery::AuthorityDiscoveryApi<Block>
     + sp_block_builder::BlockBuilder<Block>
     + sp_consensus_aura::AuraApi<Block>
     + sp_finality_grandpa::GrandpaApi<Block>
@@ -44,6 +48,8 @@ pub trait RuntimeApiCollection:
     + sp_transaction_pool::runtime_api::TaggedTransactionQueue<Block>
     + frame_system_rpc_runtime_api::AccountNonceApi<Block, AccountId, Nonce>
     + pallet_transaction_payment_rpc_runtime_api::TransactionPaymentApi<Block, Balance>
+    + pallet_staking_rpc::StakingRuntimeApi<Block, AccountId, Balance>
+    + pallet_contracts_rpc::ContractsRuntimeApi<Block, AccountId, Balance, BlockNumber>
     where
         <Self as sp_api::ApiExt<Block>>::StateBackend: sp_api::StateBackend<BlakeTwo256>,
 {
@@ -54,7 +60,6 @@ impl<Api> RuntimeApiCollection for Api
         Api: sp_transaction_pool::runtime_api::TaggedTransactionQueue<Block>
         + sp_api::ApiExt<Block, Error = sp_blockchain::Error>
         + sp_api::Metadata<Block>
-        + sp_authority_discovery::AuthorityDiscoveryApi<Block>
         + sp_block_builder::BlockBuilder<Block>
         + sp_consensus_babe::BabeApi<Block>
         + sp_finality_grandpa::GrandpaApi<Block>
@@ -62,9 +67,8 @@ impl<Api> RuntimeApiCollection for Api
         + sp_session::SessionKeys<Block>
         + frame_system_rpc_runtime_api::AccountNonceApi<Block, AccountId, Nonce>
         + pallet_transaction_payment_rpc_runtime_api::TransactionPaymentApi<Block, Balance>
-        + darwinia_balances_rpc_runtime_api::BalancesApi<Block, AccountId, Balance>
-        + darwinia_header_mmr_rpc_runtime_api::HeaderMMRApi<Block, Hash>
-        + darwinia_staking_rpc_runtime_api::StakingApi<Block, AccountId, Power>,
+        + pallet_staking_rpc::StakingRuntimeApi<Block, AccountId, Balance>
+        + pallet_contracts_rpc::ContractsRuntimeApi<Block, AccountId, Balance, BlockNumber>,
         <Self as sp_api::ApiExt<Block>>::StateBackend: sp_api::StateBackend<BlakeTwo256>,
 {
 }

@@ -52,7 +52,6 @@ frame-benchmarking-cli = { version = "2.0.0" }
 
 # pallet
 pallet-staking-rpc = { path = "../../pallets/staking/rpc" }
-pallet-contracts = { version = "2.0.0" }
 pallet-contracts-rpc = { version = "0.8.0" }
 
 [build-dependencies]

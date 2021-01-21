@@ -8070,7 +8070,6 @@ dependencies = [
  "hex-literal 0.2.1",
  "jsonrpc-core",
  "log",
- "pallet-contracts",
  "pallet-contracts-rpc",
  "pallet-staking-rpc",
  "pallet-transaction-payment-rpc",

@@ -5,6 +5,11 @@ pub use pangu::{
     staging_config, pangu_config, pangu_development_config, pangu_local_testnet_config, PanguChainSpec,
 };
 
+pub mod fuxi;
+pub use fuxi::{
+    fuxi_config, fuxi_development_config, fuxi_local_testnet_config, FuxiChainSpec,
+};
+
 // --- crates ---
 use serde::{Deserialize, Serialize};
 // --- substrate ---

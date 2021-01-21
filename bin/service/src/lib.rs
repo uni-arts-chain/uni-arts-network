@@ -4,7 +4,7 @@ pub mod chain_spec;
 pub mod client;
 pub use client::*;
 
-pub use chain_spec::{PanguChainSpec};
+pub use chain_spec::{PanguChainSpec, FuxiChainSpec};
 pub use pangu_runtime;
 pub use fuxi_runtime;
 use uniarts_primitives::{OpaqueBlock as Block};

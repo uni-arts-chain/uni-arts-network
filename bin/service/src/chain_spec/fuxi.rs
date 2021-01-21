@@ -71,11 +71,11 @@ pub fn properties() -> Option<Properties> {
 	serde_json::from_value(properties).ok()
 }
 
-pub fn pangu_config() -> Result<FuxiChainSpec, String> {
+pub fn fuxi_config() -> Result<FuxiChainSpec, String> {
 	FuxiChainSpec::from_json_bytes(&include_bytes!("../../res/fuxi.json")[..])
 }
 
-pub fn staging_config() -> Result<FuxiChainSpec, String> {
+pub fn fuxi_staging_config() -> Result<FuxiChainSpec, String> {
 	let wasm_binary = WASM_BINARY.ok_or("Staging wasm binary not available".to_string())?;
 
 	let initial_authorities: Vec<(AccountId, AccountId, AuraId, GrandpaId)> = vec![
@@ -152,7 +152,7 @@ pub fn staging_config() -> Result<FuxiChainSpec, String> {
 	))
 }
 
-pub fn pangu_development_config() -> Result<FuxiChainSpec, String> {
+pub fn fuxi_development_config() -> Result<FuxiChainSpec, String> {
 	let wasm_binary = WASM_BINARY.ok_or("Development wasm binary not available".to_string())?;
 
 	Ok(FuxiChainSpec::from_genesis(
@@ -201,7 +201,7 @@ pub fn pangu_development_config() -> Result<FuxiChainSpec, String> {
 	))
 }
 
-pub fn pangu_local_testnet_config() -> Result<FuxiChainSpec, String> {
+pub fn fuxi_local_testnet_config() -> Result<FuxiChainSpec, String> {
 	let wasm_binary = WASM_BINARY.ok_or("Development wasm binary not available".to_string())?;
 
 	Ok(FuxiChainSpec::from_genesis(

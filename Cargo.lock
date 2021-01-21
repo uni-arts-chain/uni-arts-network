@@ -8074,6 +8074,7 @@ dependencies = [
  "pallet-staking-rpc",
  "pallet-transaction-payment-rpc",
  "pangu-runtime",
+ "parity-scale-codec",
  "sc-basic-authorship",
  "sc-chain-spec",
  "sc-cli",

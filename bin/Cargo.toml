@@ -1,10 +1,14 @@
 [package]
 name = "uart"
-version = "0.1.0"
+version = "1.0.0"
+description = "Uni-Arts node implementation in Rust"
 authors = ["Uniarts Developers"]
 edition = "2018"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[package.metadata.docs.rs]
+targets = ["x86_64-unknown-linux-gnu"]
 
 [[bin]]
 name = "uart"

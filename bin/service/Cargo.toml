@@ -6,7 +6,7 @@ edition = "2018"
 
 [dependencies]
 structopt = "0.3.8"
-serde = { version = "1.0.118", features = ["derive"] }
+serde = { version = "1.0.101", features = ["derive"] }
 serde_json = { version = "1.0.41" }
 hex-literal = "0.2.1"
 jsonrpc-core = "15.1.0"
@@ -46,15 +46,19 @@ sp-api = { version = "2.0.0" }
 sp-blockchain = { version = "2.0.0" }
 sp-block-builder = { version = "2.0.0" }
 sp-offchain = { version = "2.0.0" }
+sp-session = { version = "2.0.0" }
+sp-trie = { version = "2.0.0" }
 
 frame-benchmarking = { version = "2.0.0" }
 frame-benchmarking-cli = { version = "2.0.0" }
 
 # pallet
 substrate-frame-rpc-system = { version = "2.0.0" }
+substrate-prometheus-endpoint = { version = "0.8.1" }
 pallet-transaction-payment-rpc = { version = "2.0.0" }
 pallet-staking-rpc = { path = "../../pallets/staking/rpc" }
 pallet-contracts-rpc = { version = "0.8.0" }
+pallet-contracts = { version = "2.0.0" }
 
 # API
 frame-system-rpc-runtime-api = { version = "2.0.0" }

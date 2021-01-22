@@ -4,7 +4,7 @@
 /// Uniarts internal crates.
 // --- crates ---
 pub use codec::Codec;
-use uniarts_primitives::{OpaqueBlock as Block, AccountId, Balance, Nonce, BlockNumber};
+use uniarts_primitives::{OpaqueBlock as Block, AccountId, Balance, Nonce, BlockNumber, AuraId};
 use sp_runtime::traits::BlakeTwo256;
 
 pub trait UniartsClient<Block, Backend, Runtime>: Sized
@@ -41,7 +41,7 @@ pub trait RuntimeApiCollection:
     sp_api::ApiExt<Block, Error = sp_blockchain::Error>
     + sp_api::Metadata<Block>
     + sp_block_builder::BlockBuilder<Block>
-    + sp_consensus_aura::AuraApi<Block>
+    + sp_consensus_aura::AuraApi<Block, AuraId>
     + sp_finality_grandpa::GrandpaApi<Block>
     + sp_offchain::OffchainWorkerApi<Block>
     + sp_session::SessionKeys<Block>
@@ -61,7 +61,7 @@ impl<Api> RuntimeApiCollection for Api
         + sp_api::ApiExt<Block, Error = sp_blockchain::Error>
         + sp_api::Metadata<Block>
         + sp_block_builder::BlockBuilder<Block>
-        + sp_consensus_aura::AuraApi<Block>
+        + sp_consensus_aura::AuraApi<Block, AuraId>
         + sp_finality_grandpa::GrandpaApi<Block>
         + sp_offchain::OffchainWorkerApi<Block>
         + sp_session::SessionKeys<Block>

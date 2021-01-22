@@ -8,8 +8,7 @@ pub use chain_spec::{PanguChainSpec, FuxiChainSpec};
 pub use pangu_runtime;
 pub use fuxi_runtime;
 use uniarts_primitives::{OpaqueBlock as Block};
-use uniarts_rpc::{FullDeps, LightDeps, RpcExtension};
-
+use uniarts_rpc::{FullDeps};
 
 use std::sync::Arc;
 use std::time::Duration;
@@ -18,13 +17,13 @@ use sc_service::{error::Error as ServiceError, ChainSpec, Configuration, TaskMan
 use sp_inherents::InherentDataProviders;
 use sc_executor::native_executor_instance;
 pub use sc_executor::{NativeExecutor, NativeExecutionDispatch};
-use sp_consensus::{
-    import_queue::BasicQueue, CanAuthorWithNativeVersion, DefaultImportQueue, NeverCanAuthor,
-};
+use sp_consensus::{import_queue::BasicQueue};
 use sp_consensus_aura::sr25519::{AuthorityPair as AuraPair};
 use sc_finality_grandpa::{FinalityProofProvider as GrandpaFinalityProofProvider, SharedVoterState};
 use sp_api::ConstructRuntimeApi;
 use sp_runtime::traits::BlakeTwo256;
+use sp_trie::PrefixedMemoryDB;
+use substrate_prometheus_endpoint::Registry;
 
 type FullClient<RuntimeApi, Executor> = sc_service::TFullClient<Block, RuntimeApi, Executor>;
 type FullBackend = sc_service::TFullBackend<Block>;

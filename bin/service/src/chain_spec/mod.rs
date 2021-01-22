@@ -15,8 +15,6 @@ use serde::{Deserialize, Serialize};
 // --- substrate ---
 use uniarts_primitives::{AccountId, AccountPublic};
 use sc_chain_spec::ChainSpecExtension;
-use sc_finality_grandpa::AuthorityId as GrandpaId;
-use sp_consensus_aura::AuthorityId as AuraId;
 use sp_core::{sr25519, Pair, Public};
 use sp_runtime::traits::IdentifyAccount;
 
@@ -48,23 +46,6 @@ pub fn get_account_id_from_seed<TPublic: Public>(seed: &str) -> AccountId
         AccountPublic: From<<TPublic::Pair as Pair>::Public>,
 {
     AccountPublic::from(get_from_seed::<TPublic>(seed)).into_account()
-}
-
-/// Helper function to generate stash, controller and session key from seed
-pub fn get_authority_keys_from_seed(
-    seed: &str,
-) -> (
-    AccountId,
-    AccountId,
-    AuraId,
-    GrandpaId,
-) {
-    (
-        get_account_id_from_seed::<sr25519::Public>(&format!("{}//stash", seed)),
-        get_account_id_from_seed::<sr25519::Public>(seed),
-        get_from_seed::<AuraId>(seed),
-        get_from_seed::<GrandpaId>(seed),
-    )
 }
 
 fn testnet_accounts() -> Vec<AccountId> {

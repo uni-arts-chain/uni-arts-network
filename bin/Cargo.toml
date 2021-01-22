@@ -11,8 +11,9 @@ name = "uart"
 path = "src/main.rs"
 
 [dependencies]
-futures = { version = "=0.3.8" }
-parity-util-mem = { version = "0.7.0", default-features = false, features = ["jemalloc-global"] }
+futures         = { version = "=0.3.8" }
+parity-util-mem = { version = "*", default-features = false, features = ["jemalloc-global"] }
+
 uniarts-cli = { path = "cli" }
 uniarts-service = { path = "service" }
 uniarts-rpc = { path = "rpc" }

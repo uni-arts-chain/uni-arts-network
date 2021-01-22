@@ -7995,6 +7995,7 @@ dependencies = [
  "sp-core",
  "structopt",
  "substrate-build-script-utils",
+ "uniarts-primitives",
  "uniarts-service",
 ]
 

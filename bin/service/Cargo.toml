@@ -77,4 +77,5 @@ dev = [
 
 runtime-benchmarks = [
     "pangu-runtime/runtime-benchmarks",
+    "fuxi-runtime/runtime-benchmarks",
 ]

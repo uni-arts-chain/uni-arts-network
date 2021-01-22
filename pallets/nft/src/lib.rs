@@ -1151,7 +1151,7 @@ decl_module! {
 
                 <T as Trait>::Currency::resolve_creating(&auction.owner, negative_imbalance);
 
-                for i in 0..(histories.len() - 2) {
+                for i in 0..(histories.len() - 1) {
                     let h = &histories[i];
                     <T as Trait>::Currency::remove_lock(lock_id, &h.bidder);
                 }

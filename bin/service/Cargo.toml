@@ -45,15 +45,20 @@ sp-runtime = { version = "2.0.0" }
 sp-api = { version = "2.0.0" }
 sp-blockchain = { version = "2.0.0" }
 sp-block-builder = { version = "2.0.0" }
-substrate-frame-rpc-system = { version = "2.0.0" }
-pallet-transaction-payment-rpc = { version = "2.0.0" }
+sp-offchain = { version = "2.0.0" }
 
 frame-benchmarking = { version = "2.0.0" }
 frame-benchmarking-cli = { version = "2.0.0" }
 
 # pallet
+substrate-frame-rpc-system = { version = "2.0.0" }
+pallet-transaction-payment-rpc = { version = "2.0.0" }
 pallet-staking-rpc = { path = "../../pallets/staking/rpc" }
 pallet-contracts-rpc = { version = "0.8.0" }
+
+# API
+frame-system-rpc-runtime-api = { version = "2.0.0" }
+pallet-transaction-payment-rpc-runtime-api = { version = "2.0.0" }
 
 [build-dependencies]
 substrate-build-script-utils = { version = "2.0.0" }

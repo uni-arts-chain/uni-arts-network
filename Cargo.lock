@@ -8067,6 +8067,7 @@ version = "0.1.0"
 dependencies = [
  "frame-benchmarking",
  "frame-benchmarking-cli",
+ "frame-system-rpc-runtime-api",
  "fuxi-runtime",
  "hex-literal 0.2.1",
  "jsonrpc-core",
@@ -8074,6 +8075,7 @@ dependencies = [
  "pallet-contracts-rpc",
  "pallet-staking-rpc",
  "pallet-transaction-payment-rpc",
+ "pallet-transaction-payment-rpc-runtime-api",
  "pangu-runtime",
  "parity-scale-codec",
  "sc-basic-authorship",
@@ -8099,6 +8101,7 @@ dependencies = [
  "sp-core",
  "sp-finality-grandpa",
  "sp-inherents",
+ "sp-offchain",
  "sp-runtime",
  "sp-transaction-pool",
  "structopt",

@@ -87,6 +87,13 @@ impl SubstrateCli for Cli {
 	}
 }
 
+fn get_exec_name() -> Option<String> {
+	std::env::current_exe()
+		.ok()
+		.and_then(|pb| pb.file_name().map(|s| s.to_os_string()))
+		.and_then(|s| s.into_string().ok())
+}
+
 fn set_default_ss58_version(spec: &Box<dyn uniarts_service::ChainSpec>) {
 	let ss58_version = if spec.is_pangu_network() {
 		Ss58AddressFormat::SubstrateAccount
@@ -255,18 +262,8 @@ pub fn run() -> sc_cli::Result<()> {
 				unreachable!()
 			}
 		},
-		Some(Subcommand::Benchmark(cmd)) => {
-			if cfg!(feature = "runtime-benchmarks") {
-				let runner = cli.create_runner(cmd)?;
-
-				runner.sync_run(|config| cmd.run::<Block, service::Executor>(config))
-			} else {
-				Err("Benchmarking wasn't enabled when building the node. \
-				You can enable it with `--features runtime-benchmarks`.".into())
-			}
-		},
 		None => {
-			let runner = cli.create_runner(cmd)?;
+			let runner = cli.create_runner(&cli.run)?;
 			let chain_spec = &runner.config().chain_spec;
 
 			set_default_ss58_version(chain_spec);

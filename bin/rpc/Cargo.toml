@@ -18,7 +18,6 @@ substrate-frame-rpc-system = { version = "2.0.0" }
 pallet-transaction-payment-rpc = { version = "2.0.0" }
 
 pallet-staking-rpc = { path = "../../pallets/staking/rpc" }
-pallet-contracts = { version = "2.0.0" }
 pallet-contracts-rpc = { version = "0.8.0" }
 
 # substrate client

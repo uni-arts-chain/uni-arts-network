@@ -1,5 +1,6 @@
 use sp_core::{Pair, Public, crypto::UncheckedInto, sr25519};
 
+use super::testnet_accounts;
 use fuxi_runtime::{
 	get_all_module_accounts,
 	BalancesConfig, ContractsConfig, GenesisConfig, SessionConfig, ValidatorSetConfig, VestingConfig,
@@ -200,6 +201,7 @@ pub fn fuxi_development_config() -> Result<FuxiChainSpec, String> {
 
 pub fn fuxi_local_testnet_config() -> Result<FuxiChainSpec, String> {
 	let wasm_binary = WASM_BINARY.ok_or("Development wasm binary not available".to_string())?;
+	let endowed_accounts: Vec<AccountId> = testnet_accounts();
 
 	Ok(FuxiChainSpec::from_genesis(
 		// Name
@@ -217,20 +219,7 @@ pub fn fuxi_local_testnet_config() -> Result<FuxiChainSpec, String> {
 			// Sudo account
 			get_account_id_from_seed::<sr25519::Public>("Alice"),
 			// Pre-funded accounts
-			vec![
-				get_account_id_from_seed::<sr25519::Public>("Alice"),
-				get_account_id_from_seed::<sr25519::Public>("Bob"),
-				get_account_id_from_seed::<sr25519::Public>("Charlie"),
-				get_account_id_from_seed::<sr25519::Public>("Dave"),
-				get_account_id_from_seed::<sr25519::Public>("Eve"),
-				get_account_id_from_seed::<sr25519::Public>("Ferdie"),
-				get_account_id_from_seed::<sr25519::Public>("Alice//stash"),
-				get_account_id_from_seed::<sr25519::Public>("Bob//stash"),
-				get_account_id_from_seed::<sr25519::Public>("Charlie//stash"),
-				get_account_id_from_seed::<sr25519::Public>("Dave//stash"),
-				get_account_id_from_seed::<sr25519::Public>("Eve//stash"),
-				get_account_id_from_seed::<sr25519::Public>("Ferdie//stash"),
-			].iter().map(|k| (k.clone(), 100_000 * UART )).chain(
+			endowed_accounts.iter().map(|k| (k.clone(), 100_000 * UART )).chain(
 				get_all_module_accounts()
 					.iter()
 					.map(|x| (x.clone(), 100_000_000 * UART)),

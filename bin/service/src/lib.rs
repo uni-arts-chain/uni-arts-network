@@ -4,6 +4,11 @@ pub mod chain_spec;
 pub mod client;
 pub use client::*;
 
+// Priority import
+pub use sc_service::{
+    ChainSpec, Configuration,
+};
+
 pub use chain_spec::{PanguChainSpec, FuxiChainSpec};
 pub use pangu_runtime;
 pub use fuxi_runtime;
@@ -13,7 +18,7 @@ use uniarts_rpc::{FullDeps};
 use std::sync::Arc;
 use std::time::Duration;
 use sc_client_api::{ExecutorProvider, RemoteBackend, StateBackendFor};
-use sc_service::{error::Error as ServiceError, ChainSpec, Configuration, TaskManager, PartialComponents, config::{KeystoreConfig, PrometheusConfig}};
+use sc_service::{error::Error as ServiceError, TaskManager, PartialComponents, config::{KeystoreConfig, PrometheusConfig}};
 use sp_inherents::InherentDataProviders;
 use sc_executor::native_executor_instance;
 pub use sc_executor::{NativeExecutor, NativeExecutionDispatch};

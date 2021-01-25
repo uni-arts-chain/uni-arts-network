@@ -20,6 +20,7 @@ std = [
     "serde",
     "codec/std",
     "sp-runtime/std",
+    "sp-consensus-aura/std",
     "sp-core/std",
     "sp-std/std",
 ]

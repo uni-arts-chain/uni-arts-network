@@ -120,7 +120,7 @@ pub fn staging_config() -> Result<PanguChainSpec, String> {
 		// Name
 		"Uni-Arts Staging network",
 		// ID
-		"uart",
+		"pangu_staging",
 		ChainType::Live,
 		move || testnet_genesis(
 			wasm_binary,
@@ -157,7 +157,7 @@ pub fn pangu_development_config() -> Result<PanguChainSpec, String> {
 		// Name
 		"Development",
 		// ID
-		"dev",
+		"pangu dev",
 		ChainType::Development,
 		move || testnet_genesis(
 			wasm_binary,
@@ -207,7 +207,7 @@ pub fn pangu_local_testnet_config() -> Result<PanguChainSpec, String> {
 		// Name
 		"Local Testnet",
 		// ID
-		"local_testnet",
+		"pangu_local_testnet",
 		ChainType::Local,
 		move || testnet_genesis(
 			wasm_binary,

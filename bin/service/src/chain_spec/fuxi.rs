@@ -120,7 +120,7 @@ pub fn fuxi_staging_config() -> Result<FuxiChainSpec, String> {
 		// Name
 		"Uni-Arts Staging network",
 		// ID
-		"uart",
+		"fuxi_staging",
 		ChainType::Live,
 		move || testnet_genesis(
 			wasm_binary,
@@ -157,7 +157,7 @@ pub fn fuxi_development_config() -> Result<FuxiChainSpec, String> {
 		// Name
 		"Development",
 		// ID
-		"dev",
+		"fuxi_dev",
 		ChainType::Development,
 		move || testnet_genesis(
 			wasm_binary,
@@ -207,7 +207,7 @@ pub fn fuxi_local_testnet_config() -> Result<FuxiChainSpec, String> {
 		// Name
 		"Local Testnet",
 		// ID
-		"local_testnet",
+		"fuxi_local_testnet",
 		ChainType::Local,
 		move || testnet_genesis(
 			wasm_binary,

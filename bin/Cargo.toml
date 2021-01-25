@@ -30,17 +30,4 @@ fuxi-runtime = { path = "../runtime/fuxi", optional = true }
 panic = "unwind"
 
 [features]
-default = [ "with-fuxi-runtime" ]
-
-with-pangu-runtime = [
-    "uniarts-service/with-pangu-runtime",
-    "uniarts-cli/with-pangu-runtime",
-]
-with-fuxi-runtime = [
-    "uniarts-service/with-fuxi-runtime",
-    "uniarts-cli/with-fuxi-runtime",
-]
-with-all-runtime = [
-    "uniarts-service/with-all-runtime",
-    "uniarts-cli/with-all-runtime",
-]
+default = [ ]

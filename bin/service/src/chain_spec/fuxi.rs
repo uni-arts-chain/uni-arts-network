@@ -2,22 +2,19 @@ use sp_core::{Pair, Public, crypto::UncheckedInto, sr25519};
 
 use fuxi_runtime::{
 	get_all_module_accounts,
-	AccountId, BalancesConfig, ContractsConfig, GenesisConfig, SessionConfig, ValidatorSetConfig, VestingConfig,
+	BalancesConfig, ContractsConfig, GenesisConfig, SessionConfig, ValidatorSetConfig, VestingConfig,
 	SudoConfig, SystemConfig, CouncilMembershipConfig, TechnicalMembershipConfig,
-	WASM_BINARY, Signature, Balance, constants::currency::*, opaque::SessionKeys
+	WASM_BINARY, Signature, opaque::SessionKeys
 };
+use fuxi_runtime::constants::currency::*;
+use uniarts_primitives::{AccountId, Balance};
+
 use sp_consensus_aura::sr25519::AuthorityId as AuraId;
 use sp_finality_grandpa::AuthorityId as GrandpaId;
 use sp_runtime::traits::{Verify, IdentifyAccount};
 use sc_service::{ChainType, Properties};
 use hex_literal::hex;
 use sc_telemetry::TelemetryEndpoints;
-
-
-
-const DEFAULT_PROTOCOL_ID: &str = "uart";
-const TELEMETRY_URL: &str = "wss://telemetry.polkadot.io/submit/";
-
 
 // The URL for the telemetry server.
 // const STAGING_TELEMETRY_URL: &str = "wss://telemetry.polkadot.io/submit/";
@@ -140,11 +137,11 @@ pub fn fuxi_staging_config() -> Result<FuxiChainSpec, String> {
 		vec![],
 		// Telemetry
 		Some(
-			TelemetryEndpoints::new(vec![(TELEMETRY_URL.to_string(), 0)])
+			TelemetryEndpoints::new(vec![(super::TELEMETRY_URL.to_string(), 0)])
 				.expect("telemetry url is valid; qed"),
 		),
 		// Protocol ID
-		Some(DEFAULT_PROTOCOL_ID),
+		Some(super::DEFAULT_PROTOCOL_ID),
 		// Properties
 		properties(),
 		// Extensions

@@ -27,7 +27,7 @@ sp-trie = { version = "2.0.0", default-features = false }
 substrate-build-script-utils = { version = "2.0.0", default-features = false }
 
 [features]
-default = ["wasmtime", "cli", "with-fuxi-runtime"]
+default = ["wasmtime", "cli"]
 trie-memory-tracker = ["sp-trie/memory-tracker"]
 
 wasmtime = [
@@ -43,13 +43,3 @@ cli = [
     "frame-benchmarking-cli",
 ]
 runtime-benchmarks = [ "uniarts-service/runtime-benchmarks" ]
-
-with-pangu-runtime = [
-    "uniarts-service/with-pangu-runtime",
-]
-with-fuxi-runtime = [
-    "uniarts-service/with-fuxi-runtime",
-]
-with-all-runtime = [
-    "uniarts-service/with-all-runtime",
-]

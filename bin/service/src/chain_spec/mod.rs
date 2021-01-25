@@ -19,6 +19,7 @@ use sp_core::{sr25519, Pair, Public};
 use sp_runtime::traits::IdentifyAccount;
 
 const DEFAULT_PROTOCOL_ID: &str = "uart";
+const TELEMETRY_URL: &str = "wss://telemetry.polkadot.io/submit/";
 
 /// Node `ChainSpec` extensions.
 ///

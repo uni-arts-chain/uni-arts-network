@@ -16,7 +16,7 @@ name = "uart"
 path = "src/main.rs"
 
 [dependencies]
-futures         = { version = "=0.3.5" }
+futures         = { version = "=0.3.8" }
 parity-util-mem = { version = "*", default-features = false, features = ["jemalloc-global"] }
 
 uniarts-cli = { path = "cli" }
@@ -28,3 +28,19 @@ fuxi-runtime = { path = "../runtime/fuxi", optional = true }
 [profile.release]
 # runtime requires unwinding.
 panic = "unwind"
+
+[features]
+default = [ "with-fuxi-runtime" ]
+
+with-pangu-runtime = [
+    "uniarts-service/with-pangu-runtime",
+    "uniarts-cli/with-pangu-runtime",
+]
+with-fuxi-runtime = [
+    "uniarts-service/with-fuxi-runtime",
+    "uniarts-cli/with-fuxi-runtime",
+]
+with-all-runtime = [
+    "uniarts-service/with-all-runtime",
+    "uniarts-cli/with-all-runtime",
+]

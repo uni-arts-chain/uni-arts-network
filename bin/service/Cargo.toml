@@ -9,13 +9,13 @@ structopt = "0.3.8"
 serde = { version = "1.0.101", features = ["derive"] }
 serde_json = { version = "1.0.41" }
 hex-literal = "0.2.1"
-jsonrpc-core = "15.1.0"
+futures = { version = "=0.3.8" }
 log = { version = "0.4.11" }
 codec = { package = "parity-scale-codec", version = "1.3.4", default-features = false }
 
 # Uniarts
-pangu-runtime = { path = "../../runtime/pangu" }
-fuxi-runtime = { path = "../../runtime/fuxi" }
+pangu-runtime = { path = "../../runtime/pangu", optional = true }
+fuxi-runtime = { path = "../../runtime/fuxi", optional = true }
 uniarts-primitives = { path = "../../primitives" }
 uniarts-rpc = { path = "../rpc" }
 
@@ -69,7 +69,7 @@ substrate-build-script-utils = { version = "2.0.0" }
 # frame-benchmarking-cli = { version = '2.0.0', optional = true }
 
 [features]
-default = ["db", "full-node"]
+default = ["db", "full-node", "with-fuxi-runtime"]
 
 db        = ["sc-service/db"]
 full-node = []
@@ -82,4 +82,15 @@ dev = [
 runtime-benchmarks = [
     "pangu-runtime/runtime-benchmarks",
     "fuxi-runtime/runtime-benchmarks",
+]
+
+with-pangu-runtime = [
+    "pangu-runtime",
+]
+with-fuxi-runtime = [
+    "fuxi-runtime",
+]
+with-all-runtime = [
+    "with-pangu-runtime",
+    "with-fuxi-runtime",
 ]

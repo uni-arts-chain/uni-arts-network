@@ -130,6 +130,7 @@ std = [
     "pallet-indices/std",
     "pallet-recovery/std",
     "pallet-nicks/std",
+    "pallet-assets/std",
     "sp-api/std",
     "sp-block-builder/std",
     "sp-consensus-aura/std",

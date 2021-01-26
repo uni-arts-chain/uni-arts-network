@@ -57,11 +57,11 @@ impl SubstrateCli for Cli {
 	fn load_spec(&self, id: &str) -> Result<Box<dyn sc_service::ChainSpec>, String> {
 		let id = if id.is_empty() {
 			let n = get_exec_name().unwrap_or_default();
-			["uniarts", "pangu", "fuxi"]
+			["uart", "pangu", "fuxi"]
 				.iter()
 				.cloned()
 				.find(|&chain| n.starts_with(chain))
-				.unwrap_or("uniarts")
+				.unwrap_or("uart")
 		} else {
 			id
 		};
@@ -70,6 +70,7 @@ impl SubstrateCli for Cli {
 			"dev" => Box::new(uniarts_service::chain_spec::pangu_development_config()?),
 			"" | "local" => Box::new(uniarts_service::chain_spec::pangu_local_testnet_config()?),
 			"staging" => Box::new(uniarts_service::chain_spec::staging_config()?),
+			"uart" => Box::new(uniarts_service::chain_spec::pangu_config()?),
 			"pangu" => Box::new(uniarts_service::chain_spec::pangu_config()?),
 			"fuxi" => Box::new(uniarts_service::chain_spec::fuxi_config()?),
 			path => Box::new(uniarts_service::chain_spec::PanguChainSpec::from_json_file(

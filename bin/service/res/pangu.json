@@ -1,6 +1,6 @@
 {
-  "name": "Uni-Arts network",
-  "id": "pangu",
+  "name": "Uni-Arts Staging network",
+  "id": "uart",
   "chainType": "Live",
   "bootNodes": [],
   "telemetryEndpoints": [

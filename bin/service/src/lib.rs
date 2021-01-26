@@ -69,7 +69,7 @@ pub trait IdentifyVariant {
 }
 impl IdentifyVariant for Box<dyn ChainSpec> {
     fn is_pangu_network(&self) -> bool {
-        self.id().starts_with("pangu")
+        self.id().starts_with("pangu") || self.id().starts_with("uart")
     }
 
     fn is_fuxi_network(&self) -> bool {

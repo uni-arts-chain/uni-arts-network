@@ -33,12 +33,12 @@ use substrate_prometheus_endpoint::Registry;
 type FullClient<RuntimeApi, Executor> = sc_service::TFullClient<Block, RuntimeApi, Executor>;
 type FullBackend = sc_service::TFullBackend<Block>;
 type FullSelectChain = sc_consensus::LongestChain<FullBackend, Block>;
-type FullGrandpaBlockImport<RuntimeApi, Executor> = sc_finality_grandpa::GrandpaBlockImport<
-    FullBackend,
-    Block,
-    FullClient<RuntimeApi, Executor>,
-    FullSelectChain,
->;
+// type FullGrandpaBlockImport<RuntimeApi, Executor> = sc_finality_grandpa::GrandpaBlockImport<
+//     FullBackend,
+//     Block,
+//     FullClient<RuntimeApi, Executor>,
+//     FullSelectChain,
+// >;
 type LightBackend = sc_service::TLightBackendWithHash<Block, BlakeTwo256>;
 type LightClient<RuntimeApi, Executor> =
 sc_service::TLightClientWithBackend<Block, RuntimeApi, Executor, LightBackend>;

@@ -1,6 +1,6 @@
 {
-  "name": "Uni-Arts Staging network",
-  "id": "uart",
+  "name": "Uni-Arts network",
+  "id": "fuxi",
   "chainType": "Live",
   "bootNodes": [],
   "telemetryEndpoints": [

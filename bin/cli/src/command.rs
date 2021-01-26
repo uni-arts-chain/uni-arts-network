@@ -15,15 +15,17 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 // --- std ---
-use std::path::PathBuf;
+// use std::path::PathBuf;
 
 use crate::cli::{Cli, Subcommand};
 use sc_cli::{SubstrateCli, RuntimeVersion, Role, ChainSpec};
-use sc_service::PartialComponents;
+// use sc_service::PartialComponents;
 use sp_core::crypto::Ss58AddressFormat;
-use uniarts_primitives::{OpaqueBlock as Block};
+// use uniarts_primitives::{OpaqueBlock as Block};
 use uniarts_service::{pangu_runtime, fuxi_runtime, IdentifyVariant};
 use log::info;
+
+const UNI_ARTS_ADDRESS_FORMAT_ID: u8 = 45;
 
 impl SubstrateCli for Cli {
 	fn impl_name() -> String {
@@ -100,7 +102,7 @@ fn set_default_ss58_version(spec: &Box<dyn uniarts_service::ChainSpec>) {
 	} else if spec.is_fuxi_network() {
 		// todo
 		// Waiting for release: uniart address id
-		Ss58AddressFormat::SubstrateAccount
+		Ss58AddressFormat::Custom(UNI_ARTS_ADDRESS_FORMAT_ID)
 	} else {
 		Ss58AddressFormat::SubstrateAccount
 	};

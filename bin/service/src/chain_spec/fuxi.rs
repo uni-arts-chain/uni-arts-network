@@ -1,11 +1,15 @@
 use sp_core::{Pair, Public, crypto::UncheckedInto, sr25519};
 
-use pangu_runtime::{
+use super::testnet_accounts;
+use fuxi_runtime::{
 	get_all_module_accounts,
-	AccountId, BalancesConfig, ContractsConfig, GenesisConfig, SessionConfig, ValidatorSetConfig, VestingConfig,
+	BalancesConfig, ContractsConfig, GenesisConfig, SessionConfig, ValidatorSetConfig, VestingConfig,
 	SudoConfig, SystemConfig, CouncilMembershipConfig, TechnicalMembershipConfig,
-	WASM_BINARY, Signature, Balance, constants::currency::*, opaque::SessionKeys
+	WASM_BINARY, Signature, opaque::SessionKeys
 };
+use fuxi_runtime::constants::currency::*;
+use uniarts_primitives::{AccountId, Balance};
+
 use sp_consensus_aura::sr25519::AuthorityId as AuraId;
 use sp_finality_grandpa::AuthorityId as GrandpaId;
 use sp_runtime::traits::{Verify, IdentifyAccount};
@@ -13,17 +17,11 @@ use sc_service::{ChainType, Properties};
 use hex_literal::hex;
 use sc_telemetry::TelemetryEndpoints;
 
-
-
-const DEFAULT_PROTOCOL_ID: &str = "uart";
-const TELEMETRY_URL: &str = "wss://telemetry.polkadot.io/submit/";
-
-
 // The URL for the telemetry server.
 // const STAGING_TELEMETRY_URL: &str = "wss://telemetry.polkadot.io/submit/";
 
 /// Specialized `ChainSpec`. This is a specialization of the general Substrate ChainSpec type.
-pub type ChainSpec = sc_service::GenericChainSpec<GenesisConfig>;
+pub type FuxiChainSpec = sc_service::GenericChainSpec<GenesisConfig>;
 
 /// Generate a crypto pair from seed.
 pub fn get_from_seed<TPublic: Public>(seed: &str) -> <TPublic::Pair as Pair>::Public {
@@ -71,11 +69,11 @@ pub fn properties() -> Option<Properties> {
 	serde_json::from_value(properties).ok()
 }
 
-pub fn pangu_config() -> Result<ChainSpec, String> {
-	ChainSpec::from_json_bytes(&include_bytes!("../res/pangu.json")[..])
+pub fn fuxi_config() -> Result<FuxiChainSpec, String> {
+	FuxiChainSpec::from_json_bytes(&include_bytes!("../../res/fuxi.json")[..])
 }
 
-pub fn staging_config() -> Result<ChainSpec, String> {
+pub fn fuxi_staging_config() -> Result<FuxiChainSpec, String> {
 	let wasm_binary = WASM_BINARY.ok_or("Staging wasm binary not available".to_string())?;
 
 	let initial_authorities: Vec<(AccountId, AccountId, AuraId, GrandpaId)> = vec![
@@ -118,11 +116,11 @@ pub fn staging_config() -> Result<ChainSpec, String> {
 
 	let sudo_key: AccountId = hex!("4447c1a629b6261a461eed4355f47d30658fb1f8ee20cf5839ab1893d98b4f5e").into();
 
-	Ok(ChainSpec::from_genesis(
+	Ok(FuxiChainSpec::from_genesis(
 		// Name
 		"Uni-Arts Staging network",
 		// ID
-		"uart",
+		"fuxi_staging",
 		ChainType::Live,
 		move || testnet_genesis(
 			wasm_binary,
@@ -140,11 +138,11 @@ pub fn staging_config() -> Result<ChainSpec, String> {
 		vec![],
 		// Telemetry
 		Some(
-			TelemetryEndpoints::new(vec![(TELEMETRY_URL.to_string(), 0)])
+			TelemetryEndpoints::new(vec![(super::TELEMETRY_URL.to_string(), 0)])
 				.expect("telemetry url is valid; qed"),
 		),
 		// Protocol ID
-		Some(DEFAULT_PROTOCOL_ID),
+		Some(super::DEFAULT_PROTOCOL_ID),
 		// Properties
 		properties(),
 		// Extensions
@@ -152,14 +150,14 @@ pub fn staging_config() -> Result<ChainSpec, String> {
 	))
 }
 
-pub fn development_config() -> Result<ChainSpec, String> {
+pub fn fuxi_development_config() -> Result<FuxiChainSpec, String> {
 	let wasm_binary = WASM_BINARY.ok_or("Development wasm binary not available".to_string())?;
 
-	Ok(ChainSpec::from_genesis(
+	Ok(FuxiChainSpec::from_genesis(
 		// Name
 		"Development",
 		// ID
-		"dev",
+		"fuxi_dev",
 		ChainType::Development,
 		move || testnet_genesis(
 			wasm_binary,
@@ -201,14 +199,15 @@ pub fn development_config() -> Result<ChainSpec, String> {
 	))
 }
 
-pub fn local_testnet_config() -> Result<ChainSpec, String> {
+pub fn fuxi_local_testnet_config() -> Result<FuxiChainSpec, String> {
 	let wasm_binary = WASM_BINARY.ok_or("Development wasm binary not available".to_string())?;
+	let endowed_accounts: Vec<AccountId> = testnet_accounts();
 
-	Ok(ChainSpec::from_genesis(
+	Ok(FuxiChainSpec::from_genesis(
 		// Name
 		"Local Testnet",
 		// ID
-		"local_testnet",
+		"fuxi_local_testnet",
 		ChainType::Local,
 		move || testnet_genesis(
 			wasm_binary,
@@ -220,20 +219,7 @@ pub fn local_testnet_config() -> Result<ChainSpec, String> {
 			// Sudo account
 			get_account_id_from_seed::<sr25519::Public>("Alice"),
 			// Pre-funded accounts
-			vec![
-				get_account_id_from_seed::<sr25519::Public>("Alice"),
-				get_account_id_from_seed::<sr25519::Public>("Bob"),
-				get_account_id_from_seed::<sr25519::Public>("Charlie"),
-				get_account_id_from_seed::<sr25519::Public>("Dave"),
-				get_account_id_from_seed::<sr25519::Public>("Eve"),
-				get_account_id_from_seed::<sr25519::Public>("Ferdie"),
-				get_account_id_from_seed::<sr25519::Public>("Alice//stash"),
-				get_account_id_from_seed::<sr25519::Public>("Bob//stash"),
-				get_account_id_from_seed::<sr25519::Public>("Charlie//stash"),
-				get_account_id_from_seed::<sr25519::Public>("Dave//stash"),
-				get_account_id_from_seed::<sr25519::Public>("Eve//stash"),
-				get_account_id_from_seed::<sr25519::Public>("Ferdie//stash"),
-			].iter().map(|k| (k.clone(), 100_000 * UART )).chain(
+			endowed_accounts.iter().map(|k| (k.clone(), 100_000 * UART )).chain(
 				get_all_module_accounts()
 					.iter()
 					.map(|x| (x.clone(), 100_000_000 * UART)),

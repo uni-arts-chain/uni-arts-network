@@ -3,8 +3,8 @@
 use codec::{Decode, Encode};
 use sp_runtime::{
     generic,
-    traits::{IdentifyAccount, Verify},
-    MultiSignature, RuntimeDebug,
+    traits::{IdentifyAccount, Verify, BlakeTwo256},
+    MultiSignature, RuntimeDebug, OpaqueExtrinsic,
 };
 
 #[cfg(feature = "std")]
@@ -15,6 +15,10 @@ pub type BlockNumber = u32;
 
 /// Alias to 512-bit hash when used in the context of a transaction signature on the chain.
 pub type Signature = MultiSignature;
+
+/// Alias to the public key used for this chain, actually a `MultiSigner`. Like the signature, this
+/// also isn't a fixed size when encoded, as different cryptos have different size public keys.
+pub type AccountPublic = <Signature as Verify>::Signer;
 
 /// Some way of identifying an account on the chain. We intentionally make it equivalent
 /// to the public key of our transaction signing scheme.
@@ -33,8 +37,20 @@ pub type Index = u32;
 /// A hash of some data used by the chain.
 pub type Hash = sp_core::H256;
 
+/// Index of a transaction in the relay chain. 32-bit should be plenty.
+pub type Nonce = u32;
+
 /// Digest item type.
 pub type DigestItem = generic::DigestItem<Hash>;
+
+/// Header type.
+pub type Header = generic::Header<BlockNumber, BlakeTwo256>;
+
+/// Block type.
+pub type OpaqueBlock = generic::Block<Header, OpaqueExtrinsic>;
+
+/// AuraId type.
+pub type AuraId = sp_consensus_aura::sr25519::AuthorityId;
 
 #[derive(Encode, Decode, Eq, PartialEq, Copy, Clone, RuntimeDebug, PartialOrd, Ord)]
 #[cfg_attr(feature = "std", derive(Serialize, Deserialize))]

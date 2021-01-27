@@ -26,7 +26,7 @@ RUN	rustup uninstall stable && \
 
 RUN mkdir uniarts_chain
 WORKDIR /uniarts_chain
-COPY node  ./node/
+COPY bin  ./bin/
 COPY pallets ./pallets/
 COPY runtime ./runtime/
 COPY scripts ./scripts/

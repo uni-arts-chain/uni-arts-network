@@ -8202,7 +8202,7 @@ dependencies = [
 
 [[package]]
 name = "uniarts-cli"
-version = "0.1.0"
+version = "1.0.0"
 dependencies = [
  "frame-benchmarking-cli",
  "log",
@@ -8246,7 +8246,7 @@ dependencies = [
 
 [[package]]
 name = "uniarts-rpc"
-version = "0.1.0"
+version = "1.0.0"
 dependencies = [
  "jsonrpc-core",
  "pallet-contracts-rpc",
@@ -8281,7 +8281,7 @@ dependencies = [
 
 [[package]]
 name = "uniarts-service"
-version = "0.1.0"
+version = "1.0.0"
 dependencies = [
  "frame-benchmarking",
  "frame-benchmarking-cli",

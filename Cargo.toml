@@ -6,6 +6,9 @@ panic = 'unwind'
 members = [
     'bin',
     'primitives',
+    'primitives/evm',
+    'primitives/consensus',
+    'primitives/rpc',
     'runtime/pangu',
     'runtime/fuxi',
     'pallets/common',
@@ -17,4 +20,6 @@ members = [
     'pallets/validator-set',
     'pallets/staking',
     'pallets/rewards',
+    'pallets/ethereum',
+    'pallets/evm',
 ]

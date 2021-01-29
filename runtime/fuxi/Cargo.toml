@@ -58,6 +58,7 @@ pallet-elections-phragmen = { version = "2.0.0", default-features = false }
 pallet-contracts = { version = "2.0.0", default-features = false }
 pallet-contracts-primitives = { version = "2.0.0", default-features = false }
 pallet-contracts-rpc-runtime-api = { version = "0.8.0", default-features = false }
+pallet-evm = { version = "2.0.0", default-features = false }
 
 # Used for RPCs
 pallet-transaction-payment-rpc-runtime-api = { version = "2.0.0", default-features = false }
@@ -74,6 +75,7 @@ pallet-staking = { path = "../../pallets/staking", default-features = false }
 pallet-validator-set = { path = "../../pallets/validator-set", default-features = false }
 pallet-token = { path = "../../pallets/token", default-features = false }
 pallet-trade = { path = "../../pallets/trade", default-features = false }
+pallet-ethereum = { path = "../../pallets/ethereum", default-features = false }
 # pallet-lotteries = { path = "../../pallets/lotteries", default-features = false }
 primitives = { package = "uniarts-primitives", path = "../../primitives", default-features = false }
 
@@ -131,6 +133,8 @@ std = [
     "pallet-recovery/std",
     "pallet-nicks/std",
     "pallet-assets/std",
+    "pallet-ethereum/std",
+    "pallet-evm/std",
     "sp-api/std",
     "sp-block-builder/std",
     "sp-consensus-aura/std",

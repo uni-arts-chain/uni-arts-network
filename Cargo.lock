@@ -1331,6 +1331,7 @@ checksum = "71a6567e6fd35589fea0c63b94b4cf2e55573e413901bdbe60ab15cf0e25e5df"
 dependencies = [
  "crunchy",
  "fixed-hash 0.6.1",
+ "impl-codec",
  "impl-rlp 0.2.1",
  "impl-serde",
  "tiny-keccak",
@@ -1391,6 +1392,7 @@ checksum = "473aecff686bd8e7b9db0165cbbb53562376b39bf35b427f0c60446a9e1634b0"
 dependencies = [
  "ethbloom 0.9.2",
  "fixed-hash 0.6.1",
+ "impl-codec",
  "impl-rlp 0.2.1",
  "impl-serde",
  "primitive-types 0.7.3",
@@ -1427,6 +1429,24 @@ dependencies = [
  "evm-core 0.17.2",
  "evm-gasometer 0.17.2",
  "evm-runtime 0.17.2",
+ "log",
+ "parity-scale-codec",
+ "primitive-types 0.7.3",
+ "rlp 0.4.6",
+ "serde",
+ "sha3 0.8.2",
+]
+
+[[package]]
+name = "evm"
+version = "0.20.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "52494176f51e37ac07f10f0368a162391a3c368d6c859b69d4ebc52cfc090952"
+dependencies = [
+ "ethereum 0.4.2",
+ "evm-core 0.20.0",
+ "evm-gasometer 0.20.0",
+ "evm-runtime 0.20.0",
  "log",
  "parity-scale-codec",
  "primitive-types 0.7.3",
@@ -1668,7 +1688,7 @@ dependencies = [
 name = "fp-evm"
 version = "0.8.0"
 dependencies = [
- "evm",
+ "evm 0.20.0",
  "impl-trait-for-tuples",
  "parity-scale-codec",
  "serde",
@@ -4190,7 +4210,7 @@ version = "0.1.0"
 dependencies = [
  "ethereum 0.6.0",
  "ethereum-types 0.10.0",
- "evm",
+ "evm 0.20.0",
  "fp-consensus",
  "fp-evm",
  "fp-rpc",
@@ -4215,7 +4235,7 @@ dependencies = [
 name = "pallet-evm"
 version = "2.0.0"
 dependencies = [
- "evm",
+ "evm 0.20.0",
  "evm-gasometer 0.20.0",
  "evm-runtime 0.20.0",
  "fp-evm",
@@ -4240,7 +4260,7 @@ version = "2.0.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "9b59d3bfd2c8199922b93cd71853ad809a9a1972f9016bd9c5fa4ed25a0ee4ba"
 dependencies = [
- "evm",
+ "evm 0.17.3",
  "frame-support",
  "frame-system",
  "impl-trait-for-tuples",

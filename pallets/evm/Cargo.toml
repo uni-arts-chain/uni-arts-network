@@ -19,6 +19,7 @@ primitive-types       = { version = "0.7.0", default-features = false, features 
 rlp                   = { version = "0.4", default-features = false }
 serde                 = { version = "1.0.118", optional = true, features = ["derive"] }
 sha3                  = { version = "0.8", default-features = false }
+log = "0.4.8"
 
 # uniarts
 pallet-balances = { version = "2.0.0", default-features = false }

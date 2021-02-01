@@ -15,10 +15,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use sp_std::vec::Vec;
-use sp_core::H160;
+use evm::{Context, ExitError, ExitSucceed};
 use impl_trait_for_tuples::impl_for_tuples;
-use evm::{ExitSucceed, ExitError, Context};
+use sp_core::H160;
+use sp_std::vec::Vec;
 
 /// Custom precompiles to be used by EVM engine.
 pub trait PrecompileSet {
@@ -30,9 +30,9 @@ pub trait PrecompileSet {
 	fn execute(
 		address: H160,
 		input: &[u8],
-		target_gas: Option<u64>,
+		target_gas: Option<usize>,
 		context: &Context,
-	) -> Option<core::result::Result<(ExitSucceed, Vec<u8>, u64), ExitError>>;
+	) -> Option<core::result::Result<(ExitSucceed, Vec<u8>, usize), ExitError>>;
 }
 
 /// One single precompile used by EVM engine.
@@ -42,9 +42,9 @@ pub trait Precompile {
 	/// successful. Otherwise return `Err(_)`.
 	fn execute(
 		input: &[u8],
-		target_gas: Option<u64>,
+		target_gas: Option<usize>,
 		context: &Context,
-	) -> core::result::Result<(ExitSucceed, Vec<u8>, u64), ExitError>;
+	) -> core::result::Result<(ExitSucceed, Vec<u8>, usize), ExitError>;
 }
 
 #[impl_for_tuples(16)]
@@ -55,9 +55,9 @@ impl PrecompileSet for Tuple {
 	fn execute(
 		address: H160,
 		input: &[u8],
-		target_gas: Option<u64>,
+		target_gas: Option<usize>,
 		context: &Context,
-	) -> Option<core::result::Result<(ExitSucceed, Vec<u8>, u64), ExitError>> {
+	) -> Option<core::result::Result<(ExitSucceed, Vec<u8>, usize), ExitError>> {
 		let mut index = 0;
 
 		for_tuples!( #(
@@ -72,22 +72,22 @@ impl PrecompileSet for Tuple {
 }
 
 pub trait LinearCostPrecompile {
-	const BASE: u64;
-	const WORD: u64;
+	const BASE: usize;
+	const WORD: usize;
 
 	fn execute(
 		input: &[u8],
-		cost: u64,
+		cost: usize,
 	) -> core::result::Result<(ExitSucceed, Vec<u8>), ExitError>;
 }
 
 impl<T: LinearCostPrecompile> Precompile for T {
 	fn execute(
 		input: &[u8],
-		target_gas: Option<u64>,
+		target_gas: Option<usize>,
 		_: &Context,
-	) -> core::result::Result<(ExitSucceed, Vec<u8>, u64), ExitError> {
-		let cost = ensure_linear_cost(target_gas, input.len() as u64, T::BASE, T::WORD)?;
+	) -> core::result::Result<(ExitSucceed, Vec<u8>, usize), ExitError> {
+		let cost = ensure_linear_cost(target_gas, input.len(), T::BASE, T::WORD)?;
 
 		let (succeed, out) = T::execute(input, cost)?;
 		Ok((succeed, out, cost))
@@ -96,18 +96,21 @@ impl<T: LinearCostPrecompile> Precompile for T {
 
 /// Linear gas cost
 fn ensure_linear_cost(
-	target_gas: Option<u64>,
-	len: u64,
-	base: u64,
-	word: u64
-) -> Result<u64, ExitError> {
-	let cost = base.checked_add(
-		word.checked_mul(len.saturating_add(31) / 32).ok_or(ExitError::OutOfGas)?
-	).ok_or(ExitError::OutOfGas)?;
+	target_gas: Option<usize>,
+	len: usize,
+	base: usize,
+	word: usize,
+) -> Result<usize, ExitError> {
+	let cost = base
+		.checked_add(
+			word.checked_mul(len.saturating_add(31) / 32)
+				.ok_or(ExitError::OutOfGas)?,
+		)
+		.ok_or(ExitError::OutOfGas)?;
 
 	if let Some(target_gas) = target_gas {
 		if cost > target_gas {
-			return Err(ExitError::OutOfGas)
+			return Err(ExitError::OutOfGas);
 		}
 	}
 

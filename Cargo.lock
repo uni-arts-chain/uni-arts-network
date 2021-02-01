@@ -1087,16 +1087,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "ctor"
-version = "0.1.18"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "10bcb9d7dcbf7002aaffbb53eac22906b64cdcc127971dcc387d8eb7c95d5560"
-dependencies = [
- "quote",
- "syn",
-]
-
-[[package]]
 name = "cuckoofilter"
 version = "0.3.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1330,21 +1320,10 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "71a6567e6fd35589fea0c63b94b4cf2e55573e413901bdbe60ab15cf0e25e5df"
 dependencies = [
  "crunchy",
- "fixed-hash 0.6.1",
+ "fixed-hash",
  "impl-codec",
  "impl-rlp",
  "impl-serde",
- "tiny-keccak",
-]
-
-[[package]]
-name = "ethbloom"
-version = "0.10.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "22a621dcebea74f2a6f2002d0a885c81ccf6cbdf86760183316a7722b5707ca4"
-dependencies = [
- "crunchy",
- "fixed-hash 0.7.0",
  "tiny-keccak",
 ]
 
@@ -1354,7 +1333,7 @@ version = "0.4.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "df706418ff7d3874b9506424b04ea0bef569a2b39412b43a27ea86e679be108e"
 dependencies = [
- "ethereum-types 0.9.2",
+ "ethereum-types",
  "hash-db",
  "hash256-std-hasher",
  "parity-scale-codec",
@@ -1371,7 +1350,7 @@ version = "0.5.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "01ea35e1b0845310ade8eb048d401b0b899b8eff05c4d2a3454d29ef4eb1b8af"
 dependencies = [
- "ethereum-types 0.9.2",
+ "ethereum-types",
  "hash-db",
  "hash256-std-hasher",
  "parity-scale-codec",
@@ -1388,25 +1367,13 @@ version = "0.9.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "473aecff686bd8e7b9db0165cbbb53562376b39bf35b427f0c60446a9e1634b0"
 dependencies = [
- "ethbloom 0.9.2",
- "fixed-hash 0.6.1",
+ "ethbloom",
+ "fixed-hash",
  "impl-codec",
  "impl-rlp",
  "impl-serde",
- "primitive-types 0.7.3",
- "uint 0.8.5",
-]
-
-[[package]]
-name = "ethereum-types"
-version = "0.10.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "05dc5f0df4915fa6dff7f975a8366ecfaaa8959c74235469495153e7bb1b280e"
-dependencies = [
- "ethbloom 0.10.0",
- "fixed-hash 0.7.0",
- "primitive-types 0.8.0",
- "uint 0.9.0",
+ "primitive-types",
+ "uint",
 ]
 
 [[package]]
@@ -1427,7 +1394,7 @@ dependencies = [
  "evm-runtime 0.17.2",
  "log",
  "parity-scale-codec",
- "primitive-types 0.7.3",
+ "primitive-types",
  "rlp 0.4.6",
  "serde",
  "sha3 0.8.2",
@@ -1445,7 +1412,7 @@ dependencies = [
  "evm-runtime 0.20.0",
  "log",
  "parity-scale-codec",
- "primitive-types 0.7.3",
+ "primitive-types",
  "rlp 0.4.6",
  "serde",
  "sha3 0.8.2",
@@ -1458,7 +1425,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "cf2d732b3c36df36833761cf67df8f65866be1d368d20508bc3e13e6f256c8c5"
 dependencies = [
  "log",
- "primitive-types 0.7.3",
+ "primitive-types",
 ]
 
 [[package]]
@@ -1468,7 +1435,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "cad7ff84008aa24272cf3e9f7a71054271ede93613665cd9fdfa65447ae6e017"
 dependencies = [
  "parity-scale-codec",
- "primitive-types 0.7.3",
+ "primitive-types",
  "serde",
 ]
 
@@ -1480,7 +1447,7 @@ checksum = "46de1b91ccd744627484183729f1b5af484b3bf15505007fc28cc54264cb9ea1"
 dependencies = [
  "evm-core 0.17.2",
  "evm-runtime 0.17.2",
- "primitive-types 0.7.3",
+ "primitive-types",
 ]
 
 [[package]]
@@ -1491,7 +1458,7 @@ checksum = "8aed6fc83d542d58a63b7827bd9e4808e1e2a9324b503c255f9e2acccfa0bef9"
 dependencies = [
  "evm-core 0.20.0",
  "evm-runtime 0.20.0",
- "primitive-types 0.7.3",
+ "primitive-types",
 ]
 
 [[package]]
@@ -1501,7 +1468,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "f2c1d1ffe96f833788512c890d702457d790dba4917ac6f64f8f60fbd9bc40b8"
 dependencies = [
  "evm-core 0.17.2",
- "primitive-types 0.7.3",
+ "primitive-types",
  "sha3 0.8.2",
 ]
 
@@ -1512,7 +1479,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "507a6d0c3377f34335a264b387e13dc56c7946c34073e0c1250b923018bdf3fa"
 dependencies = [
  "evm-core 0.20.0",
- "primitive-types 0.7.3",
+ "primitive-types",
  "sha3 0.8.2",
 ]
 
@@ -1615,18 +1582,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "fixed-hash"
-version = "0.7.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "cfcf0ed7fe52a17a03854ec54a9f76d6d84508d1c0e66bc1793301c73fc8493c"
-dependencies = [
- "byteorder 1.4.2",
- "rand 0.8.3",
- "rustc-hex",
- "static_assertions",
-]
-
-[[package]]
 name = "fixedbitset"
 version = "0.2.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1698,7 +1653,7 @@ name = "fp-rpc"
 version = "0.1.0"
 dependencies = [
  "ethereum 0.5.1",
- "ethereum-types 0.9.2",
+ "ethereum-types",
  "fp-evm",
  "parity-scale-codec",
  "sp-api",
@@ -3209,7 +3164,7 @@ dependencies = [
  "rand 0.7.3",
  "sha2 0.8.2",
  "smallvec 1.6.1",
- "uint 0.8.5",
+ "uint",
  "unsigned-varint 0.4.0",
  "void",
  "wasm-timer",
@@ -3527,12 +3482,11 @@ dependencies = [
 
 [[package]]
 name = "log"
-version = "0.4.14"
+version = "0.4.11"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "51b9bbe6c47d51fc3e1a9b945965946b4c44142ab8792c50835a980d362c2710"
+checksum = "4fabed175da42fed1fa0746b0ea71f412aa9d35e76e95e59b192c64b9dc2bf8b"
 dependencies = [
- "cfg-if 1.0.0",
- "value-bag",
+ "cfg-if 0.1.10",
 ]
 
 [[package]]
@@ -4197,7 +4151,7 @@ name = "pallet-ethereum"
 version = "0.1.0"
 dependencies = [
  "ethereum 0.5.1",
- "ethereum-types 0.10.0",
+ "ethereum-types",
  "evm 0.20.0",
  "fp-consensus",
  "fp-evm",
@@ -4210,7 +4164,7 @@ dependencies = [
  "pallet-evm 2.0.0",
  "pallet-timestamp",
  "parity-scale-codec",
- "rlp 0.5.0",
+ "rlp 0.4.6",
  "rustc-hex",
  "serde",
  "sha3 0.8.2",
@@ -4234,7 +4188,7 @@ dependencies = [
  "pallet-balances",
  "pallet-timestamp",
  "parity-scale-codec",
- "primitive-types 0.7.3",
+ "primitive-types",
  "rlp 0.4.6",
  "serde",
  "sha3 0.8.2",
@@ -4257,7 +4211,7 @@ dependencies = [
  "pallet-balances",
  "pallet-timestamp",
  "parity-scale-codec",
- "primitive-types 0.7.3",
+ "primitive-types",
  "ripemd160",
  "rlp 0.4.6",
  "serde",
@@ -4921,7 +4875,7 @@ dependencies = [
  "jemallocator",
  "parity-util-mem-derive",
  "parking_lot 0.10.2",
- "primitive-types 0.7.3",
+ "primitive-types",
  "smallvec 1.6.1",
  "winapi 0.3.9",
 ]
@@ -5239,22 +5193,11 @@ version = "0.7.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "7dd39dcacf71411ba488570da7bbc89b717225e46478b30ba99b92db6b149809"
 dependencies = [
- "fixed-hash 0.6.1",
+ "fixed-hash",
  "impl-codec",
  "impl-rlp",
  "impl-serde",
- "uint 0.8.5",
-]
-
-[[package]]
-name = "primitive-types"
-version = "0.8.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b3824ae2c5e27160113b9e029a10ec9e3f0237bad8029f69c7724393c9fdefd8"
-dependencies = [
- "fixed-hash 0.7.0",
- "impl-codec",
- "uint 0.9.0",
+ "uint",
 ]
 
 [[package]]
@@ -7372,7 +7315,7 @@ dependencies = [
  "parity-scale-codec",
  "parity-util-mem",
  "parking_lot 0.10.2",
- "primitive-types 0.7.3",
+ "primitive-types",
  "rand 0.7.3",
  "regex",
  "schnorrkel",
@@ -7588,7 +7531,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "8fb6574401a7b5c89111b417efecbc9f0c3d38c2c539ce3a964b8393769c3e15"
 dependencies = [
  "parity-scale-codec",
- "primitive-types 0.7.3",
+ "primitive-types",
  "sp-externalities",
  "sp-runtime-interface-proc-macro",
  "sp-std",
@@ -8599,18 +8542,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "uint"
-version = "0.9.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e11fe9a9348741cf134085ad57c249508345fe16411b3d7fb4ff2da2f1d6382e"
-dependencies = [
- "byteorder 1.4.2",
- "crunchy",
- "hex",
- "static_assertions",
-]
-
-[[package]]
 name = "uniarts-cli"
 version = "1.0.0"
 dependencies = [
@@ -8847,15 +8778,6 @@ dependencies = [
  "idna 0.2.0",
  "matches",
  "percent-encoding 2.1.0",
-]
-
-[[package]]
-name = "value-bag"
-version = "1.0.0-alpha.6"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "6b676010e055c99033117c2343b33a40a30b91fecd6c49055ac9cd2d6c305ab1"
-dependencies = [
- "ctor",
 ]
 
 [[package]]

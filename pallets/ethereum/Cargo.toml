@@ -22,13 +22,14 @@ sp-std = { version = "2.0.0", default-features = false }
 sp-io = { version = "2.0.0", default-features = false }
 evm = { version = "0.20.0", default-features = false, features = ["with-codec"] }
 ethereum = { version = "0.5.1", default-features = false, features = ["with-codec"] }
-ethereum-types = { version = "0.10", default-features = false }
-rlp = { version = "0.5", default-features = false }
+ethereum-types = { version = "0.9", default-features = false }
+rlp = { version = "0.4", default-features = false }
 sha3 = { version = "0.8", default-features = false }
 libsecp256k1 = { version = "0.3", default-features = false }
+
 fp-consensus = { path = "../../primitives/consensus", default-features = false }
 fp-rpc = { path = "../../primitives/rpc", default-features = false }
-fp-evm = { version = "0.8.0", default-features = false, path = "../../primitives/evm" }
+fp-evm = { path = "../../primitives/evm", default-features = false }
 
 [dev-dependencies]
 sp-core = { version = "2.0.0" }

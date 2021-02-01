@@ -4,7 +4,7 @@ use super::testnet_accounts;
 use fuxi_runtime::{
 	get_all_module_accounts,
 	BalancesConfig, ContractsConfig, GenesisConfig, SessionConfig, ValidatorSetConfig, VestingConfig,
-	SudoConfig, SystemConfig, CouncilMembershipConfig, TechnicalMembershipConfig,
+	SudoConfig, SystemConfig, CouncilMembershipConfig, TechnicalMembershipConfig, EVMConfig,
 	WASM_BINARY, Signature, opaque::SessionKeys
 };
 use fuxi_runtime::constants::currency::*;
@@ -16,6 +16,7 @@ use sp_runtime::traits::{Verify, IdentifyAccount};
 use sc_service::{ChainType, Properties};
 use hex_literal::hex;
 use sc_telemetry::TelemetryEndpoints;
+use std::collections::BTreeMap;
 
 // The URL for the telemetry server.
 // const STAGING_TELEMETRY_URL: &str = "wss://telemetry.polkadot.io/submit/";
@@ -296,5 +297,9 @@ fn testnet_genesis(
 			phantom: Default::default(),
 		}),
 		pallet_treasury: Some(Default::default()),
+		pallet_evm: Some(EVMConfig {
+			accounts: BTreeMap::new(),
+		}),
+		pallet_ethereum: Some(Default::default()),
 	}
 }

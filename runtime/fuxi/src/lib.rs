@@ -13,8 +13,8 @@ mod weights;
 
 // --- crates ---
 use codec::{Decode, Encode};
-use sp_std::prelude::*;
-use sp_core::{crypto::KeyTypeId, OpaqueMetadata};
+use sp_std::{convert::TryFrom, marker::PhantomData, prelude::*};
+use sp_core::{crypto::KeyTypeId, OpaqueMetadata, H160, U256};
 use sp_runtime::{
 	ApplyExtrinsicResult, generic, create_runtime_str, impl_opaque_keys, RuntimeDebug,
 	transaction_validity::{TransactionValidity, TransactionSource}
@@ -33,6 +33,14 @@ use sp_version::RuntimeVersion;
 use pallet_contracts_rpc_runtime_api::ContractExecResult;
 #[cfg(feature = "std")]
 use sp_version::NativeVersion;
+
+// evm
+use pallet_ethereum::Call::transact;
+use pallet_ethereum::account_basic::UVMAccountBasicMapping;
+use pallet_evm::{
+	Account as EVMAccount, EnsureAddressNever, FeeCalculator, EnsureAddressTruncated,
+	ConcatAddressMapping, Runner,
+};
 
 // Uni-Arts
 use constants::{currency::*};
@@ -423,6 +431,22 @@ impl FindAuthor<AccountId> for AuraAccountAdapter {
 	}
 }
 
+pub struct EthereumFindAuthor<F>(PhantomData<F>);
+
+impl<F: FindAuthor<u32>> FindAuthor<H160> for EthereumFindAuthor<F> {
+	fn find_author<'a, I>(digests: I) -> Option<H160>
+		where
+			I: 'a + IntoIterator<Item = (ConsensusEngineId, &'a [u8])>,
+	{
+		if let Some(author_index) = F::find_author(digests) {
+			let validator = pallet_session::Module::<Runtime>::validators()[author_index as usize].clone();
+			let account = AccountIdOf::convert(validator).unwrap();
+			return Some(H160::from_slice(&account.encode()[4..24]));
+		}
+		None
+	}
+}
+
 pub struct DealWithFees;
 
 impl OnUnbalanced<NegativeImbalance<Runtime>> for DealWithFees {
@@ -486,6 +510,86 @@ impl pallet_sudo::Trait for Runtime {
 // 	type Event = Event;
 // 	type WorkId = u32;
 // }
+
+/// Current approximation of the gas/s consumption considering
+/// EVM execution over compiled WASM (on 4.4Ghz CPU).
+/// Given the 500ms Weight, from which 75% only are used for transactions,
+/// the total EVM execution gas limit is: GAS_PER_SECOND * 0.500 * 0.75 => 6_000_000.
+pub const GAS_PER_SECOND: u64 = 16_000_000;
+
+/// Approximate ratio of the amount of Weight per Gas.
+/// u64 works for approximations because Weight is a very small unit compared to gas.
+pub const WEIGHT_PER_GAS: u64 = WEIGHT_PER_SECOND / GAS_PER_SECOND;
+
+parameter_types! {
+	pub const EthereumChainId: u64 = 45;
+}
+
+pub struct UniartsGasWeightMapping;
+
+impl pallet_evm::GasWeightMapping for UniartsGasWeightMapping {
+	fn gas_to_weight(gas: usize) -> Weight {
+		Weight::try_from((gas as u64).saturating_mul(WEIGHT_PER_GAS)).unwrap_or(Weight::MAX)
+	}
+	fn weight_to_gas(weight: Weight) -> usize {
+		usize::try_from(weight.wrapping_div(WEIGHT_PER_GAS)).unwrap_or(usize::MAX)
+	}
+}
+
+
+impl pallet_evm::Trait for Runtime {
+	type FeeCalculator = ();
+	type GasWeightMapping = UniartsGasWeightMapping;
+	type CallOrigin = EnsureAddressTruncated;
+	type WithdrawOrigin = EnsureAddressNever<AccountId>;
+	type AddressMapping = ConcatAddressMapping;
+	type AccountBasicMapping = UVMAccountBasicMapping<Self>;
+	type Currency = Uart;
+	type Event = Event;
+	type Runner = pallet_evm::runner::stack::Runner<Self>;
+	type Precompiles = (
+		pallet_evm_precompile_simple::ECRecover,
+		pallet_evm_precompile_simple::Sha256,
+		pallet_evm_precompile_simple::Ripemd160,
+		pallet_evm_precompile_simple::Identity,
+	);
+	type ChainId = EthereumChainId;
+}
+
+pub struct TransactionConverter;
+
+impl fp_rpc::ConvertTransaction<UncheckedExtrinsic> for TransactionConverter {
+	fn convert_transaction(&self, transaction: pallet_ethereum::Transaction) -> UncheckedExtrinsic {
+		UncheckedExtrinsic::new_unsigned(
+			pallet_ethereum::Call::<Runtime>::transact(transaction).into(),
+		)
+	}
+}
+
+impl fp_rpc::ConvertTransaction<opaque::UncheckedExtrinsic> for TransactionConverter {
+	fn convert_transaction(
+		&self,
+		transaction: pallet_ethereum::Transaction,
+	) -> opaque::UncheckedExtrinsic {
+		let extrinsic = UncheckedExtrinsic::new_unsigned(
+			pallet_ethereum::Call::<Runtime>::transact(transaction).into(),
+		);
+		let encoded = extrinsic.encode();
+		opaque::UncheckedExtrinsic::decode(&mut &encoded[..])
+			.expect("Encoded extrinsic is always valid")
+	}
+}
+
+parameter_types! {
+	pub BlockGasLimit: U256 = U256::from(u32::max_value());
+}
+
+impl pallet_ethereum::Trait for Runtime {
+	type Event = Event;
+	type FindAuthor = EthereumFindAuthor<Aura>;
+	type StateRoot = pallet_ethereum::IntermediateStateRoot;
+	type BlockGasLimit = BlockGasLimit;
+}
 
 impl pallet_assets::Trait for Runtime {
 	type Event = Event;
@@ -1028,6 +1132,8 @@ construct_runtime!(
 		Proxy: pallet_proxy::{Module, Call, Storage, Event<T>},
 		Multisig: pallet_multisig::{Module, Call, Storage, Event<T>},
 		Recovery: pallet_recovery::{Module, Call, Storage, Event<T>},
+		EVM: pallet_evm::{Module, Config, Call, Storage, Event<T>},
+		Ethereum: pallet_ethereum::{Module, Call, Storage, Event, Config, ValidateUnsigned},
 	}
 );
 

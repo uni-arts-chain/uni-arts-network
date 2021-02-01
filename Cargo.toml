@@ -5,6 +5,9 @@ panic = 'unwind'
 [workspace]
 members = [
     'bin',
+    'client/consensus',
+    'client/rpc-core',
+    'client/rpc',
     'primitives',
     'primitives/evm',
     'primitives/consensus',

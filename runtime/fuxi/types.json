@@ -30,12 +30,19 @@
     "result": "Option<LottoResult<AccountId, Balance>>"
   },
   "CurrencyId": {
+    "_enum": {
+      "Native": "Null",
+      "UINK": "Null",
+      "DOT": "Null",
+      "KSM": "Null",
+      "ETH": "Null",
+      "Token": "TokenSymbol"
+    }
+  },
+  "TokenSymbol": {
     "_enum": [
-      "Native",
-      "UINK",
-      "DOT",
-      "KSM",
-      "ETH"
+      "USDT",
+      "DAI"
     ]
   },
   "CurrencyIdOf": "CurrencyId",

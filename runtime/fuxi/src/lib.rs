@@ -33,6 +33,7 @@ use sp_version::RuntimeVersion;
 use pallet_contracts_rpc_runtime_api::ContractExecResult;
 #[cfg(feature = "std")]
 use sp_version::NativeVersion;
+use orml_currencies::BasicCurrencyAdapter;
 
 // Uni-Arts
 use constants::{currency::*};
@@ -58,12 +59,11 @@ pub use frame_support::{
 
 pub use primitives::{
 	BlockNumber, Signature, AccountId, AccountIndex, Balance, Index, Hash, DigestItem,
-	TokenSymbol, CurrencyId,
+	TokenSymbol, CurrencyId, Amount,
 };
 
 /// Import pallets.
 // pub use pallet_certificate;
-pub use pallet_assets;
 pub use pallet_nft;
 pub use pallet_nicks;
 pub use pallet_rewards;
@@ -223,7 +223,7 @@ parameter_types! {
 
 impl pallet_validator_set::Trait for Runtime {
 	type Event = Event;
-	type Currency = Balances;
+	type Currency = Uart;
 	type ValidatorMortgageLimit = ValidatorMortgageLimit;
 }
 
@@ -350,9 +350,6 @@ parameter_types! {
 	pub const MaxLocks: u32 = 50;
 }
 
-// type UartInstance = pallet_balances::Instance0;
-type UinkInstance = pallet_balances::Instance1;
-
 impl pallet_balances::Trait for Runtime {
 	/// The type for recording an account's balance.
 	type Balance = Balance;
@@ -375,26 +372,6 @@ impl pallet_balances::Trait for Runtime {
 // 	type AccountStore = System;
 // 	type WeightInfo = ();
 // }
-
-type UinkAccountStore = StorageMapShim<
-		pallet_balances::Account<Runtime, UinkInstance>,
-		frame_system::CallOnCreatedAccount<Runtime>,
-		frame_system::CallKillAccount<Runtime>,
-		AccountId,
-		pallet_balances::AccountData<Balance>
-	>;
-
-impl pallet_balances::Trait<UinkInstance> for Runtime {
-	/// The type for recording an account's balance.
-	type Balance = Balance;
-	/// The ubiquitous event type.
-	type Event = Event;
-	type DustRemoval = ();
-	type ExistentialDeposit = ExistentialDeposit;
-	type AccountStore = UinkAccountStore;
-	type WeightInfo = ();
-	type MaxLocks = MaxLocks;
-}
 
 parameter_types! {
 	pub const UncleGenerations: BlockNumber = 0;
@@ -482,16 +459,31 @@ impl pallet_sudo::Trait for Runtime {
 	type Call = Call;
 }
 
+impl orml_tokens::Trait for Runtime {
+	type Event = Event;
+	type Balance = Balance;
+	type Amount = Amount;
+	type CurrencyId = CurrencyId;
+	type OnReceived = ();
+	type WeightInfo = ();
+}
+
+parameter_types! {
+	pub const GetNativeCurrencyId: CurrencyId = CurrencyId::Native;
+}
+
+impl orml_currencies::Trait for Runtime {
+	type Event = Event;
+	type MultiCurrency = UniTokens;
+	type NativeCurrency = BasicCurrencyAdapter<Runtime, Balances, Amount, BlockNumber>;
+	type GetNativeCurrencyId = GetNativeCurrencyId;
+	type WeightInfo = ();
+}
+
 // impl pallet_certificate::Trait for Runtime {
 // 	type Event = Event;
 // 	type WorkId = u32;
 // }
-
-impl pallet_assets::Trait for Runtime {
-	type Event = Event;
-	type Balance = Balance;
-	type AssetId = u32;
-}
 
 impl pallet_token::Trait for Runtime {
 	type Event = Event;
@@ -895,7 +887,7 @@ parameter_types! {
 impl pallet_proxy::Trait for Runtime {
 	type Event = Event;
 	type Call = Call;
-	type Currency = Balances;
+	type Currency = Uart;
 	type ProxyType = ProxyType;
 	type ProxyDepositBase = ProxyDepositBase;
 	type ProxyDepositFactor = ProxyDepositFactor;
@@ -952,7 +944,7 @@ parameter_types! {
 impl pallet_recovery::Trait for Runtime {
 	type Event = Event;
 	type Call = Call;
-	type Currency = Balances;
+	type Currency = Uart;
 	type ConfigDepositBase = ConfigDepositBase;
 	type FriendDepositFactor = FriendDepositFactor;
 	type MaxFriends = MaxFriends;
@@ -1001,7 +993,10 @@ construct_runtime!(
 		Contracts: pallet_contracts::{Module, Call, Storage, Event<T>, Config},
 		// Lotteries: pallet_lotteries::{Module, Call, Storage, Event<T>},
 		// Uart: pallet_balances::<Instance0>::{Module, Call, Storage, Config<T>, Event<T>},
-		Uink: pallet_balances::<Instance1>::{Module, Call, Storage, Config<T>, Event<T>},
+
+		// Orml
+		Currencies: orml_currencies::{Module, Call, Event<T>},
+		UniTokens: orml_tokens::{Module, Storage, Event<T>, Config<T>},
 
 		// Governance
 		Council: pallet_collective::<Instance0>::{Module, Call, Storage, Origin<T>, Event<T>, Config<T>},
@@ -1019,7 +1014,6 @@ construct_runtime!(
 		TransactionPayment: pallet_transaction_payment::{Module, Storage},
 		Sudo: pallet_sudo::{Module, Call, Config<T>, Storage, Event<T>},
 
-		Assets: pallet_assets::{Module, Call, Storage, Event<T>},
 		Names: pallet_names::{Module, Call, Storage, Event<T>},
 		Nft: pallet_nft::{Module, Call, Storage, Event<T>},
 		Token: pallet_token::{Module, Call, Storage, Event<T>},

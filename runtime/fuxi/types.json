@@ -29,6 +29,18 @@
     "tickets": "BTreeMap<u32, AccountId>",
     "result": "Option<LottoResult<AccountId, Balance>>"
   },
+  "CurrencyId": {
+    "_enum": [
+      "Native",
+      "UINK",
+      "DOT",
+      "KSM",
+      "ETH"
+    ]
+  },
+  "CurrencyIdOf": "CurrencyId",
+  "Amount": "i128",
+  "AmountOf": "Amount",
   "NameData": {
     "value": "Value",
     "owner": "AccountId",

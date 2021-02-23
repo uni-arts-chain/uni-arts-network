@@ -4,7 +4,7 @@ use super::testnet_accounts;
 use fuxi_runtime::{
 	get_all_module_accounts,
 	BalancesConfig, ContractsConfig, GenesisConfig, SessionConfig, ValidatorSetConfig, VestingConfig,
-	SudoConfig, SystemConfig, CouncilMembershipConfig, TechnicalMembershipConfig,
+	SudoConfig, SystemConfig, CouncilMembershipConfig, TechnicalMembershipConfig, UniTokensConfig, CurrencyId,
 	WASM_BINARY, Signature, opaque::SessionKeys
 };
 use fuxi_runtime::constants::currency::*;
@@ -259,12 +259,11 @@ fn testnet_genesis(
 		}),
 		pallet_indices: Some(Default::default()),
 		pallet_balances: Some(BalancesConfig {
-			balances: endowed_accounts 
+			balances: endowed_accounts.clone()
 		}),
 		pallet_validator_set: Some(ValidatorSetConfig {
 			validators: initial_authorities.iter().map(|x| x.0.clone()).collect::<Vec<_>>(),
 		}),
-		pallet_balances_Instance1: None,
 		pallet_session: Some(SessionConfig {
 			keys: initial_authorities.iter().map(|x| (
 				x.0.clone(),
@@ -294,6 +293,16 @@ fn testnet_genesis(
 		pallet_membership_Instance1: Some(TechnicalMembershipConfig {
 			members: technical_members,
 			phantom: Default::default(),
+		}),
+		orml_tokens: Some(UniTokensConfig {
+			endowed_accounts: endowed_accounts.clone()
+				.iter()
+				.flat_map(|x| {
+					vec![
+						(x.0.clone(), CurrencyId::UINK, 10u128.pow(16)),
+					]
+				})
+				.collect(),
 		}),
 		pallet_treasury: Some(Default::default()),
 	}

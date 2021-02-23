@@ -31,6 +31,9 @@ pub type AccountIndex = u32;
 /// Balance of an account.
 pub type Balance = u128;
 
+/// Signed version of Balance
+pub type Amount = i128;
+
 /// Index of a transaction in the chain.
 pub type Index = u32;
 
@@ -55,13 +58,18 @@ pub type AuraId = sp_consensus_aura::sr25519::AuthorityId;
 #[derive(Encode, Decode, Eq, PartialEq, Copy, Clone, RuntimeDebug, PartialOrd, Ord)]
 #[cfg_attr(feature = "std", derive(Serialize, Deserialize))]
 pub enum TokenSymbol {
-    UDOT = 0,
-    UUSDT = 1,
+    USDT = 0,
+    DAI = 1,
 }
 
 #[derive(Encode, Decode, Eq, PartialEq, Copy, Clone, RuntimeDebug, PartialOrd, Ord)]
 #[cfg_attr(feature = "std", derive(Serialize, Deserialize))]
 pub enum CurrencyId {
+    Native,
+    UINK,
+    DOT,
+    KSM,
+    ETH,
     Token(TokenSymbol),
 }
 

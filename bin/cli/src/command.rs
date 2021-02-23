@@ -67,7 +67,7 @@ impl SubstrateCli for Cli {
 		};
 
 		Ok(match id {
-			"dev" => Box::new(uniarts_service::chain_spec::pangu_development_config()?),
+			"dev" => Box::new(uniarts_service::chain_spec::fuxi_development_config()?),
 			"" | "local" => Box::new(uniarts_service::chain_spec::pangu_local_testnet_config()?),
 			"staging" => Box::new(uniarts_service::chain_spec::staging_config()?),
 			"uart" => Box::new(uniarts_service::chain_spec::pangu_config()?),

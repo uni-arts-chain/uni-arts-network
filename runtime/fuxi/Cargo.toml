@@ -59,6 +59,10 @@ pallet-contracts = { version = "2.0.0", default-features = false }
 pallet-contracts-primitives = { version = "2.0.0", default-features = false }
 pallet-contracts-rpc-runtime-api = { version = "0.8.0", default-features = false }
 
+# orml
+orml-currencies = { default-features = false, version = '0.3.0' }
+orml-tokens = { default-features = false, version = '0.3.0' }
+
 # Used for RPCs
 pallet-transaction-payment-rpc-runtime-api = { version = "2.0.0", default-features = false }
 pallet-staking-rpc-runtime-api = { version = "0.1.0", default-features = false, path = "../../pallets/staking/rpc/runtime-api"}
@@ -66,7 +70,6 @@ pallet-staking-rpc-runtime-api = { version = "0.1.0", default-features = false, 
 # Uni-Arts pallets
 uniarts-common = { path = "../../pallets/common", default-features = false }
 pallet-certificate = { path = "../../pallets/certificate", default-features = false }
-pallet-assets = { path = "../../pallets/assets", default-features = false }
 pallet-names = { path = "../../pallets/names", default-features = false }
 pallet-nft = { path = "../../pallets/nft", default-features = false }
 pallet-rewards = { path = "../../pallets/rewards", default-features = false }
@@ -130,7 +133,8 @@ std = [
     "pallet-indices/std",
     "pallet-recovery/std",
     "pallet-nicks/std",
-    "pallet-assets/std",
+    "orml-currencies/std",
+    "orml-tokens/std",
     "sp-api/std",
     "sp-block-builder/std",
     "sp-consensus-aura/std",

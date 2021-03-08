@@ -17,4 +17,5 @@ members = [
     'pallets/validator-set',
     'pallets/staking',
     'pallets/rewards',
+    'pallets/bridge',
 ]

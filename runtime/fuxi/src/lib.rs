@@ -951,9 +951,11 @@ impl pallet_recovery::Trait for Runtime {
 	type RecoveryDeposit = RecoveryDeposit;
 }
 
-impl pallet_bridge::Trait for Runtime {
-	type Event = Event;
-}
+// impl pallet_bridge::Trait for Runtime {
+// 	type Event = Event;
+// 	type Currency = Uart;
+// 	type Slash = ();
+// }
 
 // parameter_types! {
 // 	pub const TicketPrice: Balance = 10 * UART;
@@ -1022,7 +1024,7 @@ construct_runtime!(
 		Nft: pallet_nft::{Module, Call, Storage, Event<T>},
 		Token: pallet_token::{Module, Call, Storage, Event<T>},
 		Trade: pallet_trade::{Module, Call, Storage, Event<T>},
-		Bridge: pallet_bridge::{Module, Storage, Event<T>, Config<T>},
+		// Bridge: pallet_bridge::{Module, Storage, Event<T>, Config<T>},
 		Utility: pallet_utility::{Module, Call, Event},
 		Proxy: pallet_proxy::{Module, Call, Storage, Event<T>},
 		Multisig: pallet_multisig::{Module, Call, Storage, Event<T>},

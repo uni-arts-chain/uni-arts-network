@@ -10,6 +10,7 @@
   "LottoIndex": "u32",
   "MemberId": "u64",
   "ProposalId": "u64",
+  "TokenBalance": "Balance",
   "LotteryKind": {
     "_enum": [
       "Routine",

@@ -3,7 +3,7 @@ use sp_core::{Pair, Public, crypto::UncheckedInto, sr25519};
 use super::testnet_accounts;
 use fuxi_runtime::{
 	get_all_module_accounts,
-	BalancesConfig, ContractsConfig, GenesisConfig, SessionConfig, ValidatorSetConfig, VestingConfig,
+	BalancesConfig, ContractsConfig, GenesisConfig, SessionConfig, ValidatorSetConfig, VestingConfig, BridgeConfig,
 	SudoConfig, SystemConfig, CouncilMembershipConfig, TechnicalMembershipConfig, UniTokensConfig, CurrencyId,
 	WASM_BINARY, Signature, opaque::SessionKeys
 };
@@ -251,6 +251,12 @@ fn testnet_genesis(
 	technical_members: Vec<AccountId>,
 	enable_println: bool,
 ) -> GenesisConfig {
+	let bridge_validators = vec![
+		hex!("3a495ac93eca02fa4f64bcc99b2f950b7df8d866b4b107596a0ea7a547b48753").into(), // 5DP8Rd8jUQD9oukZduPSMxdrH8g3r4mzS1zXLZCS6qDissTm
+		hex!("1450cad95384831a1b267f2d18273b83b77aaee8555a23b7f1abbb48b5af8e77").into(), // 5CXLpEbkeqp475Y8p7uMeiimgKXX6haZ1fCT4jzyry26CPxp
+		hex!("2452305cbdb33a55de1bc46f6897fd96d724d8bccc5ca4783f6f654af8582d58").into(), // 5CtKzjXcWrD8GRQqorFiwHF9oUbx2wHpf43erxB2u7dpfCq9
+	];
+
 	GenesisConfig {
 		frame_system: Some(SystemConfig {
 			// Add Wasm runtime to storage.
@@ -305,5 +311,16 @@ fn testnet_genesis(
 				.collect(),
 		}),
 		pallet_treasury: Some(Default::default()),
+		pallet_bridge: Some(BridgeConfig {
+			validator_accounts: bridge_validators,
+			validators_count: 3u32,
+			current_limits: vec![
+				100*10u128.pow(18),
+				200*10u128.pow(18),
+				50*10u128.pow(18),
+				400*10u128.pow(18),
+				10*10u128.pow(18),
+			]
+		})
 	}
 }

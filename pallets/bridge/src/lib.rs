@@ -138,7 +138,7 @@ decl_module! {
         // initiate substrate -> ethereum transfer.
         // create proposition and emit the RelayMessage event
         #[weight = 0]
-        fn set_transfer(origin, to: H160, #[compact] amount: TokenBalance)-> DispatchResult
+        pub fn set_transfer(origin, to: H160, #[compact] amount: TokenBalance)-> DispatchResult
         {
             let from = ensure_signed(origin)?;
             ensure!(Self::bridge_is_operational(), "Bridge is not operational");
@@ -168,7 +168,7 @@ decl_module! {
 
         // ethereum-side multi-signed mint operation
         #[weight = 0]
-        fn multi_signed_mint(origin, message_id: T::Hash, from: H160, to: T::AccountId, #[compact] amount: TokenBalance)-> DispatchResult {
+        pub fn multi_signed_mint(origin, message_id: T::Hash, from: H160, to: T::AccountId, #[compact] amount: TokenBalance)-> DispatchResult {
             let validator = ensure_signed(origin)?;
             ensure!(Self::bridge_is_operational(), "Bridge is not operational");
 
@@ -195,7 +195,7 @@ decl_module! {
 
         // change maximum tx limit
         #[weight = 0]
-        fn update_limits(origin, max_tx_value: u128, day_max_limit: u128, day_max_limit_for_one_address: u128, max_pending_tx_limit: u128,min_tx_value: u128)-> DispatchResult {
+        pub fn update_limits(origin, max_tx_value: u128, day_max_limit: u128, day_max_limit_for_one_address: u128, max_pending_tx_limit: u128,min_tx_value: u128)-> DispatchResult {
             let validator = ensure_signed(origin)?;
             Self::check_validator(validator.clone())?;
             let limits = Limits{
@@ -224,7 +224,7 @@ decl_module! {
 
         // validator`s response to RelayMessage
         #[weight = 0]
-        fn approve_transfer(origin, message_id: T::Hash) -> DispatchResult {
+        pub fn approve_transfer(origin, message_id: T::Hash) -> DispatchResult {
             let validator = ensure_signed(origin)?;
             ensure!(Self::bridge_is_operational(), "Bridge is not operational");
             Self::check_validator(validator.clone())?;
@@ -235,7 +235,7 @@ decl_module! {
 
         // each validator calls it to update whole set of validators
         #[weight = 0]
-        fn update_validator_list(origin, message_id: T::Hash, quorum: u64, new_validator_list: Vec<T::AccountId>) -> DispatchResult {
+        pub fn update_validator_list(origin, message_id: T::Hash, quorum: u64, new_validator_list: Vec<T::AccountId>) -> DispatchResult {
             let validator = ensure_signed(origin)?;
             Self::check_validator(validator.clone())?;
 
@@ -257,7 +257,7 @@ decl_module! {
 
         // each validator calls it to pause the bridge
         #[weight = 0]
-        fn pause_bridge(origin) -> DispatchResult {
+        pub fn pause_bridge(origin) -> DispatchResult {
             let validator = ensure_signed(origin)?;
             Self::check_validator(validator.clone())?;
 
@@ -281,7 +281,7 @@ decl_module! {
 
         // each validator calls it to resume the bridge
         #[weight = 0]
-        fn resume_bridge(origin) -> DispatchResult {
+        pub fn resume_bridge(origin) -> DispatchResult {
             let validator = ensure_signed(origin)?;
             Self::check_validator(validator.clone())?;
 
@@ -304,7 +304,7 @@ decl_module! {
 
         //confirm burn from validator
         #[weight = 0]
-        fn confirm_transfer(origin, message_id: T::Hash) -> DispatchResult {
+        pub fn confirm_transfer(origin, message_id: T::Hash) -> DispatchResult {
             let validator = ensure_signed(origin)?;
             ensure!(Self::bridge_is_operational(), "Bridge is not operational");
             Self::check_validator(validator.clone())?;
@@ -324,7 +324,7 @@ decl_module! {
 
         //cancel burn from validator
         #[weight = 0]
-        fn cancel_transfer(origin, message_id: T::Hash) -> DispatchResult {
+        pub fn cancel_transfer(origin, message_id: T::Hash) -> DispatchResult {
             let validator = ensure_signed(origin)?;
             Self::check_validator(validator.clone())?;
 

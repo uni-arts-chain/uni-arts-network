@@ -8,6 +8,8 @@
   "Value": "Vec<u8>",
   "ReasonIndex": "u32",
   "LottoIndex": "u32",
+  "MemberId": "u64",
+  "ProposalId": "u64",
   "LotteryKind": {
     "_enum": [
       "Routine",

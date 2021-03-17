@@ -16,28 +16,33 @@ use crate::types::{
 use codec::{Encode};
 use sp_core::H160;
 use sp_std::prelude::Vec;
-use sp_runtime::traits::{Hash, Zero, SaturatedConversion, CheckedDiv, CheckedSub, Saturating};
+use sp_runtime::traits::{Hash, Zero, SaturatedConversion, CheckedDiv, CheckedSub};
 pub use frame_support::{
     decl_event, decl_module, decl_error, decl_storage, ensure, fail, StorageMap, StorageValue,
     dispatch::DispatchResult,
     traits::{
-        Currency, LockableCurrency, ReservableCurrency, ExistenceRequirement, Get, Imbalance, KeyOwnerProofSystem, OnUnbalanced,
+        Currency, LockableCurrency, ReservableCurrency, ExistenceRequirement, Get, Imbalance, KeyOwnerProofSystem,
         Randomness, WithdrawReason, WithdrawReasons
     },
 };
 use frame_system::{self as system, ensure_signed};
 use pallet_timestamp as timestamp;
+use uniarts_primitives::{CurrencyId, Balance};
+use orml_traits::{MultiCurrency, MultiCurrencyExtended, MultiLockableCurrency};
 
 const MAX_VALIDATORS: u32 = 100_000;
 const DAY_IN_BLOCKS: u32 = 14_400;
 const DAY: u32 = 86_400_000;
 
-pub type AccountId<T> = <T as frame_system::Trait>::AccountId;
-pub type BalanceOf<T> =
-<<T as Trait>::Currency as Currency<<T as frame_system::Trait>::AccountId>>::Balance;
+pub trait Trait: system::Trait + timestamp::Trait {
+    /// The Currency for managing assets
+    type Currency: MultiCurrencyExtended<Self::AccountId, CurrencyId = CurrencyId, Balance = Balance> + MultiLockableCurrency<Self::AccountId> ;
 
-type NegativeImbalanceOf<T> =
-<<T as Trait>::Currency as Currency<<T as frame_system::Trait>::AccountId>>::NegativeImbalance;
+    /// Bridgecoin currency id
+    type GetBridgeCurrencyId: Get<CurrencyId>;
+
+    type Event: From<Event<Self>> + Into<<Self as system::Trait>::Event>;
+}
 
 decl_event!(
     pub enum Event<T>
@@ -71,16 +76,6 @@ decl_error! {
 		/// Tried to manage bridge with non-supported status
 		ManageBridgeNonSupported,
 	}
-}
-
-pub trait Trait: system::Trait + timestamp::Trait {
-    /// The transaction locking balance.
-    type Currency: Currency<AccountId<Self>> + ReservableCurrency<Self::AccountId> + LockableCurrency<AccountId<Self>, Moment=Self::BlockNumber> + Send + Sync;
-
-    type Event: From<Event<Self>> + Into<<Self as system::Trait>::Event>;
-
-    /// Handler for the unbalanced decrease when slashing for a rejected proposal or bounty.
-    type Slash: OnUnbalanced<NegativeImbalanceOf<Self>>;
 }
 
 decl_storage! {
@@ -136,6 +131,9 @@ decl_module! {
         type Error = Error<T>;
 
         fn deposit_event() = default;
+
+        /// Bridgecoin currency id
+		const GetBridgeCurrencyId: CurrencyId = T::GetBridgeCurrencyId::get();
 
         // initiate substrate -> ethereum transfer.
         // create proposition and emit the RelayMessage event
@@ -439,7 +437,7 @@ impl<T: Trait> Module<T> {
             <DailyHolds<T>>::insert(to.clone(), (T::BlockNumber::from(0), message.message_id));
         }
         // Currency mint
-        let _ = <T as Trait>::Currency::deposit_into_existing(&to, BalanceOf::<T>::saturated_from(message.amount));
+        let _ = <T as Trait>::Currency::deposit(T::GetBridgeCurrencyId::get(), &to, Balance::saturated_from(message.amount));
 
         Self::deposit_event(RawEvent::MintedMessage(message.message_id));
         Self::update_status(message.message_id, Status::Confirmed, Kind::Transfer)
@@ -462,7 +460,7 @@ impl<T: Trait> Module<T> {
     }
     fn _cancel_transfer(message: TransferMessage<T::AccountId, T::Hash>) -> DispatchResult {
         let lock_id = Self::bridge_lock_id(message.message_id);
-        <T as Trait>::Currency::remove_lock(lock_id, &message.substrate_address);
+        <T as Trait>::Currency::remove_lock( lock_id,T::GetBridgeCurrencyId::get(), &message.substrate_address);
         Self::update_status(message.message_id, Status::Canceled, Kind::Transfer)
     }
     fn pause_the_bridge(message: BridgeMessage<T::AccountId, T::Hash>) -> DispatchResult {
@@ -538,7 +536,7 @@ impl<T: Trait> Module<T> {
     fn lock_for_burn(message_id: T::Hash, account: T::AccountId, amount: TokenBalance) -> DispatchResult {
         // lock currency
         let lock_id = Self::bridge_lock_id(message_id);
-        <T as Trait>::Currency::extend_lock(lock_id, &account, BalanceOf::<T>::saturated_from(amount), WithdrawReasons::all());
+        <T as Trait>::Currency::extend_lock( lock_id,T::GetBridgeCurrencyId::get(), &account, Balance::saturated_from(amount));
 
         Ok(())
     }
@@ -550,11 +548,11 @@ impl<T: Trait> Module<T> {
 
         // remove lock
         let lock_id = Self::bridge_lock_id(message_id);
-        <T as Trait>::Currency::remove_lock(lock_id, &from);
+        <T as Trait>::Currency::remove_lock( lock_id, T::GetBridgeCurrencyId::get(),&from);
         // burn amount
-        let burn_amount = BalanceOf::<T>::saturated_from(message.amount);
-        let imbalance = <T as Trait>::Currency::slash_reserved(&from, burn_amount).0;
-        <T as Trait>::Slash::on_unbalanced(imbalance);
+        let burn_amount = Balance::saturated_from(message.amount);
+
+        <T as Trait>::Currency::can_slash(T::GetBridgeCurrencyId::get(), &from, burn_amount);
 
         <DailyLimits<T>>::mutate(from.clone(), |a| *a -= message.amount);
 
@@ -732,6 +730,7 @@ impl<T: Trait> Module<T> {
         );
         Ok(())
     }
+
     //open transactions check
     fn check_pending_burn(amount: TokenBalance) -> DispatchResult {
         let new_pending_volume = CurrentPendingBurn::get()
@@ -775,15 +774,15 @@ impl<T: Trait> Module<T> {
         let day_passed = first_tx.0 + daily_hold < T::BlockNumber::from(0);
 
         if !day_passed {
-            let account_balance = <T as Trait>::Currency::free_balance(&from);
+            let account_balance = <T as Trait>::Currency::free_balance(T::GetBridgeCurrencyId::get(), &from);
 
             // 75% of potentially really big numbers
             let allowed_amount = account_balance
-                .checked_div(&BalanceOf::<T>::saturated_from(100))
+                .checked_div(Balance::saturated_from(100))
                 .expect("Failed to calculate allowed withdraw amount")
-                .saturating_mul(BalanceOf::<T>::saturated_from(75));
+                .saturating_mul(Balance::saturated_from(75));
 
-            if BalanceOf::<T>::saturated_from(message.amount) > allowed_amount {
+            if Balance::saturated_from(message.amount) > allowed_amount {
                 Self::update_status(message.message_id, Status::Canceled, Kind::Transfer)?;
                 fail!("Cannot withdraw more that 75% of first day deposit.");
             }

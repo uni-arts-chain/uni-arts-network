@@ -23,6 +23,11 @@ sha3 = { version = "0.8", default-features = false }
 pallet-balances = { version = "2.0.1", default-features = false}
 pallet-timestamp = { version = "2.0.1", default-features = false}
 
+# orml
+orml-currencies = { default-features = false, version = '0.3.0' }
+orml-tokens = { default-features = false, version = '0.3.0' }
+orml-traits = { default-features = false, version = '0.3.0' }
+
 uniarts-primitives = { version = "2.0.1", default-features = false, path = "../../primitives" }
 
 [dev-dependencies]
@@ -43,4 +48,7 @@ std = [
     'pallet-balances/std',
     'pallet-timestamp/std',
     'uniarts-primitives/std',
+    'orml-traits/std',
+    'orml-currencies/std',
+    'orml-tokens/std',
 ]

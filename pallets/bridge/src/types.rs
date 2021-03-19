@@ -1,6 +1,7 @@
 use codec::{Decode, Encode};
 use sp_core::H160;
 use sp_std::prelude::Vec;
+use sp_runtime::RuntimeDebug;
 use uniarts_primitives::Balance;
 
 pub type MemberId = u64;
@@ -9,8 +10,7 @@ pub type ProposalId = u64;
 // token factory types
 pub type TokenBalance = Balance;
 
-#[derive(Encode, Decode, Default, Clone, PartialEq)]
-#[cfg_attr(feature = "std", derive(Debug))]
+#[derive(Encode, Decode, Default, Clone, PartialEq, RuntimeDebug)]
 pub struct Limits {
     pub max_tx_value: u128,
     pub day_max_limit: u128,
@@ -20,8 +20,7 @@ pub struct Limits {
 }
 
 // bridge types
-#[derive(Encode, Decode, Clone)]
-#[cfg_attr(feature = "std", derive(Debug))]
+#[derive(Encode, Decode, Clone, RuntimeDebug)]
 pub struct BridgeTransfer<Hash> {
     pub transfer_id: ProposalId,
     pub message_id: Hash,
@@ -30,8 +29,7 @@ pub struct BridgeTransfer<Hash> {
     pub kind: Kind,
 }
 
-#[derive(Encode, Decode, Clone, PartialEq)]
-#[cfg_attr(feature = "std", derive(Debug))]
+#[derive(Encode, Decode, Clone, PartialEq, RuntimeDebug)]
 pub enum Status {
     Revoked,
     Pending,
@@ -46,8 +44,7 @@ pub enum Status {
     Confirmed,
 }
 
-#[derive(Encode, Decode, Clone, PartialEq)]
-#[cfg_attr(feature = "std", derive(Debug))]
+#[derive(Encode, Decode, Clone, PartialEq, RuntimeDebug)]
 pub enum Kind {
     Transfer,
     Limits,
@@ -55,8 +52,7 @@ pub enum Kind {
     Bridge,
 }
 
-#[derive(Encode, Decode, Clone)]
-#[cfg_attr(feature = "std", derive(Debug))]
+#[derive(Encode, Decode, Clone, RuntimeDebug)]
 pub struct TransferMessage<AccountId, Hash> {
     pub message_id: Hash,
     pub eth_address: H160,
@@ -66,16 +62,14 @@ pub struct TransferMessage<AccountId, Hash> {
     pub action: Status,
 }
 
-#[derive(Encode, Decode, Clone)]
-#[cfg_attr(feature = "std", derive(Debug))]
+#[derive(Encode, Decode, Clone, RuntimeDebug)]
 pub struct LimitMessage<Hash> {
     pub id: Hash,
     pub limits: Limits,
     pub status: Status,
 }
 
-#[derive(Encode, Decode, Clone)]
-#[cfg_attr(feature = "std", derive(Debug))]
+#[derive(Encode, Decode, Clone, RuntimeDebug)]
 pub struct BridgeMessage<AccountId, Hash> {
     pub message_id: Hash,
     pub account: AccountId,
@@ -83,8 +77,7 @@ pub struct BridgeMessage<AccountId, Hash> {
     pub status: Status,
 }
 
-#[derive(Encode, Decode, Clone)]
-#[cfg_attr(feature = "std", derive(Debug))]
+#[derive(Encode, Decode, Clone, RuntimeDebug)]
 pub struct ValidatorsMessage<AccountId, Hash> {
     pub message_id: Hash,
     pub quorum: u64,

@@ -19,7 +19,7 @@ use sp_std::prelude::Vec;
 use sp_runtime::traits::{Hash, Zero, SaturatedConversion, CheckedDiv, CheckedSub};
 pub use frame_support::{
     decl_event, decl_module, decl_error, decl_storage, ensure, fail, StorageMap, StorageValue,
-    dispatch::DispatchResult,
+    dispatch::DispatchResult, debug,
     traits::{
         Currency, LockableCurrency, ReservableCurrency, ExistenceRequirement, Get, Imbalance, KeyOwnerProofSystem,
         Randomness, WithdrawReason, WithdrawReasons

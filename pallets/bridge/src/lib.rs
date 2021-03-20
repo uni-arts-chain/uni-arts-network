@@ -63,6 +63,10 @@ decl_event!(
 // Errors inform users that something went wrong.
 decl_error! {
 	pub enum Error for Module<T: Trait> {
+	    /// Cross chain amount check Min error
+	    CossAmountBelowMin,
+        /// Cross chain amount check Max error
+	    CossAmountAboveMax,
 		/// Tried to deposit with non-supported status
 		DepositNonSupported,
 		/// Tried to withdraw with non-supported status
@@ -722,11 +726,11 @@ impl<T: Trait> Module<T> {
 
         ensure!(
             amount > min,
-            "Invalid amount for transaction. Reached minimum limit."
+            Error::<T>::CossAmountBelowMin
         );
         ensure!(
             amount < max,
-            "Invalid amount for transaction. Reached maximum limit."
+            Error::<T>::CossAmountAboveMax
         );
         Ok(())
     }

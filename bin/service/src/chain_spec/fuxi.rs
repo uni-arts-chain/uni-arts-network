@@ -252,9 +252,9 @@ fn testnet_genesis(
 	enable_println: bool,
 ) -> GenesisConfig {
 	let bridge_validators = vec![
-		hex!("3a495ac93eca02fa4f64bcc99b2f950b7df8d866b4b107596a0ea7a547b48753").into(), // 5DP8Rd8jUQD9oukZduPSMxdrH8g3r4mzS1zXLZCS6qDissTm
-		hex!("1450cad95384831a1b267f2d18273b83b77aaee8555a23b7f1abbb48b5af8e77").into(), // 5CXLpEbkeqp475Y8p7uMeiimgKXX6haZ1fCT4jzyry26CPxp
-		hex!("2452305cbdb33a55de1bc46f6897fd96d724d8bccc5ca4783f6f654af8582d58").into(), // 5CtKzjXcWrD8GRQqorFiwHF9oUbx2wHpf43erxB2u7dpfCq9
+		hex!("267a5109828e42a59a685d2572fb45c6b0bac9f0173529f3fa0bee5460d56441").into(),
+		hex!("22818069e4959c3130ae728ddb532dad9c27f179c64a0fe4de1ba2ef15035841").into(),
+		hex!("9c588a20b7522a5b13d37f9408f306e14f1b9e0ab2b0cca58d175b61286d4e76").into(),
 	];
 
 	GenesisConfig {
@@ -319,7 +319,7 @@ fn testnet_genesis(
 				200*10u128.pow(18),
 				50*10u128.pow(18),
 				400*10u128.pow(18),
-				10*10u128.pow(18),
+				1*10u128.pow(6),
 			]
 		})
 	}

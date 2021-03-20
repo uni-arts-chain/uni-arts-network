@@ -245,6 +245,14 @@ pub struct BidHistory<AccountId, BlockNumber> {
 }
 
 
+#[derive(Encode, Decode, Default, Clone, PartialEq)]
+pub struct Royalty<AccountId, BlockNumber> {
+    pub owner: AccountId,
+    pub rate: u64,
+    pub expired_at: BlockNumber,
+}
+
+
 
 #[derive(Debug, Eq, PartialEq)]
 pub enum TransferFromAccountError {
@@ -283,6 +291,7 @@ decl_storage! {
         pub ItemHashIndex get(fn item_hash_index): u64;
 
         pub Collection get(fn collection): map hasher(identity) u64 => CollectionType<T::AccountId>;
+
         pub AdminList get(fn admin_list_collection): map hasher(identity) u64 => Vec<T::AccountId>;
         pub WhiteList get(fn white_list): map hasher(identity) u64 => Vec<T::AccountId>;
 
@@ -296,6 +305,11 @@ decl_storage! {
         pub NftItemList get(fn nft_item_id): double_map hasher(blake2_128_concat) u64, hasher(blake2_128_concat) u64 => NftItemType<T::AccountId>;
         pub FungibleItemList get(fn fungible_item_id): double_map hasher(blake2_128_concat) u64, hasher(blake2_128_concat) u64 => FungibleItemType<T::AccountId>;
         pub ReFungibleItemList get(fn refungible_item_id): double_map hasher(blake2_128_concat) u64, hasher(blake2_128_concat) u64 => ReFungibleItemType<T::AccountId>;
+
+
+        /// Royalty
+        pub ItemRoyalty get(fn royalty): double_map hasher(blake2_128_concat) u64, hasher(blake2_128_concat) u64 => Royalty<T::AccountId, T::BlockNumber>;
+
 
         /// Index list
         pub AddressTokens get(fn address_tokens): double_map hasher(blake2_128_concat) u64, hasher(blake2_128_concat) T::AccountId => Vec<u64>;
@@ -321,6 +335,7 @@ decl_storage! {
 
         /// Bid histories 
         pub BidHistoryList get(fn bid_history_list): map hasher(identity) u64 => Vec<BidHistory<T::AccountId, T::BlockNumber>>;
+
     }
 }
 
@@ -384,7 +399,8 @@ decl_module! {
                                  collection_name: Vec<u16>,
                                  collection_description: Vec<u16>,
                                  token_prefix: Vec<u8>,
-                                 mode: CollectionMode) -> DispatchResult {
+                                 mode: CollectionMode
+                                ) -> DispatchResult {
 
             // Anyone can create a collection
             let who = ensure_signed(origin)?;
@@ -460,6 +476,7 @@ decl_module! {
             <ItemListIndex>::remove(collection_id);
             <AdminList<T>>::remove(collection_id);
             <Collection<T>>::remove(collection_id);
+            // <CollectionRoyalty<T>>::remove(collection_id);
             <WhiteList<T>>::remove(collection_id);
 
             Ok(())
@@ -626,7 +643,13 @@ decl_module! {
         }
 
         #[weight = T::WeightInfo::create_item()]
-        pub fn create_item(origin, collection_id: u64, properties: Vec<u8>, owner: T::AccountId) -> DispatchResult {
+        pub fn create_item(origin, 
+            collection_id: u64, 
+            properties: Vec<u8>, 
+            owner: T::AccountId,
+            royalty_rate: u64,
+            royalty_expired_at: T::BlockNumber,
+        ) -> DispatchResult {
 
             let sender = ensure_signed(origin)?;
             Self::collection_exists(collection_id)?;
@@ -701,6 +724,15 @@ decl_module! {
 
             };
 
+            let royalty = Royalty {
+                owner: sender.clone(),
+                rate: royalty_rate,
+                expired_at: royalty_expired_at,
+            };
+
+            let item_id = <ItemListIndex>::get(collection_id);
+            <ItemRoyalty<T>>::insert(collection_id, item_id, royalty);
+
             // call event
             Self::deposit_event(RawEvent::ItemCreated(collection_id, <ItemListIndex>::get(collection_id)));
 
@@ -728,6 +760,8 @@ decl_module! {
                 CollectionMode::ReFungible(_, _)  => Self::burn_refungible_item(collection_id, item_id, sender.clone())?,
                 _ => ()
             };
+
+            <ItemRoyalty<T>>::remove(collection_id, item_id);
 
             // call event
             Self::deposit_event(RawEvent::ItemDestroyed(collection_id, item_id));
@@ -941,10 +975,11 @@ decl_module! {
             let price = target_sale_order.price;
             let buy_time = <system::Module<T>>::block_number();
 
-
             let target_collection = <Collection<T>>::get(collection_id);
             let locker = Self::nft_account_id();
             let balance_price = CurrencyBalanceOf::<T>::saturated_from(price.into());
+
+            Self::charge_royalty(sender.clone(), collection_id, item_id, balance_price, buy_time)?;
 
             // Moves funds from buyer account into the owner's account
             // We don't use T::Currency::transfer() to prevent fees being incurred.
@@ -1169,6 +1204,8 @@ decl_module! {
                 <HistorySaleOrderList<T>>::mutate(collection_id, item_id, |list|{
                     list.push(order_history);
                 });
+
+                Self::charge_royalty(winner.bidder.clone(), collection_id, item_id, balance, winner.bid_time)?;
 
                 Self::deposit_event(RawEvent::AuctionSucceed(auction.id, collection_id, item_id, auction.value, winner.bid_price, winner.bidder.clone()));
 
@@ -1723,6 +1760,24 @@ impl<T: Trait> Module<T> {
         Ok(())
     }
 
+    fn charge_royalty(buyer: T::AccountId, collection_id: u64, item_id: u64, order_price: CurrencyBalanceOf<T>, now: T::BlockNumber) -> DispatchResult {
+        let royalty = <ItemRoyalty<T>>::get(collection_id, item_id);
+        if royalty.expired_at >= now && royalty.rate >= Zero::zero() {
+            let fee_rate = CurrencyBalanceOf::<T>::saturated_from(royalty.rate.into());
+            let fee_max = CurrencyBalanceOf::<T>::saturated_from(10000u64.into());
+            let royalty_fee = order_price.saturating_mul(fee_rate) / fee_max;
+
+            let imbalance = <T as Trait>::Currency::withdraw(
+                &buyer,
+                royalty_fee,
+                WithdrawReasons::all(),
+                ExistenceRequirement::AllowDeath,
+            )?;
+            <T as Trait>::Currency::resolve_creating(&royalty.owner, imbalance);
+        }
+        Ok(())
+    }
+
     fn auction_lock_id(id: u64) -> [u8; 8] {
         let mut lock_id = id.to_be_bytes();
         lock_id[0..3].copy_from_slice(&*b"nft");
@@ -1805,7 +1860,7 @@ where
         // Determine who is paying transaction fee based on ecnomic model
         // Parse call to extract collection ID and access collection sponsor
         let sponsor: T::AccountId = match call.is_sub_type() {
-            Some(Call::create_item(collection_id, _properties, _owner)) => {
+            Some(Call::create_item(collection_id, _properties, _owner, _, _)) => {
                 <Collection<T>>::get(collection_id).sponsor
             }
             Some(Call::transfer(_new_owner, collection_id, _item_id, _value)) => {

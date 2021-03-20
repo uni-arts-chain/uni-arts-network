@@ -232,5 +232,10 @@
     "day_max_limit_for_one_address": "u128",
     "max_pending_tx_limit": "u128",
     "min_tx_value": "u128"
+  },
+  "Royalty": {
+    "owner": "AccountId",
+    "rate": "u64",
+    "expired_at": "BlockNumber"
   }
 }

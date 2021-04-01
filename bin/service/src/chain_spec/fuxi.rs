@@ -252,12 +252,12 @@ fn testnet_genesis(
 	enable_println: bool,
 ) -> GenesisConfig {
 	let bridge_validators = vec![
-		// hex!("267a5109828e42a59a685d2572fb45c6b0bac9f0173529f3fa0bee5460d56441").into(),
-		// hex!("22818069e4959c3130ae728ddb532dad9c27f179c64a0fe4de1ba2ef15035841").into(),
-		// hex!("9c588a20b7522a5b13d37f9408f306e14f1b9e0ab2b0cca58d175b61286d4e76").into(),
-		get_account_id_from_seed::<sr25519::Public>("Alice"),
-		get_account_id_from_seed::<sr25519::Public>("Bob"),
-		get_account_id_from_seed::<sr25519::Public>("Charlie"),
+		hex!("c0c4ffc36cec38e37f68fa34dd6c14dc3788841b80372981ff2a46583cdea50b").into(),
+		hex!("a6159859c000019b92a858037baed672ba50e50e658e9f90a00d00c86e3fe438").into(),
+		hex!("2abf312c5a9300f91485abb555597c8305e378d16017316a8303a275f8cee245").into(),
+		// get_account_id_from_seed::<sr25519::Public>("Alice"),
+		// get_account_id_from_seed::<sr25519::Public>("Bob"),
+		// get_account_id_from_seed::<sr25519::Public>("Charlie"),
 	];
 
 	GenesisConfig {

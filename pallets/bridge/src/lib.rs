@@ -25,7 +25,7 @@ pub use frame_support::{
         Randomness, WithdrawReason, WithdrawReasons
     },
 };
-use frame_system::{self as system, ensure_signed};
+use frame_system::{self as system, ensure_signed, ensure_root};
 use pallet_timestamp as timestamp;
 use uniarts_primitives::{CurrencyId, Balance};
 use orml_traits::{MultiCurrency, MultiCurrencyExtended, MultiLockableCurrency};
@@ -235,6 +235,24 @@ decl_module! {
 
             let id = <TransferId<T>>::get(message_id);
             Self::_sign(validator, id)
+        }
+
+        #[weight = 0]
+        // init validators
+        pub fn init_bridge_validators(origin, new_validator_list: Vec<T::AccountId>) -> DispatchResult {
+            // uni-arts
+			ensure_root(origin.clone())?;
+
+            let new_count = new_validator_list.clone().len() as u32;
+            ensure!(
+                new_count < MAX_VALIDATORS,
+                "New validator list is exceeding allowed length."
+            );
+            ValidatorsCount::put(new_count);
+            new_validator_list.clone()
+                .iter()
+                .for_each(|v| <Validators<T>>::insert(v, true));
+            Ok(())
         }
 
         // each validator calls it to update whole set of validators

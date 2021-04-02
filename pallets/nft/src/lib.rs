@@ -378,7 +378,7 @@ decl_event!(
         ItemOrderSucceed(u64, u64, AccountId),
         ItemSeparableOrderCreated(u64, u64, u64, u64, u64, AccountId),
         ItemSeparableOrderCancel(u64, u64, u64),
-        ItemSeparableOrderSucceed(u64, u64, u64, AccountId),
+        ItemSeparableOrderSucceed(u64, u64, u64, u64, AccountId),
         ItemAddSignature(u64, u64, AccountId),
         AuctionCreated(u64, u64, u64, u64, u64, AccountId),
         AuctionBid(u64, u64, u64, u64, u64, AccountId),
@@ -1253,7 +1253,7 @@ decl_module! {
             }
 
             // call event
-            Self::deposit_event(RawEvent::ItemSeparableOrderSucceed(order_id, collection_id, item_id, sender));
+            Self::deposit_event(RawEvent::ItemSeparableOrderSucceed(order_id, collection_id, item_id, value, sender));
             Ok(())
         }
 

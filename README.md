@@ -1,5 +1,5 @@
 # Uni-arts Network [云画链](https://uniarts.me)
-![Image text](https://raw.githubusercontent.com/uni-arts-chain/uni-arts-network/master/docs/uniarts.png)
+![Image text](https://raw.githubusercontent.com/uni-arts-chain/uni-arts-network/master/docs/uniarts-network-new.png)
 
 链接信用、助力原创。
 

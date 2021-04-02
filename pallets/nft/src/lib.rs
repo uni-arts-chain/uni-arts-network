@@ -68,6 +68,9 @@ pub trait WeightInfo {
     fn create_sale_order() -> Weight;
     fn cancel_sale_order() -> Weight;
     fn accept_sale_order() -> Weight;
+    fn create_separable_sale_order() -> Weight;
+    fn cancel_separable_sale_order() -> Weight;
+    fn accept_separable_sale_order() -> Weight;
     fn add_signature() -> Weight;
     fn create_auction() -> Weight;
     fn cancel_auction() -> Weight;
@@ -160,6 +163,7 @@ pub struct FungibleItemType<AccountId> {
     pub collection: u64,
     pub owner: AccountId,
     pub value: u128,
+    pub item_hash: H160,
 }
 
 #[derive(Encode, Decode, Default, Clone, PartialEq)]
@@ -168,6 +172,7 @@ pub struct ReFungibleItemType<AccountId> {
     pub collection: u64,
     pub owner: Vec<Ownership<AccountId>>,
     pub data: Vec<u8>,
+    pub item_hash: H160,
 }
 
 #[derive(Encode, Decode, Default, Clone, PartialEq)]
@@ -206,6 +211,17 @@ pub struct SaleOrder<AccountId> {
     pub collection_id: u64,
     pub item_id: u64,
     pub value: u64,
+    pub owner: AccountId,
+    pub price: u64, // maker order's price\
+}
+
+#[derive(Encode, Decode, Default, Clone, PartialEq)]
+#[cfg_attr(feature = "std", derive(Debug))]
+pub struct SplitSaleOrder<AccountId> {
+    pub collection_id: u64,
+    pub item_id: u64,
+    pub value: u64,
+    pub balance: u64,
     pub owner: AccountId,
     pub price: u64, // maker order's price\
 }
@@ -321,11 +337,20 @@ decl_storage! {
         /// Consignment
         pub SaleOrderList get(fn nft_trade_id): double_map hasher(blake2_128_concat) u64, hasher(blake2_128_concat) u64 => SaleOrder<T::AccountId>;
 
+        /// Separable SaleOrder
+        pub SeparableSaleOrder get(fn separablet_order_id): map hasher(identity) u64 => SplitSaleOrder<T::AccountId>;
+
+        /// Separable SaleOrder List
+        pub SeparableSaleOrderList get(fn separablet_order_list_id):double_map hasher(blake2_128_concat) u64, hasher(blake2_128_concat) u64 => Vec<u64>;
+
         /// Sales history
         pub HistorySaleOrderList get(fn nft_trade_history_id): double_map hasher(blake2_128_concat) u64, hasher(blake2_128_concat) u64 => Vec<SaleOrderHistory<T::AccountId, T::BlockNumber>>;
 
         /// Signature history
         pub SignatureList get(fn nft_signature_list): double_map hasher(blake2_128_concat) u64, hasher(blake2_128_concat) u64 => Vec<SignatureAuthentication<T::AccountId, T::BlockNumber, T::Name>>;
+
+        /// Next Order id
+        pub NextOrderID: u64 = 1;
 
         /// Next auction id
         pub NextAuctionID: u64 = 1;
@@ -351,6 +376,9 @@ decl_event!(
         ItemOrderCreated(u64, u64, u64, u64, AccountId),
         ItemOrderCancel(u64, u64),
         ItemOrderSucceed(u64, u64, AccountId),
+        ItemSeparableOrderCreated(u64, u64, u64, u64, u64, AccountId),
+        ItemSeparableOrderCancel(u64, u64, u64),
+        ItemSeparableOrderSucceed(u64, u64, u64, AccountId),
         ItemAddSignature(u64, u64, AccountId),
         AuctionCreated(u64, u64, u64, u64, u64, AccountId),
         AuctionBid(u64, u64, u64, u64, u64, AccountId),
@@ -663,6 +691,14 @@ decl_module! {
                 Self::check_white_list(collection_id, owner.clone())?;
             }
 
+            // Generate next hash index ID
+            let hash_index_id = ItemHashIndex::get()
+                .checked_add(1)
+                .expect("hash index id error");
+            ItemHashIndex::put(hash_index_id);
+            let hasher = Keccak256::digest(&hash_index_id.to_be_bytes());
+            let item_hash: H160 = H160::from_slice(&hasher.as_slice()[0 .. 20]);
+
             match target_collection.mode
             {
                 CollectionMode::NFT(_) => {
@@ -670,14 +706,7 @@ decl_module! {
                     // check size
                     ensure!(target_collection.custom_data_size >= properties.len() as u32, "Size of item is too large");
 
-                    // Generate next hash index ID
-                    let hash_index_id = ItemHashIndex::get()
-                        .checked_add(1)
-                        .expect("hash index id error");
 
-                    ItemHashIndex::put(hash_index_id);
-                    let hasher = Keccak256::digest(&hash_index_id.to_be_bytes());
-                    let item_hash: H160 = H160::from_slice(&hasher.as_slice()[0 .. 20]);
 
                     // Create nft item
                     let item = NftItemType {
@@ -698,7 +727,8 @@ decl_module! {
                     let item = FungibleItemType {
                         collection: collection_id,
                         owner: owner,
-                        value: (10 as u128).pow(target_collection.decimal_points)
+                        value: (10 as u128).pow(target_collection.decimal_points),
+                        item_hash: item_hash.clone(),
                     };
 
                     Self::add_fungible_item(item)?;
@@ -715,7 +745,8 @@ decl_module! {
                     let item = ReFungibleItemType {
                         collection: collection_id,
                         owner: owner_list,
-                        data: properties.clone()
+                        data: properties.clone(),
+                        item_hash: item_hash.clone(),
                     };
 
                     Self::add_refungible_item(item)?;
@@ -1027,6 +1058,202 @@ decl_module! {
 
             // call event
             Self::deposit_event(RawEvent::ItemOrderSucceed(collection_id, item_id, sender));
+            Ok(())
+        }
+
+        #[weight = T::WeightInfo::create_separable_sale_order()]
+        pub fn create_separable_sale_order(origin, collection_id: u64, item_id: u64, value: u64, price: u64 ) -> DispatchResult {
+            let sender = ensure_signed(origin)?;
+
+            let item_owner = Self::is_item_owner(sender.clone(), collection_id, item_id);
+            if !item_owner {
+                Self::check_white_list(collection_id, sender.clone())?;
+            }
+
+            let order_id = NextOrderID::get();
+            let target_collection = <Collection<T>>::get(collection_id);
+
+            let recipient = Self::nft_account_id();
+
+            match target_collection.mode
+            {
+                CollectionMode::NFT(_) => Self::transfer_nft(collection_id, item_id, sender.clone(), recipient)?,
+                CollectionMode::Fungible(_)  => Self::transfer_fungible(collection_id, item_id, value, sender.clone(), recipient)?,
+                CollectionMode::ReFungible(_, _)  => Self::transfer_refungible(collection_id, item_id, value, sender.clone(), recipient)?,
+                _ => ()
+            };
+
+            // Create order
+            let order = SplitSaleOrder {
+                collection_id: collection_id,
+                item_id: item_id,
+                value: value,
+                balance: value,
+                owner: sender.clone(),
+                price: price,
+            };
+
+
+            <SeparableSaleOrder<T>>::insert(order_id, order);
+            let list_exists = <SeparableSaleOrderList>::contains_key(collection_id, item_id);
+            if list_exists {
+                let mut list = <SeparableSaleOrderList>::get(collection_id, item_id);
+                list.push(order_id);
+                <SeparableSaleOrderList>::insert(collection_id, item_id, list);
+            } else {
+                let mut list = Vec::new();
+                list.push(order_id);
+                <SeparableSaleOrderList>::insert(collection_id, item_id, list);
+            }
+
+            // call event
+            Self::deposit_event(RawEvent::ItemSeparableOrderCreated(order_id, collection_id, item_id, value, price, sender));
+            Ok(())
+        }
+
+        #[weight = T::WeightInfo::cancel_separable_sale_order()]
+        pub fn cancel_separable_sale_order(origin, order_id: u64, value: u64) -> DispatchResult {
+            let sender = ensure_signed(origin)?;
+
+            let target_sale_order = <SeparableSaleOrder<T>>::get(order_id);
+            let collection_id = target_sale_order.collection_id;
+            let item_id = target_sale_order.item_id;
+
+            let order_owner = Self::is_separable_sale_order_owner(sender.clone(), order_id);
+            if !order_owner
+            {
+                let mes = "Account is not sale order owner";
+                panic!(mes);
+            }
+
+            ensure!(target_sale_order.balance >= value, "Value not enough");
+
+            let target_collection = <Collection<T>>::get(target_sale_order.collection_id);
+            let locker = Self::nft_account_id();
+
+            match target_collection.mode
+            {
+                CollectionMode::NFT(_) => Self::transfer_nft(collection_id, item_id, locker, sender.clone())?,
+                CollectionMode::Fungible(_)  => Self::transfer_fungible(collection_id, item_id, target_sale_order.balance, locker, sender.clone())?,
+                CollectionMode::ReFungible(_, _)  => Self::transfer_refungible(collection_id, item_id, target_sale_order.balance, locker, sender.clone())?,
+                _ => ()
+            };
+
+            <SeparableSaleOrder<T>>::remove(order_id);
+            let list_exists = <SeparableSaleOrderList>::contains_key(collection_id, item_id);
+            if list_exists {
+                let mut list = <SeparableSaleOrderList>::get(collection_id, item_id);
+                let item_contains = list.contains(&order_id.clone());
+
+                if item_contains {
+                    list.retain(|&item| item != order_id);
+                    <SeparableSaleOrderList>::insert(collection_id, item_id, list);
+                }
+            }
+
+            // call event
+            Self::deposit_event(RawEvent::ItemSeparableOrderCancel(order_id, collection_id, item_id));
+            Ok(())
+        }
+
+        #[weight = T::WeightInfo::accept_sale_order()]
+        pub fn accept_separable_sale_order(origin, order_id: u64, value: u64) -> DispatchResult {
+            let sender = ensure_signed(origin)?;
+            ensure!(<SeparableSaleOrder<T>>::contains_key(order_id), Error::<T>::SaleOrderNotExists);
+
+            let target_sale_order = <SeparableSaleOrder<T>>::get(order_id);
+            let collection_id = target_sale_order.collection_id;
+            let item_id = target_sale_order.item_id;
+            let nft_owner = target_sale_order.owner;
+            let price = target_sale_order.price;
+            let order_value = target_sale_order.value;
+            let balance = target_sale_order.balance;
+            let buy_time = <system::Module<T>>::block_number();
+
+            let target_collection = <Collection<T>>::get(collection_id);
+            let locker = Self::nft_account_id();
+
+            ensure!(target_sale_order.balance >= value, "Value not enough");
+            let remain_value = balance - value;
+
+            let accept_price = CurrencyBalanceOf::<T>::saturated_from(price.into());
+            let accept_value = CurrencyBalanceOf::<T>::saturated_from(value.into());
+            let balance_price = accept_price.saturating_mul(accept_value);
+
+            Self::charge_royalty(sender.clone(), collection_id, item_id, balance_price, buy_time)?;
+
+            // Moves funds from buyer account into the owner's account
+            // We don't use T::Currency::transfer() to prevent fees being incurred.
+            let negative_imbalance = <T as Trait>::Currency::withdraw(
+                &sender,
+                balance_price,
+                WithdrawReasons::all(),
+                ExistenceRequirement::AllowDeath,
+            )?;
+
+            <T as Trait>::Currency::resolve_creating(&nft_owner, negative_imbalance);
+
+            // Moves nft from locker account into the buyer's account
+            match target_collection.mode
+            {
+                CollectionMode::NFT(_) => Self::transfer_nft(collection_id, item_id, locker, sender.clone())?,
+                CollectionMode::Fungible(_)  => Self::transfer_fungible(collection_id, item_id, value, locker, sender.clone())?,
+                CollectionMode::ReFungible(_, _)  => Self::transfer_refungible(collection_id, item_id, value, locker, sender.clone())?,
+                _ => ()
+            };
+
+            // Create order history
+            let order_history = SaleOrderHistory {
+                collection_id: collection_id,
+                item_id: item_id,
+                value: price,
+                seller: nft_owner.clone(),
+                buyer: sender.clone(),
+                price: price,
+                buy_time: buy_time,
+            };
+
+            let new_order = SplitSaleOrder {
+                collection_id: collection_id,
+                item_id: item_id,
+                value: order_value,
+                balance: remain_value,
+                owner: sender.clone(),
+                price: price,
+            };
+
+            let list_exists = <HistorySaleOrderList<T>>::contains_key(collection_id, item_id);
+            if list_exists {
+                let mut list = <HistorySaleOrderList<T>>::get(collection_id, item_id);
+                list.push(order_history);
+                <HistorySaleOrderList<T>>::insert(collection_id, item_id, list);
+            } else {
+                let mut list = Vec::new();
+                list.push(order_history);
+                <HistorySaleOrderList<T>>::insert(collection_id, item_id, list);
+            }
+
+            if remain_value == 0 {
+                <SeparableSaleOrder<T>>::remove(order_id);
+                let list_exists = <SeparableSaleOrderList>::contains_key(collection_id, item_id);
+                if list_exists {
+                    let mut list = <SeparableSaleOrderList>::get(collection_id, item_id);
+                    let item_contains = list.contains(&order_id.clone());
+                    if item_contains {
+                        list.retain(|&item| item != order_id);
+                        <SeparableSaleOrderList>::insert(collection_id, item_id, list);
+                    }
+                }
+            } else {
+                let list_exists = <SeparableSaleOrder<T>>::contains_key(order_id);
+                if list_exists {
+                    <SeparableSaleOrder<T>>::remove(order_id);
+                    <SeparableSaleOrder<T>>::insert(order_id, new_order);
+                }
+            }
+
+            // call event
+            Self::deposit_event(RawEvent::ItemSeparableOrderSucceed(order_id, collection_id, item_id, sender));
             Ok(())
         }
 
@@ -1489,6 +1716,12 @@ impl<T: Trait> Module<T> {
         target_sale_order.owner == owner
     }
 
+    fn is_separable_sale_order_owner(owner: T::AccountId, order_id: u64) -> bool {
+        let target_sale_order = <SeparableSaleOrder<T>>::get(order_id);
+
+        target_sale_order.owner == owner
+    }
+
     fn transfer_fungible(
         collection_id: u64,
         item_id: u64,
@@ -1504,6 +1737,7 @@ impl<T: Trait> Module<T> {
 
         let full_item = <FungibleItemList<T>>::get(collection_id, item_id);
         let amount = full_item.value;
+        let item_hash = full_item.item_hash;
 
         ensure!(amount >= value.into(), "Item balance not enouth");
 
@@ -1560,6 +1794,7 @@ impl<T: Trait> Module<T> {
                     collection: collection_id,
                     owner: new_owner.clone(),
                     value: val64,
+                    item_hash: item_hash,
                 };
 
                 Self::add_fungible_item(item)?;

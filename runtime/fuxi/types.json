@@ -136,7 +136,8 @@
   "FungibleItemType": {
     "Collection": "u64",
     "Owner": "AccountId",
-    "value": "u128"
+    "value": "u128",
+    "item_hash": "H160"
   },
   "ApprovePermissions": {
     "approved": "AccountId",
@@ -155,10 +156,18 @@
     "owner": "AccountId",
     "price": "u64"
   },
+  "SplitSaleOrder": {
+    "collection_id": "u64",
+    "item_id": "u64",
+    "value": "u64",
+    "owner": "AccountId",
+    "price": "u64"
+  },
   "SaleOrderHistory": {
     "collection_id": "u64",
     "item_id": "u64",
     "value": "u64",
+    "balance": "u64",
     "seller": "AccountId",
     "buyer": "AccountId",
     "price": "u64",
@@ -180,7 +189,8 @@
   "ReFungibleItemType": {
     "Collection": "u64",
     "Owner": "Vec<Ownership<AccountId>>",
-    "Data": "Vec<u8>"
+    "Data": "Vec<u8>",
+    "item_hash": "H160"
   },
   "CollectionType": {
     "Owner": "AccountId",

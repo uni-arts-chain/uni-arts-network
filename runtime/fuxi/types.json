@@ -247,5 +247,22 @@
     "owner": "AccountId",
     "rate": "u64",
     "expired_at": "BlockNumber"
+  },
+  "NftCard": {
+    "collection_id": "u64",
+    "item_id": "u64",
+    "value": "u64"
+  },
+  "BlindBox": {
+    "id": "u64",
+    "owner": "AccountId",
+    "card_group": "Vec<NftCard>",
+    "total_count": "u64",
+    "remaind_card_group": "Vec<NftCard>",
+    "remaind_count": "u64",
+    "price": "u64",
+    "start_time": "BlockNumber",
+    "end_time": "BlockNumber",
+    "has_ended": "bool"
   }
 }

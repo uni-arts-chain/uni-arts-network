@@ -76,6 +76,7 @@ pub trait WeightInfo {
     fn cancel_auction() -> Weight;
     fn bid() -> Weight;
     fn finish_auction() -> Weight;
+    fn create_blind_box() -> Weight;
 }
 
 #[derive(Encode, Decode, Debug, Eq, Clone, PartialEq)]
@@ -268,6 +269,26 @@ pub struct Royalty<AccountId, BlockNumber> {
     pub expired_at: BlockNumber,
 }
 
+#[derive(Encode, Decode, Default, Clone, PartialEq)]
+pub struct NftCard {
+    pub collection_id: u64,
+    pub item_id: u64,
+    pub value: u64,
+}
+
+#[derive(Encode, Decode, Default, Clone, PartialEq)]
+pub struct BlindBox<AccountId, BlockNumber> {
+    pub id: u64,
+    pub owner: AccountId,
+    pub card_group: Vec<NftCard>,
+    pub total_count: u64,
+    pub remaind_card_group: Vec<NftCard>,
+    pub remaind_count: u64,
+    pub price: u64,
+    pub start_time: BlockNumber,
+    pub end_time: BlockNumber,
+    pub has_ended: bool,
+}
 
 
 #[derive(Debug, Eq, PartialEq)]
@@ -322,10 +343,8 @@ decl_storage! {
         pub FungibleItemList get(fn fungible_item_id): double_map hasher(blake2_128_concat) u64, hasher(blake2_128_concat) u64 => FungibleItemType<T::AccountId>;
         pub ReFungibleItemList get(fn refungible_item_id): double_map hasher(blake2_128_concat) u64, hasher(blake2_128_concat) u64 => ReFungibleItemType<T::AccountId>;
 
-
         /// Royalty
         pub ItemRoyalty get(fn royalty): double_map hasher(blake2_128_concat) u64, hasher(blake2_128_concat) u64 => Royalty<T::AccountId, T::BlockNumber>;
-
 
         /// Index list
         pub AddressTokens get(fn address_tokens): double_map hasher(blake2_128_concat) u64, hasher(blake2_128_concat) T::AccountId => Vec<u64>;
@@ -343,6 +362,9 @@ decl_storage! {
         /// Separable SaleOrder List
         pub SeparableSaleOrderList get(fn separablet_order_list_id):double_map hasher(blake2_128_concat) u64, hasher(blake2_128_concat) u64 => Vec<u64>;
 
+        /// BlindBox List
+        pub BlindBoxList get(fn blind_box_id): map hasher(identity) u64 => BlindBox<T::AccountId, T::BlockNumber>;
+
         /// Sales history
         pub HistorySaleOrderList get(fn nft_trade_history_id): double_map hasher(blake2_128_concat) u64, hasher(blake2_128_concat) u64 => Vec<SaleOrderHistory<T::AccountId, T::BlockNumber>>;
 
@@ -354,6 +376,9 @@ decl_storage! {
 
         /// Next auction id
         pub NextAuctionID: u64 = 1;
+
+        /// Next BlindBox id
+        pub NextBlindBoxID: u64 = 1;
 
         /// Auction
         pub AuctionList get(fn get_auction): double_map hasher(blake2_128_concat) u64, hasher(blake2_128_concat) u64 => Auction<T::AccountId, T::BlockNumber>; 
@@ -384,6 +409,7 @@ decl_event!(
         AuctionBid(u64, u64, u64, u64, u64, AccountId),
         AuctionSucceed(u64, u64, u64, u64, u64, AccountId),
         AuctionCancel(u64, u64, u64),
+        BlindBoxCreated(u64, u64, AccountId),
     }
 );
 
@@ -1254,6 +1280,29 @@ decl_module! {
 
             // call event
             Self::deposit_event(RawEvent::ItemSeparableOrderSucceed(order_id, collection_id, item_id, value, sender));
+            Ok(())
+        }
+
+        #[weight = T::WeightInfo::create_blind_box()]
+        pub fn create_blind_box(origin, start_time: T::BlockNumber, end_time: T::BlockNumber, price: u64 ) -> DispatchResult {
+            let sender = ensure_signed(origin)?;
+
+            let blind_box = BlindBox {
+                id: NextBlindBoxID::get(),
+                owner: sender.clone(),
+                price: price,
+                start_time: start_time,
+                end_time: end_time,
+                has_ended: false,
+                .. Default::default()
+            };
+
+            let blind_box_id = blind_box.id;
+            <BlindBoxList<T>>::insert(blind_box_id, blind_box);
+            NextBlindBoxID::mutate(|id| *id += 1);
+
+            // call event
+            Self::deposit_event(RawEvent::BlindBoxCreated(blind_box_id, price, sender));
             Ok(())
         }
 

@@ -1,7 +1,10 @@
-# Uni-arts Network [云画链](https://uniarts.me)
+# Uni-arts Network (https://uniarts.me)
 ![Image text](https://raw.githubusercontent.com/uni-arts-chain/uni-arts-network/master/docs/uniarts-network-new.png)
 
-链接信用、助力原创。
+
+Unite of Uniqueness
+
+Uni-Arts provides the one - stop solution for Businesses and Individual creators to NFT-ize their IPs & Artworks
 
 [![Substrate version](https://img.shields.io/badge/Substrate-2.0.0-brightgreen?logo=Parity%20Substrate)](https://substrate.dev/)
 [![Discord](https://img.shields.io/badge/Discord-gray?logo=discord)](https://discord.gg/ZBDGY79X)

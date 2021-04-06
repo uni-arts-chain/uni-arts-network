@@ -77,6 +77,7 @@ pub trait WeightInfo {
     fn bid() -> Weight;
     fn finish_auction() -> Weight;
     fn create_blind_box() -> Weight;
+    fn blind_box_add_card_group() -> Weight;
 }
 
 #[derive(Encode, Decode, Debug, Eq, Clone, PartialEq)]
@@ -363,7 +364,7 @@ decl_storage! {
         pub SeparableSaleOrderList get(fn separablet_order_list_id):double_map hasher(blake2_128_concat) u64, hasher(blake2_128_concat) u64 => Vec<u64>;
 
         /// BlindBox List
-        pub BlindBoxList get(fn blind_box_id): map hasher(identity) u64 => BlindBox<T::AccountId, T::BlockNumber>;
+        pub BlindBoxList get(fn get_blind_box): map hasher(identity) u64 => BlindBox<T::AccountId, T::BlockNumber>;
 
         /// Sales history
         pub HistorySaleOrderList get(fn nft_trade_history_id): double_map hasher(blake2_128_concat) u64, hasher(blake2_128_concat) u64 => Vec<SaleOrderHistory<T::AccountId, T::BlockNumber>>;
@@ -410,6 +411,7 @@ decl_event!(
         AuctionSucceed(u64, u64, u64, u64, u64, AccountId),
         AuctionCancel(u64, u64, u64),
         BlindBoxCreated(u64, u64, AccountId),
+        BlindBoxAddCardGroup(u64, u64, u64, u64, AccountId),
     }
 );
 
@@ -1200,7 +1202,7 @@ decl_module! {
             let locker = Self::nft_account_id();
 
             ensure!(target_sale_order.balance >= value, "Value not enough");
-            let remain_value = balance - value;
+            let remain_value = balance.checked_sub(value);
 
             let accept_price = CurrencyBalanceOf::<T>::saturated_from(price.into());
             let accept_value = CurrencyBalanceOf::<T>::saturated_from(value.into());
@@ -1303,6 +1305,57 @@ decl_module! {
 
             // call event
             Self::deposit_event(RawEvent::BlindBoxCreated(blind_box_id, price, sender));
+            Ok(())
+        }
+
+        #[weight = T::WeightInfo::blind_box_add_card_group()]
+        pub fn blind_box_add_card_group(origin, blind_box_id: u64, collection_id: u64, item_id: u64, value: u64 ) -> DispatchResult {
+            let sender = ensure_signed(origin)?;
+
+            let blind_box = Self::get_blind_box(blind_box_id);
+            let card_value = value;
+
+            let blind_box_owner = Self::is_blind_box_owner(sender.clone(), blind_box_id);
+            if !blind_box_owner
+            {
+                let mes = "Account is not blind box owner";
+                panic!(mes);
+            }
+
+            let target_collection = <Collection<T>>::get(collection_id);
+            let locker = Self::nft_account_id();
+
+            match target_collection.mode
+            {
+                CollectionMode::NFT(_) => Self::transfer_nft(collection_id, item_id, locker, sender.clone())?,
+                CollectionMode::Fungible(_)  => Self::transfer_fungible(collection_id, item_id, value, locker, sender.clone())?,
+                CollectionMode::ReFungible(_, _)  => Self::transfer_refungible(collection_id, item_id, value, locker, sender.clone())?,
+                _ => ()
+            };
+
+            let nft_card = NftCard {
+                collection_id: collection_id,
+                item_id: item_id,
+                value: value
+            };
+
+            let mut card_group = blind_box.clone().card_group;
+            card_group.push(nft_card.clone());
+            let mut remaind_card_group = blind_box.clone().remaind_card_group;
+            remaind_card_group.push(nft_card.clone());
+            let total_count = blind_box.total_count.checked_add(value);
+            let remaind_count = blind_box.remaind_count.checked_add(value);
+            let blind_box_id = blind_box.id;
+
+            <BlindBoxList<T>>::mutate(blind_box_id, |blind_box| {
+                blind_box.card_group = card_group;
+                blind_box.remaind_card_group = remaind_card_group;
+                blind_box.total_count = total_count;
+                blind_box.remaind_count = remaind_count;
+            });
+
+            // call event
+            Self::deposit_event(RawEvent::BlindBoxAddCardGroup(blind_box_id, collection_id, item_id, value, sender));
             Ok(())
         }
 
@@ -1769,6 +1822,12 @@ impl<T: Trait> Module<T> {
         let target_sale_order = <SeparableSaleOrder<T>>::get(order_id);
 
         target_sale_order.owner == owner
+    }
+
+    fn is_blind_box_owner(owner: T::AccountId, blind_box_id: u64) -> bool {
+        let target_blind_box = <BlindBoxList<T>>::get(blind_box_id);
+
+        target_blind_box.owner == owner
     }
 
     fn transfer_fungible(

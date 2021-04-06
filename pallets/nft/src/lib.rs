@@ -1333,7 +1333,7 @@ decl_module! {
 
             match target_collection.mode
             {
-                CollectionMode::NFT(_) => Self::transfer_nft(collection_id, item_id, sender.clone(), locker,)?,
+                CollectionMode::NFT(_) => Self::transfer_nft(collection_id, item_id, sender.clone(), locker)?,
                 CollectionMode::Fungible(_)  => Self::transfer_fungible(collection_id, item_id, value, sender.clone(), locker)?,
                 CollectionMode::ReFungible(_, _)  => Self::transfer_refungible(collection_id, item_id, value, sender.clone(), locker)?,
                 _ => ()

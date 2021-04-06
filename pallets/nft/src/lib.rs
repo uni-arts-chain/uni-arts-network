@@ -1202,7 +1202,7 @@ decl_module! {
             let locker = Self::nft_account_id();
 
             ensure!(target_sale_order.balance >= value, "Value not enough");
-            let remain_value = balance.checked_sub(value);
+            let remain_value = balance.checked_sub(value).unwrap();
 
             let accept_price = CurrencyBalanceOf::<T>::saturated_from(price.into());
             let accept_value = CurrencyBalanceOf::<T>::saturated_from(value.into());
@@ -1296,6 +1296,8 @@ decl_module! {
                 start_time: start_time,
                 end_time: end_time,
                 has_ended: false,
+                total_count: 0,
+                remaind_count: 0,
                 .. Default::default()
             };
 
@@ -1313,7 +1315,7 @@ decl_module! {
             let sender = ensure_signed(origin)?;
 
             let blind_box = Self::get_blind_box(blind_box_id);
-            let card_value = value;
+            let mut card_value: u64 = value;
 
             let blind_box_owner = Self::is_blind_box_owner(sender.clone(), blind_box_id);
             if !blind_box_owner
@@ -1324,6 +1326,10 @@ decl_module! {
 
             let target_collection = <Collection<T>>::get(collection_id);
             let locker = Self::nft_account_id();
+
+            if let CollectionMode::NFT(_) = target_collection.mode {
+                card_value = 1;
+            };
 
             match target_collection.mode
             {
@@ -1343,8 +1349,8 @@ decl_module! {
             card_group.push(nft_card.clone());
             let mut remaind_card_group = blind_box.clone().remaind_card_group;
             remaind_card_group.push(nft_card.clone());
-            let total_count = blind_box.total_count.checked_add(value);
-            let remaind_count = blind_box.remaind_count.checked_add(value);
+            let total_count: u64 = blind_box.total_count.checked_add(card_value).unwrap();
+            let remaind_count: u64 = blind_box.remaind_count.checked_add(card_value).unwrap();
             let blind_box_id = blind_box.id;
 
             <BlindBoxList<T>>::mutate(blind_box_id, |blind_box| {

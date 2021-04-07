@@ -1371,7 +1371,7 @@ decl_module! {
             };
 
             CardGroupList::insert(group_id, nft_card.clone());
-            NextBlindBoxID::mutate(|id| *id += 1);
+            NextCardGroupID::mutate(|id| *id += 1);
 
             let mut card_group = blind_box.clone().card_group;
             card_group.push(nft_card.group_id);

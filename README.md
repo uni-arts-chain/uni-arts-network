@@ -1,4 +1,4 @@
-# Uni-arts Network (https://uniarts.me)
+# Uni-arts Network (https://uniarts.network)
 ![Image text](https://raw.githubusercontent.com/uni-arts-chain/uni-arts-network/master/docs/uniarts-network-new.png)
 
 

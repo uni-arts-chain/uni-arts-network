@@ -1357,7 +1357,7 @@ decl_module! {
             let group_id = NextCardGroupID::get();
             let total_count: u64 = blind_box.total_count.checked_add(card_value).unwrap();
             let remaind_count: u64 = blind_box.remaind_count.checked_add(card_value).unwrap();
-            let draw_start: u64 = total_count.checked_add(1).unwrap();
+            let draw_start: u64 = blind_box.total_count.checked_add(1).unwrap();
             let draw_end: u64 = draw_start.checked_add(value).unwrap();
 
             let nft_card = NftCard {

@@ -372,7 +372,7 @@ decl_storage! {
         pub SeparableSaleOrderList get(fn separablet_order_list_id):double_map hasher(blake2_128_concat) u64, hasher(blake2_128_concat) u64 => Vec<u64>;
 
         /// CardGroup List
-        pub CardGroupList get(fn get_card_group): map hasher(identity) u64 => BlindBox<T::AccountId, T::BlockNumber>;
+        pub CardGroupList get(fn get_card_group): map hasher(identity) u64 => NftCard;
 
         /// BlindBox List
         pub BlindBoxList get(fn get_blind_box): map hasher(identity) u64 => BlindBox<T::AccountId, T::BlockNumber>;
@@ -1370,9 +1370,53 @@ decl_module! {
                 draw_end: draw_end,
             };
 
+            CardGroupList::insert(group_id, nft_card.clone());
             NextBlindBoxID::mutate(|id| *id += 1);
 
-            let mut card_group = blind_box.clone().card_group;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
             card_group.push(nft_card.group_id);
 
             <BlindBoxList<T>>::mutate(blind_box_id, |blind_box| {

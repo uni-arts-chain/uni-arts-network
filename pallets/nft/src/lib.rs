@@ -241,6 +241,7 @@ pub struct SaleOrderHistory<AccountId, BlockNumber> {
 }
 
 #[derive(Encode, Decode, Default, Clone, PartialEq)]
+#[cfg_attr(feature = "std", derive(Debug))]
 pub struct Auction<AccountId, BlockNumber> {
     pub id: u64,
     pub collection_id: u64,
@@ -255,6 +256,7 @@ pub struct Auction<AccountId, BlockNumber> {
 }
 
 #[derive(Encode, Decode, Default, Clone, PartialEq)]
+#[cfg_attr(feature = "std", derive(Debug))]
 pub struct BidHistory<AccountId, BlockNumber> {
     pub auction_id: u64,
     pub bidder: AccountId,
@@ -264,6 +266,7 @@ pub struct BidHistory<AccountId, BlockNumber> {
 
 
 #[derive(Encode, Decode, Default, Clone, PartialEq)]
+#[cfg_attr(feature = "std", derive(Debug))]
 pub struct Royalty<AccountId, BlockNumber> {
     pub owner: AccountId,
     pub rate: u64,
@@ -271,19 +274,24 @@ pub struct Royalty<AccountId, BlockNumber> {
 }
 
 #[derive(Encode, Decode, Default, Clone, PartialEq)]
+#[cfg_attr(feature = "std", derive(Debug))]
 pub struct NftCard {
+    pub group_id: u64,
     pub collection_id: u64,
     pub item_id: u64,
     pub value: u64,
+    pub remaind_value: u64,
+    pub draw_start: u64,
+    pub draw_end: u64,
 }
 
 #[derive(Encode, Decode, Default, Clone, PartialEq)]
+#[cfg_attr(feature = "std", derive(Debug))]
 pub struct BlindBox<AccountId, BlockNumber> {
     pub id: u64,
     pub owner: AccountId,
-    pub card_group: Vec<NftCard>,
+    pub card_group: Vec<u64>,
     pub total_count: u64,
-    pub remaind_card_group: Vec<NftCard>,
     pub remaind_count: u64,
     pub price: u64,
     pub start_time: BlockNumber,
@@ -363,6 +371,9 @@ decl_storage! {
         /// Separable SaleOrder List
         pub SeparableSaleOrderList get(fn separablet_order_list_id):double_map hasher(blake2_128_concat) u64, hasher(blake2_128_concat) u64 => Vec<u64>;
 
+        /// CardGroup List
+        pub CardGroupList get(fn get_card_group): map hasher(identity) u64 => BlindBox<T::AccountId, T::BlockNumber>;
+
         /// BlindBox List
         pub BlindBoxList get(fn get_blind_box): map hasher(identity) u64 => BlindBox<T::AccountId, T::BlockNumber>;
 
@@ -377,6 +388,9 @@ decl_storage! {
 
         /// Next auction id
         pub NextAuctionID: u64 = 1;
+
+        /// Next CardGroup id
+        pub NextCardGroupID: u64 = 1;
 
         /// Next BlindBox id
         pub NextBlindBoxID: u64 = 1;
@@ -411,7 +425,7 @@ decl_event!(
         AuctionSucceed(u64, u64, u64, u64, u64, AccountId),
         AuctionCancel(u64, u64, u64),
         BlindBoxCreated(u64, u64, AccountId),
-        BlindBoxAddCardGroup(u64, u64, u64, u64, AccountId),
+        BlindBoxAddCardGroup(u64, u64, u64, u64, u64, AccountId),
     }
 );
 
@@ -1339,29 +1353,36 @@ decl_module! {
                 _ => ()
             };
 
-            let nft_card = NftCard {
-                collection_id: collection_id,
-                item_id: item_id,
-                value: value
-            };
-
-            let mut card_group = blind_box.clone().card_group;
-            card_group.push(nft_card.clone());
-            let mut remaind_card_group = blind_box.clone().remaind_card_group;
-            remaind_card_group.push(nft_card.clone());
+            let blind_box_id = blind_box.id;
+            let group_id = NextCardGroupID::get();
             let total_count: u64 = blind_box.total_count.checked_add(card_value).unwrap();
             let remaind_count: u64 = blind_box.remaind_count.checked_add(card_value).unwrap();
-            let blind_box_id = blind_box.id;
+            let draw_start: u64 = total_count.checked_add(1).unwrap();
+            let draw_end: u64 = draw_start.checked_add(value).unwrap();
+
+            let nft_card = NftCard {
+                group_id: group_id,
+                collection_id: collection_id,
+                item_id: item_id,
+                value: value,
+                remaind_value: value,
+                draw_start: draw_start,
+                draw_end: draw_end,
+            };
+
+            NextBlindBoxID::mutate(|id| *id += 1);
+
+            let mut card_group = blind_box.clone().card_group;
+            card_group.push(nft_card.group_id);
 
             <BlindBoxList<T>>::mutate(blind_box_id, |blind_box| {
                 blind_box.card_group = card_group;
-                blind_box.remaind_card_group = remaind_card_group;
                 blind_box.total_count = total_count;
                 blind_box.remaind_count = remaind_count;
             });
 
             // call event
-            Self::deposit_event(RawEvent::BlindBoxAddCardGroup(blind_box_id, collection_id, item_id, value, sender));
+            Self::deposit_event(RawEvent::BlindBoxAddCardGroup(blind_box_id, group_id, collection_id, item_id, value, sender));
             Ok(())
         }
 

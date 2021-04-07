@@ -249,16 +249,19 @@
     "expired_at": "BlockNumber"
   },
   "NftCard": {
+    "group_id": "u64",
     "collection_id": "u64",
     "item_id": "u64",
-    "value": "u64"
+    "value": "u64",
+    "remaind_value": "u64",
+    "draw_start": "u64",
+    "draw_end": "u64"
   },
   "BlindBox": {
     "id": "u64",
     "owner": "AccountId",
-    "card_group": "Vec<NftCard>",
+    "card_group": "Vec<u64>",
     "total_count": "u64",
-    "remaind_card_group": "Vec<NftCard>",
     "remaind_count": "u64",
     "price": "u64",
     "start_time": "BlockNumber",

@@ -545,6 +545,7 @@ impl pallet_nft::Trait for Runtime {
 	type ModuleId = UniArtsNftModuleId;
 	type Currency = Uart;
 	type Event = Event;
+	type Randomness = RandomnessCollectiveFlip;
 	type WeightInfo = ();
 }
 

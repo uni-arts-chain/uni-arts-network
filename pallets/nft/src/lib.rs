@@ -16,7 +16,7 @@ pub use frame_support::{
         DispatchInfo, GetDispatchInfo, IdentityFee, Pays, PostDispatchInfo, Weight,
         WeightToFeePolynomial,
     },
-    IsSubType, StorageValue,
+    IsSubType, StorageValue, debug,
 };
 
 use frame_system::{self as system, ensure_signed};
@@ -78,6 +78,7 @@ pub trait WeightInfo {
     fn finish_auction() -> Weight;
     fn create_blind_box() -> Weight;
     fn blind_box_add_card_group() -> Weight;
+    fn buy_blind_box() -> Weight;
 }
 
 #[derive(Encode, Decode, Debug, Eq, Clone, PartialEq)]
@@ -320,6 +321,9 @@ pub trait Trait: system::Trait + pallet_names::Trait {
 
     type Event: From<Event<Self>> + Into<<Self as system::Trait>::Event>;
 
+    /// Something that provides randomness in the runtime.
+    type Randomness: Randomness<Self::Hash>;
+
     /// Weight information for the extrinsics in this module.
     type WeightInfo: WeightInfo;
 }
@@ -426,6 +430,7 @@ decl_event!(
         AuctionCancel(u64, u64, u64),
         BlindBoxCreated(u64, u64, AccountId),
         BlindBoxAddCardGroup(u64, u64, u64, u64, u64, AccountId),
+        BlindBoxDraw(u64, u64, u64, u64, AccountId),
     }
 );
 
@@ -434,6 +439,11 @@ decl_error! {
 		NamesNotExists,
 		SaleOrderNotExists,
 		NamesOwnerInvalid,
+        WinningRateInvalid,
+        BlindBoxNotExists,
+        BlindBoxNotInSalesPeriod,
+        BlindBoxIsEnded,
+        BlindBoxNotEnough,
 	}
 }
 
@@ -1358,7 +1368,7 @@ decl_module! {
             let total_count: u64 = blind_box.total_count.checked_add(card_value).unwrap();
             let remaind_count: u64 = blind_box.remaind_count.checked_add(card_value).unwrap();
             let draw_start: u64 = blind_box.total_count.checked_add(1).unwrap();
-            let draw_end: u64 = draw_start.checked_add(value).unwrap();
+            let draw_end: u64 = blind_box.total_count.checked_add(value).unwrap();
 
             let nft_card = NftCard {
                 group_id: group_id,
@@ -1384,6 +1394,39 @@ decl_module! {
 
             // call event
             Self::deposit_event(RawEvent::BlindBoxAddCardGroup(blind_box_id, group_id, collection_id, item_id, value, sender));
+            Ok(())
+        }
+
+        #[weight = T::WeightInfo::buy_blind_box()]
+        pub fn buy_blind_box(origin, blind_box_id: u64) -> DispatchResult {
+            let sender = ensure_signed(origin)?;
+
+            ensure!(blind_box_id > 0, Error::<T>::BlindBoxNotExists);
+
+            let blind_box = Self::get_blind_box(blind_box_id);
+            let now = <system::Module<T>>::block_number();
+            ensure!(now >= blind_box.start_time, Error::<T>::BlindBoxNotInSalesPeriod);
+            ensure!(now <= blind_box.end_time, Error::<T>::BlindBoxNotInSalesPeriod);
+            ensure!(blind_box.has_ended == false, Error::<T>::BlindBoxIsEnded);
+            ensure!(blind_box.remaind_count > 0, Error::<T>::BlindBoxNotEnough);
+
+            let mut random_number = Self::generate_random_number(0);
+
+            for i in 1 .. 20 {
+                if random_number < u32::MAX - u32::MAX % (blind_box.total_count as u32) {
+                    break;
+                }
+                random_number = Self::generate_random_number(i);
+            }
+            let winner_number = random_number % (blind_box.total_count as u32);
+
+            debug::info!("------ random_number {:?}", random_number);
+            debug::info!("------ winner_number {:?}", winner_number);
+
+            // TODO
+
+            // call event
+            Self::deposit_event(RawEvent::BlindBoxDraw(blind_box_id, blind_box_id, blind_box_id, blind_box_id, sender));
             Ok(())
         }
 
@@ -2153,6 +2196,13 @@ impl<T: Trait> Module<T> {
         let mut lock_id = id.to_be_bytes();
         lock_id[0..3].copy_from_slice(&*b"nft");
         lock_id
+    }
+
+    fn generate_random_number(seed: u32) -> u32 {
+        let random_seed = T::Randomness::random(&(Self::nft_account_id(), seed).encode());
+        let random_number = <u32>::decode(&mut random_seed.as_ref())
+            .expect("secure hashes should always be bigger than u32; qed");
+        random_number
     }
 }
 

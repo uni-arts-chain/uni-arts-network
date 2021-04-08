@@ -79,6 +79,7 @@ pub trait WeightInfo {
     fn create_blind_box() -> Weight;
     fn blind_box_add_card_group() -> Weight;
     fn buy_blind_box() -> Weight;
+    fn close_blind_box() -> Weight;
 }
 
 #[derive(Encode, Decode, Debug, Eq, Clone, PartialEq)]
@@ -428,7 +429,8 @@ decl_event!(
         AuctionCancel(u64, u64, u64),
         BlindBoxCreated(u64, u64, AccountId),
         BlindBoxAddCardGroup(u64, u64, u64, u64, u64, AccountId),
-        BlindBoxDraw(u64, u64, u64, u64, AccountId),
+        BlindBoxDraw(u64, u64, u64, AccountId),
+        BlindBoxClose(u64, AccountId),
     }
 );
 
@@ -1485,7 +1487,27 @@ decl_module! {
             });
 
             // call event
-            Self::deposit_event(RawEvent::BlindBoxDraw(blind_box_id, blind_box_id, blind_box_id, blind_box_id, sender));
+            Self::deposit_event(RawEvent::BlindBoxDraw(blind_box_id, card_group.collection_id, card_group.item_id, sender));
+            Ok(())
+        }
+
+        #[weight = T::WeightInfo::close_blind_box()]
+        pub fn close_blind_box(origin, blind_box_id: u64) -> DispatchResult {
+            let sender = ensure_signed(origin)?;
+
+            let blind_box_owner = Self::is_blind_box_owner(sender.clone(), blind_box_id);
+            if !blind_box_owner
+            {
+                let mes = "Account is not blind box owner";
+                panic!(mes);
+            }
+
+            <BlindBoxList<T>>::mutate(blind_box_id, |blind_box| {
+                blind_box.has_ended = true;
+            });
+
+            // call event
+            Self::deposit_event(RawEvent::BlindBoxClose(blind_box_id, sender));
             Ok(())
         }
 

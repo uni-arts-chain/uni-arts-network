@@ -31,7 +31,7 @@ use sp_runtime::{
         InvalidTransaction, TransactionPriority, TransactionValidity, TransactionValidityError,
         ValidTransaction,
     },
-    FixedPointOperand, FixedU128,
+    FixedPointOperand, FixedU128, RuntimeDebug,
 };
 use sp_std::prelude::*;
 use sp_core::H160;
@@ -274,8 +274,7 @@ pub struct Royalty<AccountId, BlockNumber> {
     pub expired_at: BlockNumber,
 }
 
-#[derive(Encode, Decode, Default, Clone, PartialEq)]
-#[cfg_attr(feature = "std", derive(Debug))]
+#[derive(Encode, Decode, Default, Clone, PartialEq, RuntimeDebug)]
 pub struct NftCard {
     pub group_id: u64,
     pub collection_id: u64,
@@ -286,8 +285,7 @@ pub struct NftCard {
     pub draw_end: u64,
 }
 
-#[derive(Encode, Decode, Default, Clone, PartialEq)]
-#[cfg_attr(feature = "std", derive(Debug))]
+#[derive(Encode, Decode, Default, Clone, PartialEq, RuntimeDebug)]
 pub struct BlindBox<AccountId, BlockNumber> {
     pub id: u64,
     pub owner: AccountId,
@@ -1410,20 +1408,81 @@ decl_module! {
             ensure!(blind_box.has_ended == false, Error::<T>::BlindBoxIsEnded);
             ensure!(blind_box.remaind_count > 0, Error::<T>::BlindBoxNotEnough);
 
-            let mut random_number = Self::generate_random_number(0);
+            let mut winner_number = Self::get_winner_number(blind_box.total_count as u32);
 
-            for i in 1 .. 20 {
-                if random_number < u32::MAX - u32::MAX % (blind_box.total_count as u32) {
-                    break;
-                }
-                random_number = Self::generate_random_number(i);
-            }
-            let winner_number = random_number % (blind_box.total_count as u32);
-
-            debug::info!("------ random_number {:?}", random_number);
             debug::info!("------ winner_number {:?}", winner_number);
 
-            // TODO
+            // Two drawing modes are adopted, It's guaranteed to win
+            // 1. Global mode: draw lots no matter whether there are cards sold or not
+            // 2. On sale mode: draw lots from all cards on sale
+            let mut mode1_choose_group_id: u64 = 0;
+            let mut mode2_choose_group_id: u64 = 0;
+            let mut mode2_card_group_ids: Vec<u64> = Vec::new();
+
+            // mode1
+            for card_group_id in blind_box.card_group.iter() {
+                let card_group = Self::get_card_group(card_group_id);
+                if winner_number >= card_group.draw_start && winner_number <= card_group.draw_end && card_group.remaind_value > 0 {
+                    mode1_choose_group_id = card_group.group_id;
+                }
+                if card_group.remaind_value > 0 {
+                    mode2_card_group_ids.push(card_group.group_id);
+                }
+            }
+
+            // mode2
+            if mode1_choose_group_id == 0 {
+                let mut group_total: u64 = 0;
+                winner_number = Self::get_winner_number(blind_box.remaind_count as u32);
+                for card_group_id in mode2_card_group_ids.iter() {
+                    let card_group = Self::get_card_group(card_group_id);
+                    let group_start = group_total.checked_add(1).unwrap();
+                    let group_end = group_total.checked_add(card_group.remaind_value).unwrap();
+                    group_total = group_total.checked_add(card_group.remaind_value).unwrap();
+                    if winner_number >= group_start && winner_number <= group_end {
+                        mode2_choose_group_id = card_group_id.clone();
+                        break;
+                    }
+                }
+            }
+
+            // send card
+            // debug::info!("------ mode1_choose_group_id {:?}", mode1_choose_group_id);
+            // debug::info!("------ mode2_choose_group_id {:?}", mode2_choose_group_id);
+
+            let mut choose_group_id = mode1_choose_group_id;
+            if mode1_choose_group_id == 0 {
+                choose_group_id = mode2_choose_group_id;
+            }
+            let card_group = Self::get_card_group(choose_group_id);
+            let locker = Self::nft_account_id();
+            let price = CurrencyBalanceOf::<T>::saturated_from(blind_box.price.into());
+
+            let negative_imbalance = <T as Trait>::Currency::withdraw(
+                &sender,
+                price,
+                WithdrawReasons::all(),
+                ExistenceRequirement::AllowDeath,
+            )?;
+
+            <T as Trait>::Currency::resolve_creating(&blind_box.owner, negative_imbalance);
+
+            let target_collection = <Collection<T>>::get(card_group.collection_id);
+            match target_collection.mode
+            {
+                CollectionMode::NFT(_) => Self::transfer_nft(card_group.collection_id, card_group.item_id, locker, sender.clone())?,
+                CollectionMode::Fungible(_)  => Self::transfer_fungible(card_group.collection_id, card_group.item_id, 1, locker, sender.clone())?,
+                CollectionMode::ReFungible(_, _)  => Self::transfer_refungible(card_group.collection_id, card_group.item_id, 1, locker, sender.clone())?,
+                _ => ()
+            };
+
+            CardGroupList::mutate(choose_group_id, |card_group| {
+                card_group.remaind_value = card_group.remaind_value - 1;
+            });
+
+            <BlindBoxList<T>>::mutate(blind_box_id, |blind_box| {
+                blind_box.remaind_count = blind_box.remaind_count - 1;
+            });
 
             // call event
             Self::deposit_event(RawEvent::BlindBoxDraw(blind_box_id, blind_box_id, blind_box_id, blind_box_id, sender));
@@ -2196,6 +2255,19 @@ impl<T: Trait> Module<T> {
         let mut lock_id = id.to_be_bytes();
         lock_id[0..3].copy_from_slice(&*b"nft");
         lock_id
+    }
+
+    fn get_winner_number(total_count: u32) -> u64 {
+        let mut random_number = Self::generate_random_number(0);
+
+        for i in 1 .. 20 {
+            if random_number < u32::MAX - u32::MAX % total_count {
+                break;
+            }
+            random_number = Self::generate_random_number(i);
+        }
+        let winner_number = (random_number % total_count) as u64;
+        winner_number
     }
 
     fn generate_random_number(seed: u32) -> u32 {

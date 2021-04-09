@@ -213,6 +213,7 @@ pub struct VestingItem<AccountId, Moment> {
 #[derive(Encode, Decode, Default, Clone, PartialEq)]
 #[cfg_attr(feature = "std", derive(Debug))]
 pub struct SaleOrder<AccountId> {
+    pub order_id: u64,
     pub collection_id: u64,
     pub item_id: u64,
     pub value: u64,
@@ -223,6 +224,7 @@ pub struct SaleOrder<AccountId> {
 #[derive(Encode, Decode, Default, Clone, PartialEq)]
 #[cfg_attr(feature = "std", derive(Debug))]
 pub struct SplitSaleOrder<AccountId> {
+    pub order_id: u64,
     pub collection_id: u64,
     pub item_id: u64,
     pub value: u64,
@@ -369,6 +371,9 @@ decl_storage! {
         /// Consignment
         pub SaleOrderList get(fn nft_trade_id): double_map hasher(blake2_128_concat) u64, hasher(blake2_128_concat) u64 => SaleOrder<T::AccountId>;
 
+        /// Consignment SaleOrder by order_id
+        pub SaleOrderByIdList get(fn sale_order_id): map hasher(identity) u64 => SaleOrder<T::AccountId>;
+
         /// Separable SaleOrder
         pub SeparableSaleOrder get(fn separablet_order_id): map hasher(identity) u64 => SplitSaleOrder<T::AccountId>;
 
@@ -417,9 +422,9 @@ decl_event!(
         ItemCreated(u64, u64),
         ItemDestroyed(u64, u64),
         ItemTransfer(u64, u64, u64, AccountId, AccountId),
-        ItemOrderCreated(u64, u64, u64, u64, AccountId),
-        ItemOrderCancel(u64, u64),
-        ItemOrderSucceed(u64, u64, AccountId),
+        ItemOrderCreated(u64, u64, u64, u64, AccountId, u64),
+        ItemOrderCancel(u64, u64, u64),
+        ItemOrderSucceed(u64, u64, AccountId, u64),
         ItemSeparableOrderCreated(u64, u64, u64, u64, u64, AccountId),
         ItemSeparableOrderCancel(u64, u64, u64),
         ItemSeparableOrderSucceed(u64, u64, u64, u64, AccountId),
@@ -1004,8 +1009,11 @@ decl_module! {
                 _ => ()
             };
 
+            let order_id = NextOrderID::get();
+
             // Create order
             let order = SaleOrder {
+                order_id: order_id,
                 collection_id: collection_id,
                 item_id: item_id,
                 value: value,
@@ -1013,10 +1021,12 @@ decl_module! {
                 price: price,
             };
 
-            <SaleOrderList<T>>::insert(collection_id, item_id, order);
+            NextOrderID::mutate(|id| *id += 1);
+            <SaleOrderList<T>>::insert(collection_id, item_id, order.clone());
+            <SaleOrderByIdList<T>>::insert(order_id, order);
 
             // call event
-            Self::deposit_event(RawEvent::ItemOrderCreated(collection_id, item_id, value, price, sender));
+            Self::deposit_event(RawEvent::ItemOrderCreated(collection_id, item_id, value, price, sender, order_id));
             Ok(())
         }
 
@@ -1025,6 +1035,7 @@ decl_module! {
             let sender = ensure_signed(origin)?;
 
             let target_sale_order = <SaleOrderList<T>>::get(collection_id, item_id);
+            let order_id = target_sale_order.order_id;
 
             let order_owner = Self::is_sale_order_owner(sender.clone(), collection_id, item_id);
             if !order_owner
@@ -1045,9 +1056,10 @@ decl_module! {
             };
 
             <SaleOrderList<T>>::remove(collection_id, item_id);
+            <SaleOrderByIdList<T>>::remove(order_id);
 
             // call event
-            Self::deposit_event(RawEvent::ItemOrderCancel(collection_id, item_id));
+            Self::deposit_event(RawEvent::ItemOrderCancel(collection_id, item_id, order_id));
             Ok(())
         }
 
@@ -1059,6 +1071,7 @@ decl_module! {
             let target_sale_order = <SaleOrderList<T>>::get(collection_id, item_id);
             let nft_owner = target_sale_order.owner;
             let price = target_sale_order.price;
+            let order_id = target_sale_order.order_id;
             let buy_time = <system::Module<T>>::block_number();
 
             let target_collection = <Collection<T>>::get(collection_id);
@@ -1110,9 +1123,10 @@ decl_module! {
             }
 
             <SaleOrderList<T>>::remove(collection_id, item_id);
+            <SaleOrderByIdList<T>>::remove(order_id);
 
             // call event
-            Self::deposit_event(RawEvent::ItemOrderSucceed(collection_id, item_id, sender));
+            Self::deposit_event(RawEvent::ItemOrderSucceed(collection_id, item_id, sender, order_id));
             Ok(())
         }
 
@@ -1126,6 +1140,7 @@ decl_module! {
             }
 
             let order_id = NextOrderID::get();
+
             let target_collection = <Collection<T>>::get(collection_id);
 
             let recipient = Self::nft_account_id();
@@ -1140,6 +1155,7 @@ decl_module! {
 
             // Create order
             let order = SplitSaleOrder {
+                order_id: order_id,
                 collection_id: collection_id,
                 item_id: item_id,
                 value: value,
@@ -1148,7 +1164,7 @@ decl_module! {
                 price: price,
             };
 
-
+            NextOrderID::mutate(|id| *id += 1);
             <SeparableSaleOrder<T>>::insert(order_id, order);
             let list_exists = <SeparableSaleOrderList>::contains_key(collection_id, item_id);
             if list_exists {
@@ -1269,6 +1285,7 @@ decl_module! {
             };
 
             let new_order = SplitSaleOrder {
+                order_id: order_id,
                 collection_id: collection_id,
                 item_id: item_id,
                 value: order_value,

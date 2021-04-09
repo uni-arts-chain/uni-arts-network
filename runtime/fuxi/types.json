@@ -150,6 +150,7 @@
     ]
   },
   "SaleOrder": {
+    "order_id": "u64",
     "collection_id": "u64",
     "item_id": "u64",
     "value": "u64",
@@ -157,6 +158,7 @@
     "price": "u64"
   },
   "SplitSaleOrder": {
+    "order_id": "u64",
     "collection_id": "u64",
     "item_id": "u64",
     "value": "u64",

@@ -80,6 +80,7 @@ pub trait WeightInfo {
     fn blind_box_add_card_group() -> Weight;
     fn buy_blind_box() -> Weight;
     fn close_blind_box() -> Weight;
+    fn cancel_blind_box() -> Weight;
 }
 
 #[derive(Encode, Decode, Debug, Eq, Clone, PartialEq)]
@@ -431,6 +432,7 @@ decl_event!(
         BlindBoxAddCardGroup(u64, u64, u64, u64, u64, AccountId),
         BlindBoxDraw(u64, u64, u64, AccountId),
         BlindBoxClose(u64, AccountId),
+        BlindBoxCancel(u64, AccountId),
     }
 );
 
@@ -443,6 +445,7 @@ decl_error! {
         BlindBoxNotExists,
         BlindBoxNotInSalesPeriod,
         BlindBoxIsEnded,
+        BlindBoxIsNotEnded,
         BlindBoxNotEnough,
 	}
 }
@@ -1508,6 +1511,40 @@ decl_module! {
 
             // call event
             Self::deposit_event(RawEvent::BlindBoxClose(blind_box_id, sender));
+            Ok(())
+        }
+
+        #[weight = T::WeightInfo::cancel_blind_box()]
+        pub fn cancel_blind_box(origin, blind_box_id: u64) -> DispatchResult {
+            let sender = ensure_signed(origin)?;
+
+            let blind_box_owner = Self::is_blind_box_owner(sender.clone(), blind_box_id);
+            if !blind_box_owner
+            {
+                let mes = "Account is not blind box owner";
+                panic!(mes);
+            }
+            let blind_box = Self::get_blind_box(blind_box_id);
+            ensure!(blind_box.has_ended == true, Error::<T>::BlindBoxIsNotEnded);
+            let locker = Self::nft_account_id();
+
+            for card_group_id in blind_box.card_group.iter() {
+                let card_group = Self::get_card_group(card_group_id);
+                if card_group.remaind_value > 0 {
+                    let target_collection = <Collection<T>>::get(card_group.collection_id);
+                    match target_collection.mode {
+                        CollectionMode::NFT(_) => Self::transfer_nft(card_group.collection_id, card_group.item_id, locker.clone(), sender.clone())?,
+                        CollectionMode::Fungible(_)  => Self::transfer_fungible(card_group.collection_id, card_group.item_id, card_group.remaind_value, locker.clone(), sender.clone())?,
+                        CollectionMode::ReFungible(_, _)  => Self::transfer_refungible(card_group.collection_id, card_group.item_id, card_group.remaind_value, locker.clone(), sender.clone())?,
+                        _ => ()
+                    };
+                }
+                CardGroupList::remove(card_group_id);
+           }
+           <BlindBoxList<T>>::remove(blind_box_id);
+
+            // call event
+            Self::deposit_event(RawEvent::BlindBoxCancel(blind_box_id, sender));
             Ok(())
         }
 

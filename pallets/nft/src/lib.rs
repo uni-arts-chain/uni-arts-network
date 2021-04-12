@@ -1104,7 +1104,7 @@ decl_module! {
             let order_history = SaleOrderHistory {
                 collection_id: collection_id,
                 item_id: item_id,
-                value: price,
+                value: target_sale_order.value,
                 seller: nft_owner.clone(),
                 buyer: sender.clone(),
                 price: price,
@@ -1277,7 +1277,7 @@ decl_module! {
             let order_history = SaleOrderHistory {
                 collection_id: collection_id,
                 item_id: item_id,
-                value: price,
+                value: value,
                 seller: nft_owner.clone(),
                 buyer: sender.clone(),
                 price: price,

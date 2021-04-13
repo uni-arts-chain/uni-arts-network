@@ -424,18 +424,18 @@ decl_event!(
         ItemTransfer(u64, u64, u64, AccountId, AccountId),
         ItemOrderCreated(u64, u64, u64, u64, AccountId, u64),
         ItemOrderCancel(u64, u64, u64),
-        ItemOrderSucceed(u64, u64, AccountId, u64),
+        ItemOrderSucceed(u64, u64, AccountId, AccountId, u64, u64, u64),
         ItemSeparableOrderCreated(u64, u64, u64, u64, u64, AccountId),
         ItemSeparableOrderCancel(u64, u64, u64),
-        ItemSeparableOrderSucceed(u64, u64, u64, u64, AccountId),
+        ItemSeparableOrderSucceed(u64, u64, u64, u64, AccountId, AccountId, u64),
         ItemAddSignature(u64, u64, AccountId),
         AuctionCreated(u64, u64, u64, u64, u64, AccountId),
         AuctionBid(u64, u64, u64, u64, u64, AccountId),
-        AuctionSucceed(u64, u64, u64, u64, u64, AccountId),
+        AuctionSucceed(u64, u64, u64, u64, u64, AccountId, AccountId),
         AuctionCancel(u64, u64, u64),
         BlindBoxCreated(u64, u64, AccountId),
         BlindBoxAddCardGroup(u64, u64, u64, u64, u64, AccountId),
-        BlindBoxDraw(u64, u64, u64, AccountId),
+        BlindBoxDraw(u64, u64, u64, AccountId, AccountId, u64),
         BlindBoxClose(u64, AccountId),
         BlindBoxCancel(u64, AccountId),
     }
@@ -1126,7 +1126,7 @@ decl_module! {
             <SaleOrderByIdList<T>>::remove(order_id);
 
             // call event
-            Self::deposit_event(RawEvent::ItemOrderSucceed(collection_id, item_id, sender, order_id));
+            Self::deposit_event(RawEvent::ItemOrderSucceed(collection_id, item_id, sender, nft_owner.clone(), order_id, target_sale_order.value, price));
             Ok(())
         }
 
@@ -1325,7 +1325,7 @@ decl_module! {
             }
 
             // call event
-            Self::deposit_event(RawEvent::ItemSeparableOrderSucceed(order_id, collection_id, item_id, value, sender));
+            Self::deposit_event(RawEvent::ItemSeparableOrderSucceed(order_id, collection_id, item_id, value, sender, nft_owner, price));
             Ok(())
         }
 
@@ -1507,7 +1507,7 @@ decl_module! {
             });
 
             // call event
-            Self::deposit_event(RawEvent::BlindBoxDraw(blind_box_id, card_group.collection_id, card_group.item_id, sender));
+            Self::deposit_event(RawEvent::BlindBoxDraw(blind_box_id, card_group.collection_id, card_group.item_id, sender, blind_box.owner, blind_box.price));
             Ok(())
         }
 
@@ -1742,7 +1742,7 @@ decl_module! {
 
                 Self::charge_royalty(winner.bidder.clone(), collection_id, item_id, balance, winner.bid_time)?;
 
-                Self::deposit_event(RawEvent::AuctionSucceed(auction.id, collection_id, item_id, auction.value, winner.bid_price, winner.bidder.clone()));
+                Self::deposit_event(RawEvent::AuctionSucceed(auction.id, collection_id, item_id, auction.value, winner.bid_price, winner.bidder.clone(), auction.owner));
 
             } else {
                 // Cancel the auction

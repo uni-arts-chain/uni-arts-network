@@ -3511,6 +3511,19 @@ dependencies = [
 ]
 
 [[package]]
+name = "module-support"
+version = "0.1.0"
+dependencies = [
+ "frame-support",
+ "frame-system",
+ "parity-scale-codec",
+ "sp-core",
+ "sp-runtime",
+ "sp-std",
+ "uniarts-primitives",
+]
+
+[[package]]
 name = "more-asserts"
 version = "0.2.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -4136,6 +4149,26 @@ dependencies = [
  "log",
  "pallet-balances",
  "pallet-names",
+ "pallet-transaction-payment",
+ "parity-scale-codec",
+ "serde",
+ "sha3 0.8.2",
+ "sp-core",
+ "sp-io",
+ "sp-runtime",
+ "sp-std",
+]
+
+[[package]]
+name = "pallet-nft-blindbox"
+version = "2.0.1"
+dependencies = [
+ "frame-support",
+ "frame-system",
+ "log",
+ "module-support",
+ "pallet-balances",
+ "pallet-nft",
  "pallet-transaction-payment",
  "parity-scale-codec",
  "serde",

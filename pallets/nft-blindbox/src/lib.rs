@@ -68,7 +68,7 @@ pub trait Trait: system::Trait + pallet_nft::Trait {
     type LockModuleId: Get<ModuleId>;
 
     /// Nft manager.
-    type Handler: NftManager<Self::AccountId>;
+    type NftHandler: NftManager<Self::AccountId>;
 
     type Event: From<Event<Self>> + Into<<Self as system::Trait>::Event>;
 
@@ -177,9 +177,9 @@ decl_module! {
 
             match target_collection.mode
             {
-                pallet_nft::CollectionMode::NFT(_) => T::Handler::transfer_nft(collection_id, item_id, sender.clone(), locker)?,
-                pallet_nft::CollectionMode::Fungible(_)  => T::Handler::transfer_fungible(collection_id, item_id, value, sender.clone(), locker)?,
-                pallet_nft::CollectionMode::ReFungible(_, _)  => T::Handler::transfer_refungible(collection_id, item_id, value, sender.clone(), locker)?,
+                pallet_nft::CollectionMode::NFT(_) => T::NftHandler::transfer_nft(collection_id, item_id, sender.clone(), locker)?,
+                pallet_nft::CollectionMode::Fungible(_)  => T::NftHandler::transfer_fungible(collection_id, item_id, value, sender.clone(), locker)?,
+                pallet_nft::CollectionMode::ReFungible(_, _)  => T::NftHandler::transfer_refungible(collection_id, item_id, value, sender.clone(), locker)?,
                 _ => ()
             };
 
@@ -292,9 +292,9 @@ decl_module! {
             let target_collection = pallet_nft::Module::<T>::collection(card_group.collection_id);
             match target_collection.mode
             {
-                pallet_nft::CollectionMode::NFT(_) => T::Handler::transfer_nft(card_group.collection_id, card_group.item_id, locker, sender.clone())?,
-                pallet_nft::CollectionMode::Fungible(_)  => T::Handler::transfer_fungible(card_group.collection_id, card_group.item_id, 1, locker, sender.clone())?,
-                pallet_nft::CollectionMode::ReFungible(_, _)  => T::Handler::transfer_refungible(card_group.collection_id, card_group.item_id, 1, locker, sender.clone())?,
+                pallet_nft::CollectionMode::NFT(_) => T::NftHandler::transfer_nft(card_group.collection_id, card_group.item_id, locker, sender.clone())?,
+                pallet_nft::CollectionMode::Fungible(_)  => T::NftHandler::transfer_fungible(card_group.collection_id, card_group.item_id, 1, locker, sender.clone())?,
+                pallet_nft::CollectionMode::ReFungible(_, _)  => T::NftHandler::transfer_refungible(card_group.collection_id, card_group.item_id, 1, locker, sender.clone())?,
                 _ => ()
             };
 
@@ -350,9 +350,9 @@ decl_module! {
                 if card_group.remaind_value > 0 {
                     let target_collection = pallet_nft::Module::<T>::collection(card_group.collection_id);
                     match target_collection.mode {
-                        pallet_nft::CollectionMode::NFT(_) => T::Handler::transfer_nft(card_group.collection_id, card_group.item_id, locker.clone(), sender.clone())?,
-                        pallet_nft::CollectionMode::Fungible(_)  => T::Handler::transfer_fungible(card_group.collection_id, card_group.item_id, card_group.remaind_value, locker.clone(), sender.clone())?,
-                        pallet_nft::CollectionMode::ReFungible(_, _)  => T::Handler::transfer_refungible(card_group.collection_id, card_group.item_id, card_group.remaind_value, locker.clone(), sender.clone())?,
+                        pallet_nft::CollectionMode::NFT(_) => T::NftHandler::transfer_nft(card_group.collection_id, card_group.item_id, locker.clone(), sender.clone())?,
+                        pallet_nft::CollectionMode::Fungible(_)  => T::NftHandler::transfer_fungible(card_group.collection_id, card_group.item_id, card_group.remaind_value, locker.clone(), sender.clone())?,
+                        pallet_nft::CollectionMode::ReFungible(_, _)  => T::NftHandler::transfer_refungible(card_group.collection_id, card_group.item_id, card_group.remaind_value, locker.clone(), sender.clone())?,
                         _ => ()
                     };
                 }

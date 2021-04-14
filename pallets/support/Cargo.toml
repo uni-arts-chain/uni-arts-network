@@ -26,5 +26,4 @@ std = [
     "sp-core/std",
     "sp-std/std",
     "uniarts-primitives/std",
-
 ]

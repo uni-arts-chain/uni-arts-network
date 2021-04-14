@@ -12,10 +12,12 @@ members = [
     'pallets/assets',
     'pallets/names',
     'pallets/nft',
+    'pallets/nft-blindbox',
     'pallets/token',
     'pallets/trade',
     'pallets/validator-set',
     'pallets/staking',
     'pallets/rewards',
     'pallets/bridge',
+    'pallets/support',
 ]

@@ -110,13 +110,13 @@ decl_event!(
 );
 
 decl_error! {
-	pub enum Error for Module<T: Trait> {
+    pub enum Error for Module<T: Trait> {
         BlindBoxNotExists,
         BlindBoxNotInSalesPeriod,
         BlindBoxIsEnded,
         BlindBoxIsNotEnded,
         BlindBoxNotEnough,
-	}
+    }
 }
 
 decl_module! {

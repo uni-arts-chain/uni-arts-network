@@ -103,7 +103,7 @@ pub const VERSION: RuntimeVersion = RuntimeVersion {
 	spec_name: create_runtime_str!("uart"),
 	impl_name: create_runtime_str!("uart"),
 	authoring_version: 1,
-	spec_version: 31,
+	spec_version: 32,
 	impl_version: 1,
 	apis: RUNTIME_API_VERSIONS,
 	transaction_version: 1,
@@ -852,6 +852,7 @@ impl InstanceFilter<Call> for ProxyType {
 				Call::Multisig(..) |
 				Call::Nicks(..) |
 				Call::Nft(..) |
+				Call::BlindBox(..) |
 				Call::Token(..) |
 				Call::Trade(..) |
 				Call::Contracts(..)

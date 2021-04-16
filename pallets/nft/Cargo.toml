@@ -24,7 +24,7 @@ pallet-names = { path = "../names", default-features = false}
 serde = { version = "1.0.102", features = ["derive"] }
 log = "0.4.8"
 sha3 = { version = "0.8", default-features = false }
-
+support = { package = "module-support", path = "../support", default-features = false }
 
 [dev-dependencies]
 sp-core = { version = "2.0.1"}

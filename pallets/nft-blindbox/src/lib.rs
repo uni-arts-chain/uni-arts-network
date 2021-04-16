@@ -73,7 +73,7 @@ pub trait Trait: system::Trait + pallet_nft::Trait {
     type Event: From<Event<Self>> + Into<<Self as system::Trait>::Event>;
 
     /// Something that provides randomness in the runtime.
-    type BlindBoxRandomness: Randomness<Self::Hash>;
+    type Randomness: Randomness<Self::Hash>;
 
     /// Weight information for the extrinsics in this module.
     type WeightInfo: WeightInfo;

@@ -31,11 +31,12 @@ use sp_runtime::{
         InvalidTransaction, TransactionPriority, TransactionValidity, TransactionValidityError,
         ValidTransaction,
     },
-    FixedPointOperand, FixedU128, RuntimeDebug,
+    FixedPointOperand, FixedU128,
 };
 use sp_std::prelude::*;
 use sp_core::H160;
 use sha3::{Digest, Keccak256};
+use support::{NftManager};
 
 mod default_weight;
 
@@ -76,11 +77,6 @@ pub trait WeightInfo {
     fn cancel_auction() -> Weight;
     fn bid() -> Weight;
     fn finish_auction() -> Weight;
-    fn create_blind_box() -> Weight;
-    fn blind_box_add_card_group() -> Weight;
-    fn buy_blind_box() -> Weight;
-    fn close_blind_box() -> Weight;
-    fn cancel_blind_box() -> Weight;
 }
 
 #[derive(Encode, Decode, Debug, Eq, Clone, PartialEq)]
@@ -278,30 +274,6 @@ pub struct Royalty<AccountId, BlockNumber> {
     pub expired_at: BlockNumber,
 }
 
-#[derive(Encode, Decode, Default, Clone, PartialEq, RuntimeDebug)]
-pub struct NftCard {
-    pub group_id: u64,
-    pub collection_id: u64,
-    pub item_id: u64,
-    pub value: u64,
-    pub remaind_value: u64,
-    pub draw_start: u64,
-    pub draw_end: u64,
-}
-
-#[derive(Encode, Decode, Default, Clone, PartialEq, RuntimeDebug)]
-pub struct BlindBox<AccountId, BlockNumber> {
-    pub id: u64,
-    pub owner: AccountId,
-    pub card_group: Vec<u64>,
-    pub total_count: u64,
-    pub remaind_count: u64,
-    pub price: u64,
-    pub start_time: BlockNumber,
-    pub end_time: BlockNumber,
-    pub has_ended: bool,
-}
-
 
 #[derive(Debug, Eq, PartialEq)]
 pub enum TransferFromAccountError {
@@ -322,9 +294,6 @@ pub trait Trait: system::Trait + pallet_names::Trait {
     type Currency: Currency<AccountId<Self>> + LockableCurrency<AccountId<Self>, Moment=Self::BlockNumber> + Send + Sync;
 
     type Event: From<Event<Self>> + Into<<Self as system::Trait>::Event>;
-
-    /// Something that provides randomness in the runtime.
-    type Randomness: Randomness<Self::Hash>;
 
     /// Weight information for the extrinsics in this module.
     type WeightInfo: WeightInfo;
@@ -380,12 +349,6 @@ decl_storage! {
         /// Separable SaleOrder List
         pub SeparableSaleOrderList get(fn separablet_order_list_id):double_map hasher(blake2_128_concat) u64, hasher(blake2_128_concat) u64 => Vec<u64>;
 
-        /// CardGroup List
-        pub CardGroupList get(fn get_card_group): map hasher(identity) u64 => NftCard;
-
-        /// BlindBox List
-        pub BlindBoxList get(fn get_blind_box): map hasher(identity) u64 => BlindBox<T::AccountId, T::BlockNumber>;
-
         /// Sales history
         pub HistorySaleOrderList get(fn nft_trade_history_id): double_map hasher(blake2_128_concat) u64, hasher(blake2_128_concat) u64 => Vec<SaleOrderHistory<T::AccountId, T::BlockNumber>>;
 
@@ -397,12 +360,6 @@ decl_storage! {
 
         /// Next auction id
         pub NextAuctionID: u64 = 1;
-
-        /// Next CardGroup id
-        pub NextCardGroupID: u64 = 1;
-
-        /// Next BlindBox id
-        pub NextBlindBoxID: u64 = 1;
 
         /// Auction
         pub AuctionList get(fn get_auction): double_map hasher(blake2_128_concat) u64, hasher(blake2_128_concat) u64 => Auction<T::AccountId, T::BlockNumber>; 
@@ -433,11 +390,6 @@ decl_event!(
         AuctionBid(u64, u64, u64, u64, u64, AccountId),
         AuctionSucceed(u64, u64, u64, u64, u64, AccountId, AccountId),
         AuctionCancel(u64, u64, u64),
-        BlindBoxCreated(u64, u64, AccountId),
-        BlindBoxAddCardGroup(u64, u64, u64, u64, u64, AccountId),
-        BlindBoxDraw(u64, u64, u64, AccountId, AccountId, u64),
-        BlindBoxClose(u64, AccountId),
-        BlindBoxCancel(u64, AccountId),
     }
 );
 
@@ -447,11 +399,6 @@ decl_error! {
 		SaleOrderNotExists,
 		NamesOwnerInvalid,
         WinningRateInvalid,
-        BlindBoxNotExists,
-        BlindBoxNotInSalesPeriod,
-        BlindBoxIsEnded,
-        BlindBoxIsNotEnded,
-        BlindBoxNotEnough,
 	}
 }
 
@@ -1031,7 +978,7 @@ decl_module! {
         }
 
         #[weight = T::WeightInfo::cancel_sale_order()]
-        pub fn cancel_sale_order(origin, collection_id: u64, item_id: u64, value: u64) -> DispatchResult {
+        pub fn cancel_sale_order(origin, collection_id: u64, item_id: u64) -> DispatchResult {
             let sender = ensure_signed(origin)?;
 
             let target_sale_order = <SaleOrderList<T>>::get(collection_id, item_id);
@@ -1183,7 +1130,7 @@ decl_module! {
         }
 
         #[weight = T::WeightInfo::cancel_separable_sale_order()]
-        pub fn cancel_separable_sale_order(origin, order_id: u64, value: u64) -> DispatchResult {
+        pub fn cancel_separable_sale_order(origin, order_id: u64) -> DispatchResult {
             let sender = ensure_signed(origin)?;
 
             let target_sale_order = <SeparableSaleOrder<T>>::get(order_id);
@@ -1196,8 +1143,6 @@ decl_module! {
                 let mes = "Account is not sale order owner";
                 panic!(mes);
             }
-
-            ensure!(target_sale_order.balance >= value, "Value not enough");
 
             let target_collection = <Collection<T>>::get(target_sale_order.collection_id);
             let locker = Self::nft_account_id();
@@ -1326,242 +1271,6 @@ decl_module! {
 
             // call event
             Self::deposit_event(RawEvent::ItemSeparableOrderSucceed(order_id, collection_id, item_id, value, sender, nft_owner, price));
-            Ok(())
-        }
-
-        #[weight = T::WeightInfo::create_blind_box()]
-        pub fn create_blind_box(origin, start_time: T::BlockNumber, end_time: T::BlockNumber, price: u64 ) -> DispatchResult {
-            let sender = ensure_signed(origin)?;
-
-            let blind_box = BlindBox {
-                id: NextBlindBoxID::get(),
-                owner: sender.clone(),
-                price: price,
-                start_time: start_time,
-                end_time: end_time,
-                has_ended: false,
-                total_count: 0,
-                remaind_count: 0,
-                .. Default::default()
-            };
-
-            let blind_box_id = blind_box.id;
-            <BlindBoxList<T>>::insert(blind_box_id, blind_box);
-            NextBlindBoxID::mutate(|id| *id += 1);
-
-            // call event
-            Self::deposit_event(RawEvent::BlindBoxCreated(blind_box_id, price, sender));
-            Ok(())
-        }
-
-        #[weight = T::WeightInfo::blind_box_add_card_group()]
-        pub fn blind_box_add_card_group(origin, blind_box_id: u64, collection_id: u64, item_id: u64, value: u64 ) -> DispatchResult {
-            let sender = ensure_signed(origin)?;
-
-            let blind_box = Self::get_blind_box(blind_box_id);
-            let mut card_value: u64 = value;
-
-            let blind_box_owner = Self::is_blind_box_owner(sender.clone(), blind_box_id);
-            if !blind_box_owner
-            {
-                let mes = "Account is not blind box owner";
-                panic!(mes);
-            }
-
-            let target_collection = <Collection<T>>::get(collection_id);
-            let locker = Self::nft_account_id();
-
-            if let CollectionMode::NFT(_) = target_collection.mode {
-                card_value = 1;
-            };
-
-            match target_collection.mode
-            {
-                CollectionMode::NFT(_) => Self::transfer_nft(collection_id, item_id, sender.clone(), locker)?,
-                CollectionMode::Fungible(_)  => Self::transfer_fungible(collection_id, item_id, value, sender.clone(), locker)?,
-                CollectionMode::ReFungible(_, _)  => Self::transfer_refungible(collection_id, item_id, value, sender.clone(), locker)?,
-                _ => ()
-            };
-
-            let blind_box_id = blind_box.id;
-            let group_id = NextCardGroupID::get();
-            let total_count: u64 = blind_box.total_count.checked_add(card_value).unwrap();
-            let remaind_count: u64 = blind_box.remaind_count.checked_add(card_value).unwrap();
-            let draw_start: u64 = blind_box.total_count.checked_add(1).unwrap();
-            let draw_end: u64 = blind_box.total_count.checked_add(value).unwrap();
-
-            let nft_card = NftCard {
-                group_id: group_id,
-                collection_id: collection_id,
-                item_id: item_id,
-                value: value,
-                remaind_value: value,
-                draw_start: draw_start,
-                draw_end: draw_end,
-            };
-
-            CardGroupList::insert(group_id, nft_card.clone());
-            NextCardGroupID::mutate(|id| *id += 1);
-
-            let mut card_group = blind_box.clone().card_group;
-            card_group.push(nft_card.group_id);
-
-            <BlindBoxList<T>>::mutate(blind_box_id, |blind_box| {
-                blind_box.card_group = card_group;
-                blind_box.total_count = total_count;
-                blind_box.remaind_count = remaind_count;
-            });
-
-            // call event
-            Self::deposit_event(RawEvent::BlindBoxAddCardGroup(blind_box_id, group_id, collection_id, item_id, value, sender));
-            Ok(())
-        }
-
-        #[weight = T::WeightInfo::buy_blind_box()]
-        pub fn buy_blind_box(origin, blind_box_id: u64) -> DispatchResult {
-            let sender = ensure_signed(origin)?;
-
-            ensure!(blind_box_id > 0, Error::<T>::BlindBoxNotExists);
-
-            let blind_box = Self::get_blind_box(blind_box_id);
-            let now = <system::Module<T>>::block_number();
-            ensure!(now >= blind_box.start_time, Error::<T>::BlindBoxNotInSalesPeriod);
-            ensure!(now <= blind_box.end_time, Error::<T>::BlindBoxNotInSalesPeriod);
-            ensure!(blind_box.has_ended == false, Error::<T>::BlindBoxIsEnded);
-            ensure!(blind_box.remaind_count > 0, Error::<T>::BlindBoxNotEnough);
-
-            let mut winner_number = Self::get_winner_number(blind_box.total_count as u32);
-
-            debug::info!("------ winner_number {:?}", winner_number);
-
-            // Two drawing modes are adopted, It's guaranteed to win
-            // 1. Global mode: draw lots no matter whether there are cards sold or not
-            // 2. On sale mode: draw lots from all cards on sale
-            let mut mode1_choose_group_id: u64 = 0;
-            let mut mode2_choose_group_id: u64 = 0;
-            let mut mode2_card_group_ids: Vec<u64> = Vec::new();
-
-            // mode1
-            for card_group_id in blind_box.card_group.iter() {
-                let card_group = Self::get_card_group(card_group_id);
-                if winner_number >= card_group.draw_start && winner_number <= card_group.draw_end && card_group.remaind_value > 0 {
-                    mode1_choose_group_id = card_group.group_id;
-                }
-                if card_group.remaind_value > 0 {
-                    mode2_card_group_ids.push(card_group.group_id);
-                }
-            }
-
-            // mode2
-            if mode1_choose_group_id == 0 {
-                let mut group_total: u64 = 0;
-                winner_number = Self::get_winner_number(blind_box.remaind_count as u32);
-                for card_group_id in mode2_card_group_ids.iter() {
-                    let card_group = Self::get_card_group(card_group_id);
-                    let group_start = group_total.checked_add(1).unwrap();
-                    let group_end = group_total.checked_add(card_group.remaind_value).unwrap();
-                    group_total = group_total.checked_add(card_group.remaind_value).unwrap();
-                    if winner_number >= group_start && winner_number <= group_end {
-                        mode2_choose_group_id = card_group_id.clone();
-                        break;
-                    }
-                }
-            }
-
-            // send card
-            // debug::info!("------ mode1_choose_group_id {:?}", mode1_choose_group_id);
-            // debug::info!("------ mode2_choose_group_id {:?}", mode2_choose_group_id);
-
-            let mut choose_group_id = mode1_choose_group_id;
-            if mode1_choose_group_id == 0 {
-                choose_group_id = mode2_choose_group_id;
-            }
-            let card_group = Self::get_card_group(choose_group_id);
-            let locker = Self::nft_account_id();
-            let price = CurrencyBalanceOf::<T>::saturated_from(blind_box.price.into());
-
-            let negative_imbalance = <T as Trait>::Currency::withdraw(
-                &sender,
-                price,
-                WithdrawReasons::all(),
-                ExistenceRequirement::AllowDeath,
-            )?;
-
-            <T as Trait>::Currency::resolve_creating(&blind_box.owner, negative_imbalance);
-
-            let target_collection = <Collection<T>>::get(card_group.collection_id);
-            match target_collection.mode
-            {
-                CollectionMode::NFT(_) => Self::transfer_nft(card_group.collection_id, card_group.item_id, locker, sender.clone())?,
-                CollectionMode::Fungible(_)  => Self::transfer_fungible(card_group.collection_id, card_group.item_id, 1, locker, sender.clone())?,
-                CollectionMode::ReFungible(_, _)  => Self::transfer_refungible(card_group.collection_id, card_group.item_id, 1, locker, sender.clone())?,
-                _ => ()
-            };
-
-            CardGroupList::mutate(choose_group_id, |card_group| {
-                card_group.remaind_value = card_group.remaind_value - 1;
-            });
-
-            <BlindBoxList<T>>::mutate(blind_box_id, |blind_box| {
-                blind_box.remaind_count = blind_box.remaind_count - 1;
-            });
-
-            // call event
-            Self::deposit_event(RawEvent::BlindBoxDraw(blind_box_id, card_group.collection_id, card_group.item_id, sender, blind_box.owner, blind_box.price));
-            Ok(())
-        }
-
-        #[weight = T::WeightInfo::close_blind_box()]
-        pub fn close_blind_box(origin, blind_box_id: u64) -> DispatchResult {
-            let sender = ensure_signed(origin)?;
-
-            let blind_box_owner = Self::is_blind_box_owner(sender.clone(), blind_box_id);
-            if !blind_box_owner
-            {
-                let mes = "Account is not blind box owner";
-                panic!(mes);
-            }
-
-            <BlindBoxList<T>>::mutate(blind_box_id, |blind_box| {
-                blind_box.has_ended = true;
-            });
-
-            // call event
-            Self::deposit_event(RawEvent::BlindBoxClose(blind_box_id, sender));
-            Ok(())
-        }
-
-        #[weight = T::WeightInfo::cancel_blind_box()]
-        pub fn cancel_blind_box(origin, blind_box_id: u64) -> DispatchResult {
-            let sender = ensure_signed(origin)?;
-
-            let blind_box_owner = Self::is_blind_box_owner(sender.clone(), blind_box_id);
-            if !blind_box_owner
-            {
-                let mes = "Account is not blind box owner";
-                panic!(mes);
-            }
-            let blind_box = Self::get_blind_box(blind_box_id);
-            ensure!(blind_box.has_ended == true, Error::<T>::BlindBoxIsNotEnded);
-            let locker = Self::nft_account_id();
-
-            for card_group_id in blind_box.card_group.iter() {
-                let card_group = Self::get_card_group(card_group_id);
-                if card_group.remaind_value > 0 {
-                    let target_collection = <Collection<T>>::get(card_group.collection_id);
-                    match target_collection.mode {
-                        CollectionMode::NFT(_) => Self::transfer_nft(card_group.collection_id, card_group.item_id, locker.clone(), sender.clone())?,
-                        CollectionMode::Fungible(_)  => Self::transfer_fungible(card_group.collection_id, card_group.item_id, card_group.remaind_value, locker.clone(), sender.clone())?,
-                        CollectionMode::ReFungible(_, _)  => Self::transfer_refungible(card_group.collection_id, card_group.item_id, card_group.remaind_value, locker.clone(), sender.clone())?,
-                        _ => ()
-                    };
-                }
-                CardGroupList::remove(card_group_id);
-           }
-           <BlindBoxList<T>>::remove(blind_box_id);
-
-            // call event
-            Self::deposit_event(RawEvent::BlindBoxCancel(blind_box_id, sender));
             Ok(())
         }
 
@@ -2030,11 +1739,83 @@ impl<T: Trait> Module<T> {
         target_sale_order.owner == owner
     }
 
-    fn is_blind_box_owner(owner: T::AccountId, blind_box_id: u64) -> bool {
-        let target_blind_box = <BlindBoxList<T>>::get(blind_box_id);
+    fn add_token_index(collection_id: u64, item_index: u64, owner: T::AccountId) -> DispatchResult {
+        let list_exists = <AddressTokens<T>>::contains_key(collection_id, owner.clone());
+        if list_exists {
+            let mut list = <AddressTokens<T>>::get(collection_id, owner.clone());
+            let item_contains = list.contains(&item_index.clone());
 
-        target_blind_box.owner == owner
+            if !item_contains {
+                list.push(item_index.clone());
+            }
+
+            <AddressTokens<T>>::insert(collection_id, owner.clone(), list);
+        } else {
+            let mut itm = Vec::new();
+            itm.push(item_index.clone());
+            <AddressTokens<T>>::insert(collection_id, owner, itm);
+        }
+
+        Ok(())
     }
+
+    fn remove_token_index(
+        collection_id: u64,
+        item_index: u64,
+        owner: T::AccountId,
+    ) -> DispatchResult {
+        let list_exists = <AddressTokens<T>>::contains_key(collection_id, owner.clone());
+        if list_exists {
+            let mut list = <AddressTokens<T>>::get(collection_id, owner.clone());
+            let item_contains = list.contains(&item_index.clone());
+
+            if item_contains {
+                list.retain(|&item| item != item_index);
+                <AddressTokens<T>>::insert(collection_id, owner, list);
+            }
+        }
+
+        Ok(())
+    }
+
+    fn move_token_index(
+        collection_id: u64,
+        item_index: u64,
+        old_owner: T::AccountId,
+        new_owner: T::AccountId,
+    ) -> DispatchResult {
+        Self::remove_token_index(collection_id, item_index, old_owner)?;
+        Self::add_token_index(collection_id, item_index, new_owner)?;
+
+        Ok(())
+    }
+
+    fn charge_royalty(buyer: T::AccountId, collection_id: u64, item_id: u64, order_price: CurrencyBalanceOf<T>, now: T::BlockNumber) -> DispatchResult {
+        let royalty = <ItemRoyalty<T>>::get(collection_id, item_id);
+        if royalty.expired_at >= now && royalty.rate >= Zero::zero() {
+            let fee_rate = CurrencyBalanceOf::<T>::saturated_from(royalty.rate.into());
+            let fee_max = CurrencyBalanceOf::<T>::saturated_from(10000u64.into());
+            let royalty_fee = order_price.saturating_mul(fee_rate) / fee_max;
+
+            let imbalance = <T as Trait>::Currency::withdraw(
+                &buyer,
+                royalty_fee,
+                WithdrawReasons::all(),
+                ExistenceRequirement::AllowDeath,
+            )?;
+            <T as Trait>::Currency::resolve_creating(&royalty.owner, imbalance);
+        }
+        Ok(())
+    }
+
+    fn auction_lock_id(id: u64) -> [u8; 8] {
+        let mut lock_id = id.to_be_bytes();
+        lock_id[0..3].copy_from_slice(&*b"nft");
+        lock_id
+    }
+}
+
+impl<T: Trait> NftManager<T::AccountId> for Module<T> {
 
     fn transfer_fungible(
         collection_id: u64,
@@ -2221,7 +2002,7 @@ impl<T: Trait> Module<T> {
         sender: T::AccountId,
         new_owner: T::AccountId,
     ) -> DispatchResult {
-    
+
         ensure!(
             <NftItemList<T>>::contains_key(collection_id, item_id),
             "Item not exists"
@@ -2256,101 +2037,6 @@ impl<T: Trait> Module<T> {
         // reset approved list
         <ApprovedList<T>>::remove(collection_id, (item_id, old_owner));
         Ok(())
-    }
-
-    fn add_token_index(collection_id: u64, item_index: u64, owner: T::AccountId) -> DispatchResult {
-        let list_exists = <AddressTokens<T>>::contains_key(collection_id, owner.clone());
-        if list_exists {
-            let mut list = <AddressTokens<T>>::get(collection_id, owner.clone());
-            let item_contains = list.contains(&item_index.clone());
-
-            if !item_contains {
-                list.push(item_index.clone());
-            }
-
-            <AddressTokens<T>>::insert(collection_id, owner.clone(), list);
-        } else {
-            let mut itm = Vec::new();
-            itm.push(item_index.clone());
-            <AddressTokens<T>>::insert(collection_id, owner, itm);
-        }
-
-        Ok(())
-    }
-
-    fn remove_token_index(
-        collection_id: u64,
-        item_index: u64,
-        owner: T::AccountId,
-    ) -> DispatchResult {
-        let list_exists = <AddressTokens<T>>::contains_key(collection_id, owner.clone());
-        if list_exists {
-            let mut list = <AddressTokens<T>>::get(collection_id, owner.clone());
-            let item_contains = list.contains(&item_index.clone());
-
-            if item_contains {
-                list.retain(|&item| item != item_index);
-                <AddressTokens<T>>::insert(collection_id, owner, list);
-            }
-        }
-
-        Ok(())
-    }
-
-    fn move_token_index(
-        collection_id: u64,
-        item_index: u64,
-        old_owner: T::AccountId,
-        new_owner: T::AccountId,
-    ) -> DispatchResult {
-        Self::remove_token_index(collection_id, item_index, old_owner)?;
-        Self::add_token_index(collection_id, item_index, new_owner)?;
-
-        Ok(())
-    }
-
-    fn charge_royalty(buyer: T::AccountId, collection_id: u64, item_id: u64, order_price: CurrencyBalanceOf<T>, now: T::BlockNumber) -> DispatchResult {
-        let royalty = <ItemRoyalty<T>>::get(collection_id, item_id);
-        if royalty.expired_at >= now && royalty.rate >= Zero::zero() {
-            let fee_rate = CurrencyBalanceOf::<T>::saturated_from(royalty.rate.into());
-            let fee_max = CurrencyBalanceOf::<T>::saturated_from(10000u64.into());
-            let royalty_fee = order_price.saturating_mul(fee_rate) / fee_max;
-
-            let imbalance = <T as Trait>::Currency::withdraw(
-                &buyer,
-                royalty_fee,
-                WithdrawReasons::all(),
-                ExistenceRequirement::AllowDeath,
-            )?;
-            <T as Trait>::Currency::resolve_creating(&royalty.owner, imbalance);
-        }
-        Ok(())
-    }
-
-    fn auction_lock_id(id: u64) -> [u8; 8] {
-        let mut lock_id = id.to_be_bytes();
-        lock_id[0..3].copy_from_slice(&*b"nft");
-        lock_id
-    }
-
-    fn get_winner_number(total_count: u32) -> u64 {
-        let mut random_number = Self::generate_random_number(0);
-
-        for i in 1 .. 20 {
-            if random_number < u32::MAX - u32::MAX % total_count {
-                break;
-            }
-            random_number = Self::generate_random_number(i);
-        }
-        let winner_number = (random_number % total_count) as u64;
-        winner_number
-    }
-
-    fn generate_random_number(seed: u32) -> u32 {
-        let random_seed = T::Randomness::random(&(Self::nft_account_id(), seed).encode());
-        let random_number = <u32>::decode(&mut random_seed.as_ref())
-            .expect("secure hashes should always be bigger than u32; qed");
-        random_number
     }
 }
 

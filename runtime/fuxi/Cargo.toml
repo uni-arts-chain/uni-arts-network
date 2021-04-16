@@ -72,6 +72,7 @@ uniarts-common = { path = "../../pallets/common", default-features = false }
 pallet-certificate = { path = "../../pallets/certificate", default-features = false }
 pallet-names = { path = "../../pallets/names", default-features = false }
 pallet-nft = { path = "../../pallets/nft", default-features = false }
+pallet-nft-blindbox = { path = "../../pallets/nft-blindbox", default-features = false }
 pallet-rewards = { path = "../../pallets/rewards", default-features = false }
 pallet-staking = { path = "../../pallets/staking", default-features = false }
 pallet-validator-set = { path = "../../pallets/validator-set", default-features = false }
@@ -122,6 +123,7 @@ std = [
     "uniarts-common/std",
     "pallet-names/std",
     "pallet-nft/std",
+    "pallet-nft-blindbox/std",
     "pallet-validator-set/std",
     "pallet-token/std",
     "pallet-trade/std",

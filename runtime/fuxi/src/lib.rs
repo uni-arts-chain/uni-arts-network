@@ -132,6 +132,7 @@ parameter_types! {
 	pub const UniArtsTreasuryModuleId: ModuleId = ModuleId(*b"py/trsry");
 	pub const StakingModuleId: ModuleId = ModuleId(*b"staking_");
 	pub const UniArtsNftModuleId: ModuleId = ModuleId(*b"art/nftb");
+	pub const UniArtsBlindBoxModuleId: ModuleId = ModuleId(*b"art/bbxb");
 	pub const LotteryModuleId: ModuleId = ModuleId(*b"art/lotb");
 	pub const SocietyModuleId: ModuleId = ModuleId(*b"art/soci");
 	pub const ElectionsPhragmenModuleId: LockIdentifier = *b"art/phre";
@@ -544,6 +545,13 @@ impl pallet_names::Trait for Runtime {
 impl pallet_nft::Trait for Runtime {
 	type ModuleId = UniArtsNftModuleId;
 	type Currency = Uart;
+	type Event = Event;
+	type WeightInfo = ();
+}
+
+impl pallet_nft_blindbox::Trait for Runtime {
+	type LockModuleId = UniArtsBlindBoxModuleId;
+	type NftHandler = Nft;
 	type Event = Event;
 	type Randomness = RandomnessCollectiveFlip;
 	type WeightInfo = ();
@@ -1027,6 +1035,7 @@ construct_runtime!(
 
 		Names: pallet_names::{Module, Call, Storage, Event<T>},
 		Nft: pallet_nft::{Module, Call, Storage, Event<T>},
+		BlindBox: pallet_nft_blindbox::{Module, Call, Storage, Event<T>},
 		Token: pallet_token::{Module, Call, Storage, Event<T>},
 		Trade: pallet_trade::{Module, Call, Storage, Event<T>},
 		Bridge: pallet_bridge::{Module, Call, Storage, Event<T>, Config<T>},

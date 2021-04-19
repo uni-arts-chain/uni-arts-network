@@ -116,6 +116,7 @@ decl_error! {
         BlindBoxIsEnded,
         BlindBoxIsNotEnded,
         BlindBoxNotEnough,
+        BlindBoxOnlyOwerBuy,
     }
 }
 
@@ -229,6 +230,7 @@ decl_module! {
             ensure!(now <= blind_box.end_time, Error::<T>::BlindBoxNotInSalesPeriod);
             ensure!(blind_box.has_ended == false, Error::<T>::BlindBoxIsEnded);
             ensure!(blind_box.remaind_count > 0, Error::<T>::BlindBoxNotEnough);
+            ensure!(blind_box.price == 0 && blind_box.owner == sender, Error::<T>::BlindBoxOnlyOwerBuy);
 
             let mut winner_number = Self::get_winner_number(blind_box.total_count as u32);
 
@@ -278,16 +280,17 @@ decl_module! {
             }
             let card_group = Self::get_card_group(choose_group_id);
             let locker = Self::nft_account_id();
-            let price = CurrencyBalanceOf::<T>::saturated_from(blind_box.price.into());
 
-            let negative_imbalance = <T as pallet_nft::Trait>::Currency::withdraw(
-                &sender,
-                price,
-                WithdrawReasons::all(),
-                ExistenceRequirement::AllowDeath,
-            )?;
-
-            <T as pallet_nft::Trait>::Currency::resolve_creating(&blind_box.owner, negative_imbalance);
+            if blind_box.price > 0 {
+                let price = CurrencyBalanceOf::<T>::saturated_from(blind_box.price.into());
+                let negative_imbalance = <T as pallet_nft::Trait>::Currency::withdraw(
+                    &sender,
+                    price,
+                    WithdrawReasons::all(),
+                    ExistenceRequirement::AllowDeath,
+                )?;
+                <T as pallet_nft::Trait>::Currency::resolve_creating(&blind_box.owner, negative_imbalance);
+            }
 
             let target_collection = pallet_nft::Module::<T>::collection(card_group.collection_id);
             match target_collection.mode

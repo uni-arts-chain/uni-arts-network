@@ -230,7 +230,9 @@ decl_module! {
             ensure!(now <= blind_box.end_time, Error::<T>::BlindBoxNotInSalesPeriod);
             ensure!(blind_box.has_ended == false, Error::<T>::BlindBoxIsEnded);
             ensure!(blind_box.remaind_count > 0, Error::<T>::BlindBoxNotEnough);
-            ensure!(blind_box.price == 0 && blind_box.owner == sender, Error::<T>::BlindBoxOnlyOwerBuy);
+            if blind_box.price == 0 {
+                ensure!(blind_box.owner == sender, Error::<T>::BlindBoxOnlyOwerBuy);
+            }
 
             let mut winner_number = Self::get_winner_number(blind_box.total_count as u32);
 

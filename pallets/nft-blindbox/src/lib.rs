@@ -137,6 +137,7 @@ decl_module! {
             let blind_box = BlindBox {
                 id: NextBlindBoxID::get(),
                 owner: sender.clone(),
+                card_group: vec![],
                 price: price,
                 start_time: start_time,
                 end_time: end_time,

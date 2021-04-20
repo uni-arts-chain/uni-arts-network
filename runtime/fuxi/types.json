@@ -162,6 +162,7 @@
     "collection_id": "u64",
     "item_id": "u64",
     "value": "u64",
+    "balance": "u64",
     "owner": "AccountId",
     "price": "u64"
   },

@@ -1235,7 +1235,7 @@ decl_module! {
                 item_id: item_id,
                 value: order_value,
                 balance: remain_value,
-                owner: sender.clone(),
+                owner: nft_owner.clone(),
                 price: price,
             };
 

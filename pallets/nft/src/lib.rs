@@ -1692,25 +1692,7 @@ impl<T: Trait> Module<T> {
         }
     }
 
-    fn is_item_owner(subject: T::AccountId, collection_id: u64, item_id: u64) -> bool {
-        let target_collection = <Collection<T>>::get(collection_id);
 
-        match target_collection.mode {
-            CollectionMode::NFT(_) => {
-                <NftItemList<T>>::get(collection_id, item_id).owner == subject
-            }
-            CollectionMode::Fungible(_) => {
-                <FungibleItemList<T>>::get(collection_id, item_id).owner == subject
-            }
-            CollectionMode::ReFungible(_, _) => {
-                <ReFungibleItemList<T>>::get(collection_id, item_id)
-                    .owner
-                    .iter()
-                    .any(|i| i.owner == subject)
-            }
-            CollectionMode::Invalid => false,
-        }
-    }
 
     fn check_white_list(collection_id: u64, address: T::AccountId) -> DispatchResult {
 
@@ -2037,6 +2019,26 @@ impl<T: Trait> NftManager<T::AccountId> for Module<T> {
         // reset approved list
         <ApprovedList<T>>::remove(collection_id, (item_id, old_owner));
         Ok(())
+    }
+
+    fn is_item_owner(subject: T::AccountId, collection_id: u64, item_id: u64) -> bool {
+        let target_collection = <Collection<T>>::get(collection_id);
+
+        match target_collection.mode {
+            CollectionMode::NFT(_) => {
+                <NftItemList<T>>::get(collection_id, item_id).owner == subject
+            }
+            CollectionMode::Fungible(_) => {
+                <FungibleItemList<T>>::get(collection_id, item_id).owner == subject
+            }
+            CollectionMode::ReFungible(_, _) => {
+                <ReFungibleItemList<T>>::get(collection_id, item_id)
+                    .owner
+                    .iter()
+                    .any(|i| i.owner == subject)
+            }
+            CollectionMode::Invalid => false,
+        }
     }
 }
 

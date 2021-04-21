@@ -947,12 +947,17 @@ decl_module! {
 
             let target_collection = <Collection<T>>::get(collection_id);
             let recipient = Self::nft_account_id();
+            let mut card_value: u64 = value;
+
+            if let CollectionMode::NFT(_) = target_collection.mode {
+                card_value = 1;
+            };
 
             match target_collection.mode
             {
                 CollectionMode::NFT(_) => Self::transfer_nft(collection_id, item_id, sender.clone(), recipient)?,
-                CollectionMode::Fungible(_)  => Self::transfer_fungible(collection_id, item_id, value, sender.clone(), recipient)?,
-                CollectionMode::ReFungible(_, _)  => Self::transfer_refungible(collection_id, item_id, value, sender.clone(), recipient)?,
+                CollectionMode::Fungible(_)  => Self::transfer_fungible(collection_id, item_id, card_value, sender.clone(), recipient)?,
+                CollectionMode::ReFungible(_, _)  => Self::transfer_refungible(collection_id, item_id, card_value, sender.clone(), recipient)?,
                 _ => ()
             };
 
@@ -963,7 +968,7 @@ decl_module! {
                 order_id: order_id,
                 collection_id: collection_id,
                 item_id: item_id,
-                value: value,
+                value: card_value,
                 owner: sender.clone(),
                 price: price,
             };
@@ -973,7 +978,7 @@ decl_module! {
             <SaleOrderByIdList<T>>::insert(order_id, order);
 
             // call event
-            Self::deposit_event(RawEvent::ItemOrderCreated(collection_id, item_id, value, price, sender, order_id));
+            Self::deposit_event(RawEvent::ItemOrderCreated(collection_id, item_id, card_value, price, sender, order_id));
             Ok(())
         }
 
@@ -1091,12 +1096,17 @@ decl_module! {
             let target_collection = <Collection<T>>::get(collection_id);
 
             let recipient = Self::nft_account_id();
+            let mut card_value: u64 = value;
+
+            if let CollectionMode::NFT(_) = target_collection.mode {
+                card_value = 1;
+            };
 
             match target_collection.mode
             {
                 CollectionMode::NFT(_) => Self::transfer_nft(collection_id, item_id, sender.clone(), recipient)?,
-                CollectionMode::Fungible(_)  => Self::transfer_fungible(collection_id, item_id, value, sender.clone(), recipient)?,
-                CollectionMode::ReFungible(_, _)  => Self::transfer_refungible(collection_id, item_id, value, sender.clone(), recipient)?,
+                CollectionMode::Fungible(_)  => Self::transfer_fungible(collection_id, item_id, card_value, sender.clone(), recipient)?,
+                CollectionMode::ReFungible(_, _)  => Self::transfer_refungible(collection_id, item_id, card_value, sender.clone(), recipient)?,
                 _ => ()
             };
 
@@ -1105,8 +1115,8 @@ decl_module! {
                 order_id: order_id,
                 collection_id: collection_id,
                 item_id: item_id,
-                value: value,
-                balance: value,
+                value: card_value,
+                balance: card_value,
                 owner: sender.clone(),
                 price: price,
             };
@@ -1125,7 +1135,7 @@ decl_module! {
             }
 
             // call event
-            Self::deposit_event(RawEvent::ItemSeparableOrderCreated(order_id, collection_id, item_id, value, price, sender));
+            Self::deposit_event(RawEvent::ItemSeparableOrderCreated(order_id, collection_id, item_id, card_value, price, sender));
             Ok(())
         }
 

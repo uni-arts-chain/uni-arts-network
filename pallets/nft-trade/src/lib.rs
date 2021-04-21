@@ -147,12 +147,17 @@ decl_module! {
 
             let target_collection = pallet_nft::Module::<T>::collection(collection_id);
             let recipient = Self::nft_account_id();
+            let mut card_value: u64 = value;
+
+            if let pallet_nft::CollectionMode::NFT(_) = target_collection.mode {
+                card_value = 1;
+            };
 
             match target_collection.mode
             {
                 pallet_nft::CollectionMode::NFT(_) => T::NftHandler::transfer_nft(collection_id, item_id, sender.clone(), recipient)?,
-                pallet_nft::CollectionMode::Fungible(_)  => T::NftHandler::transfer_fungible(collection_id, item_id, value, sender.clone(), recipient)?,
-                pallet_nft::CollectionMode::ReFungible(_, _)  => T::NftHandler::transfer_refungible(collection_id, item_id, value, sender.clone(), recipient)?,
+                pallet_nft::CollectionMode::Fungible(_)  => T::NftHandler::transfer_fungible(collection_id, item_id, card_value, sender.clone(), recipient)?,
+                pallet_nft::CollectionMode::ReFungible(_, _)  => T::NftHandler::transfer_refungible(collection_id, item_id, card_value, sender.clone(), recipient)?,
                 _ => ()
             };
 
@@ -163,7 +168,7 @@ decl_module! {
                 order_id: order_id,
                 collection_id: collection_id,
                 item_id: item_id,
-                value: value,
+                value: card_value,
                 owner: sender.clone(),
                 price: price,
             };
@@ -173,7 +178,7 @@ decl_module! {
             <SaleOrderByIdList<T>>::insert(order_id, order);
 
             // call event
-            Self::deposit_event(RawEvent::ItemOrderCreated(collection_id, item_id, value, price, sender, order_id));
+            Self::deposit_event(RawEvent::ItemOrderCreated(collection_id, item_id, card_value, price, sender, order_id));
             Ok(())
         }
 
@@ -287,12 +292,17 @@ decl_module! {
             let target_collection = pallet_nft::Module::<T>::collection(collection_id);
 
             let recipient = Self::nft_account_id();
+            let mut card_value: u64 = value;
+
+            if let pallet_nft::CollectionMode::NFT(_) = target_collection.mode {
+                card_value = 1;
+            };
 
             match target_collection.mode
             {
                 pallet_nft::CollectionMode::NFT(_) => T::NftHandler::transfer_nft(collection_id, item_id, sender.clone(), recipient)?,
-                pallet_nft::CollectionMode::Fungible(_)  => T::NftHandler::transfer_fungible(collection_id, item_id, value, sender.clone(), recipient)?,
-                pallet_nft::CollectionMode::ReFungible(_, _)  => T::NftHandler::transfer_refungible(collection_id, item_id, value, sender.clone(), recipient)?,
+                pallet_nft::CollectionMode::Fungible(_)  => T::NftHandler::transfer_fungible(collection_id, item_id, card_value, sender.clone(), recipient)?,
+                pallet_nft::CollectionMode::ReFungible(_, _)  => T::NftHandler::transfer_refungible(collection_id, item_id, card_value, sender.clone(), recipient)?,
                 _ => ()
             };
 
@@ -301,8 +311,8 @@ decl_module! {
                 order_id: order_id,
                 collection_id: collection_id,
                 item_id: item_id,
-                value: value,
-                balance: value,
+                value: card_value,
+                balance: card_value,
                 owner: sender.clone(),
                 price: price,
             };
@@ -321,7 +331,7 @@ decl_module! {
             }
 
             // call event
-            Self::deposit_event(RawEvent::ItemSeparableOrderCreated(order_id, collection_id, item_id, value, price, sender));
+            Self::deposit_event(RawEvent::ItemSeparableOrderCreated(order_id, collection_id, item_id, card_value, price, sender));
             Ok(())
         }
 

@@ -1030,7 +1030,7 @@ decl_module! {
             let locker = Self::nft_account_id();
             let balance_price = CurrencyBalanceOf::<T>::saturated_from(price.into());
 
-            Self::charge_royalty(sender.clone(), collection_id, item_id, balance_price, buy_time)?;
+            Self::charge_royalty(sender.clone(), collection_id, item_id, price, buy_time)?;
 
             // Moves funds from buyer account into the owner's account
             // We don't use T::Currency::transfer() to prevent fees being incurred.
@@ -1205,8 +1205,9 @@ decl_module! {
             let accept_price = CurrencyBalanceOf::<T>::saturated_from(price.into());
             let accept_value = CurrencyBalanceOf::<T>::saturated_from(value.into());
             let balance_price = accept_price.saturating_mul(accept_value);
+            let checked_value = price.checked_mul(value).unwrap();
 
-            Self::charge_royalty(sender.clone(), collection_id, item_id, balance_price, buy_time)?;
+            Self::charge_royalty(sender.clone(), collection_id, item_id, checked_value, buy_time)?;
 
             // Moves funds from buyer account into the owner's account
             // We don't use T::Currency::transfer() to prevent fees being incurred.
@@ -1459,7 +1460,7 @@ decl_module! {
                     list.push(order_history);
                 });
 
-                Self::charge_royalty(winner.bidder.clone(), collection_id, item_id, balance, winner.bid_time)?;
+                Self::charge_royalty(winner.bidder.clone(), collection_id, item_id, winner.bid_price, winner.bid_time)?;
 
                 Self::deposit_event(RawEvent::AuctionSucceed(auction.id, collection_id, item_id, auction.value, winner.bid_price, winner.bidder.clone(), auction.owner));
 
@@ -1782,24 +1783,6 @@ impl<T: Trait> Module<T> {
         Ok(())
     }
 
-    fn charge_royalty(buyer: T::AccountId, collection_id: u64, item_id: u64, order_price: CurrencyBalanceOf<T>, now: T::BlockNumber) -> DispatchResult {
-        let royalty = <ItemRoyalty<T>>::get(collection_id, item_id);
-        if royalty.expired_at >= now && royalty.rate >= Zero::zero() {
-            let fee_rate = CurrencyBalanceOf::<T>::saturated_from(royalty.rate.into());
-            let fee_max = CurrencyBalanceOf::<T>::saturated_from(10000u64.into());
-            let royalty_fee = order_price.saturating_mul(fee_rate) / fee_max;
-
-            let imbalance = <T as Trait>::Currency::withdraw(
-                &buyer,
-                royalty_fee,
-                WithdrawReasons::all(),
-                ExistenceRequirement::AllowDeath,
-            )?;
-            <T as Trait>::Currency::resolve_creating(&royalty.owner, imbalance);
-        }
-        Ok(())
-    }
-
     fn auction_lock_id(id: u64) -> [u8; 8] {
         let mut lock_id = id.to_be_bytes();
         lock_id[0..3].copy_from_slice(&*b"nft");
@@ -1807,7 +1790,7 @@ impl<T: Trait> Module<T> {
     }
 }
 
-impl<T: Trait> NftManager<T::AccountId> for Module<T> {
+impl<T: Trait> NftManager<T::AccountId, T::BlockNumber> for Module<T> {
 
     fn transfer_fungible(
         collection_id: u64,
@@ -2049,6 +2032,24 @@ impl<T: Trait> NftManager<T::AccountId> for Module<T> {
             }
             CollectionMode::Invalid => false,
         }
+    }
+
+    fn charge_royalty(buyer: T::AccountId, collection_id: u64, item_id: u64, order_price: u64, now: T::BlockNumber) -> DispatchResult {
+        let royalty = <ItemRoyalty<T>>::get(collection_id, item_id);
+        if royalty.expired_at >= now && royalty.rate >= Zero::zero() {
+            let fee_rate = CurrencyBalanceOf::<T>::saturated_from(royalty.rate.into());
+            let fee_max = CurrencyBalanceOf::<T>::saturated_from(10000u64.into());
+            let royalty_fee = CurrencyBalanceOf::<T>::saturated_from(order_price.into()).saturating_mul(fee_rate) / fee_max;
+
+            let imbalance = <T as Trait>::Currency::withdraw(
+                &buyer,
+                royalty_fee,
+                WithdrawReasons::all(),
+                ExistenceRequirement::AllowDeath,
+            )?;
+            <T as Trait>::Currency::resolve_creating(&royalty.owner, imbalance);
+        }
+        Ok(())
     }
 }
 

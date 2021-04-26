@@ -76,7 +76,7 @@ pub trait Trait: system::Trait + pallet_nft::Trait {
     type LockModuleId: Get<ModuleId>;
 
     /// Nft manager.
-    type NftHandler: NftManager<Self::AccountId>;
+    type NftHandler: NftManager<Self::AccountId, Self::BlockNumber>;
 
     type Event: From<Event<Self>> + Into<<Self as system::Trait>::Event>;
 
@@ -229,6 +229,8 @@ decl_module! {
             let target_collection = pallet_nft::Module::<T>::collection(collection_id);
             let locker = Self::nft_account_id();
             let balance_price = CurrencyBalanceOf::<T>::saturated_from(price.into());
+
+            T::NftHandler::charge_royalty(sender.clone(), collection_id, item_id, price, buy_time)?;
 
             // Moves funds from buyer account into the owner's account
             // We don't use T::Currency::transfer() to prevent fees being incurred.
@@ -401,6 +403,9 @@ decl_module! {
             let accept_price = CurrencyBalanceOf::<T>::saturated_from(price.into());
             let accept_value = CurrencyBalanceOf::<T>::saturated_from(value.into());
             let balance_price = accept_price.saturating_mul(accept_value);
+            let checked_value = price.checked_mul(value).unwrap();
+
+            T::NftHandler::charge_royalty(sender.clone(), collection_id, item_id, checked_value, buy_time)?;
 
             // Moves funds from buyer account into the owner's account
             // We don't use T::Currency::transfer() to prevent fees being incurred.

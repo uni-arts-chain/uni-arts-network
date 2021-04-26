@@ -68,7 +68,7 @@ pub trait Trait: system::Trait + pallet_nft::Trait {
     type LockModuleId: Get<ModuleId>;
 
     /// Nft manager.
-    type NftHandler: NftManager<Self::AccountId>;
+    type NftHandler: NftManager<Self::AccountId, Self::BlockNumber>;
 
     type Event: From<Event<Self>> + Into<<Self as system::Trait>::Event>;
 

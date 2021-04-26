@@ -143,8 +143,7 @@ decl_module! {
                 end_time: end_time,
                 has_ended: false,
                 total_count: 0,
-                remaind_count: 0,
-                .. Default::default()
+                remaind_count: 0
             };
 
             let blind_box_id = blind_box.id;

@@ -14,6 +14,7 @@ members = [
     'pallets/nft',
     'pallets/nft-blindbox',
     'pallets/nft-trade',
+    'pallets/nft-auction',
     'pallets/price',
     'pallets/token',
     'pallets/trade',

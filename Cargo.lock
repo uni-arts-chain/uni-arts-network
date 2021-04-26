@@ -4195,6 +4195,25 @@ dependencies = [
 ]
 
 [[package]]
+name = "pallet-nft-auction"
+version = "2.0.1"
+dependencies = [
+ "frame-support",
+ "frame-system",
+ "log",
+ "module-support",
+ "pallet-balances",
+ "pallet-nft",
+ "pallet-transaction-payment",
+ "parity-scale-codec",
+ "serde",
+ "sp-core",
+ "sp-io",
+ "sp-runtime",
+ "sp-std",
+]
+
+[[package]]
 name = "pallet-nft-blindbox"
 version = "2.0.1"
 dependencies = [

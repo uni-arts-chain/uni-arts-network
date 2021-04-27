@@ -396,7 +396,7 @@ impl<T: Trait> Module<T> {
             }
             random_number = Self::generate_random_number(i);
         }
-        let winner_number = (random_number % total_count) as u64;
+        let winner_number = (random_number % total_count + 1) as u64;
         winner_number
     }
 

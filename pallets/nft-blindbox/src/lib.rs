@@ -21,7 +21,7 @@ use frame_system::{self as system, ensure_signed};
 use sp_runtime::sp_std::prelude::Vec;
 use sp_runtime::{
     ModuleId, SaturatedConversion,
-    traits::{AccountIdConversion, Zero}, RuntimeDebug,
+    traits::{AccountIdConversion}, RuntimeDebug,
 };
 use sp_std::prelude::*;
 use module_support::NftManager;
@@ -48,7 +48,7 @@ pub struct NftCard {
 }
 
 #[derive(Encode, Decode, Default, Clone, PartialEq, RuntimeDebug)]
-pub struct BlindBox<AccountId, BlockNumber> {
+pub struct BlindboxItem<AccountId, BlockNumber> {
     pub id: u64,
     pub owner: AccountId,
     pub card_group: Vec<u64>,
@@ -92,7 +92,7 @@ decl_storage! {
         pub CardGroupList get(fn get_card_group): map hasher(identity) u64 => NftCard;
 
         /// BlindBox List
-        pub BlindBoxList get(fn get_blind_box): map hasher(identity) u64 => BlindBox<T::AccountId, T::BlockNumber>;
+        pub BlindBoxList get(fn get_blind_box): map hasher(identity) u64 => BlindboxItem<T::AccountId, T::BlockNumber>;
     }
 }
 
@@ -103,7 +103,7 @@ decl_event!(
     {
         BlindBoxCreated(u64, u64, AccountId),
         BlindBoxAddCardGroup(u64, u64, u64, u64, u64, AccountId),
-        BlindBoxDraw(u64, u64, u64, AccountId, AccountId, u64),
+        BlindBoxDraw(u64, u64, u64, u64, AccountId, AccountId, u64),
         BlindBoxClose(u64, AccountId),
         BlindBoxCancel(u64, AccountId),
     }
@@ -134,7 +134,7 @@ decl_module! {
         pub fn create_blind_box(origin, start_time: T::BlockNumber, end_time: T::BlockNumber, price: u64 ) -> DispatchResult {
             let sender = ensure_signed(origin)?;
 
-            let blind_box = BlindBox {
+            let blind_box = BlindboxItem {
                 id: NextBlindBoxID::get(),
                 owner: sender.clone(),
                 card_group: vec![],
@@ -312,7 +312,7 @@ decl_module! {
             });
 
             // call event
-            Self::deposit_event(RawEvent::BlindBoxDraw(blind_box_id, card_group.collection_id, card_group.item_id, sender, blind_box.owner, blind_box.price));
+            Self::deposit_event(RawEvent::BlindBoxDraw(blind_box_id, choose_group_id, card_group.collection_id, card_group.item_id, sender, blind_box.owner, blind_box.price));
             Ok(())
         }
 

@@ -21,7 +21,7 @@ use frame_system::{self as system, ensure_signed};
 use sp_runtime::sp_std::prelude::Vec;
 use sp_runtime::{
     ModuleId, SaturatedConversion,
-    traits::{AccountIdConversion}, RuntimeDebug,
+    traits::{AccountIdConversion, Zero}, RuntimeDebug,
 };
 use sp_std::prelude::*;
 use module_support::NftManager;
@@ -81,7 +81,7 @@ pub trait Trait: system::Trait + pallet_nft::Trait {
 }
 
 decl_storage! {
-    trait Store for Module<T: Trait> as Nft {
+    trait Store for Module<T: Trait> as NftBlindBox {
         /// Next CardGroup id
         pub NextCardGroupID: u64 = 1;
 

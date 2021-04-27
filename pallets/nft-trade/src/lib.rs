@@ -85,7 +85,7 @@ pub trait Trait: system::Trait + pallet_nft::Trait {
 }
 
 decl_storage! {
-    trait Store for Module<T: Trait> as Nft {
+    trait Store for Module<T: Trait> as NftTrade {
 
         /// Consignment
         pub SaleOrderList get(fn nft_trade_id): double_map hasher(blake2_128_concat) u64, hasher(blake2_128_concat) u64 => SaleOrder<T::AccountId>;

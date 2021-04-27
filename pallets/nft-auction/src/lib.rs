@@ -84,7 +84,7 @@ pub trait Trait: system::Trait + pallet_nft::Trait {
 }
 
 decl_storage! {
-    trait Store for Module<T: Trait> as Nft {
+    trait Store for Module<T: Trait> as NftAuction {
 
         /// Next auction id
         pub NextAuctionID: u64 = 1;

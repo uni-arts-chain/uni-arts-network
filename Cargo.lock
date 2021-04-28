@@ -4070,6 +4070,22 @@ dependencies = [
 ]
 
 [[package]]
+name = "pallet-forum"
+version = "2.0.1"
+dependencies = [
+ "frame-support",
+ "frame-system",
+ "log",
+ "pallet-timestamp",
+ "parity-scale-codec",
+ "serde",
+ "sp-core",
+ "sp-io",
+ "sp-runtime",
+ "sp-std",
+]
+
+[[package]]
 name = "pallet-grandpa"
 version = "2.0.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"

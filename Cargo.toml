@@ -11,6 +11,7 @@ members = [
     'pallets/common',
     'pallets/assets',
     'pallets/names',
+    'pallets/forum',
     'pallets/nft',
     'pallets/nft-blindbox',
     'pallets/nft-trade',

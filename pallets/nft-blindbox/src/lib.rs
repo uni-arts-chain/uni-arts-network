@@ -88,6 +88,9 @@ decl_storage! {
         /// Next BlindBox id
         pub NextBlindBoxID: u64 = 1;
 
+        /// Next Seed
+        pub NextSeed: u32 = 1;
+
         /// CardGroup List
         pub CardGroupList get(fn get_card_group): map hasher(identity) u64 => NftCard;
 
@@ -388,7 +391,9 @@ impl<T: Trait> Module<T> {
     }
 
     fn get_winner_number(total_count: u32) -> u64 {
-        let mut random_number = Self::generate_random_number(0);
+        let seed = NextSeed::get();
+        let mut random_number = Self::generate_random_number(seed);
+        NextSeed::mutate(|id| *id += 1);
 
         for i in 1 .. 20 {
             if random_number < u32::MAX - u32::MAX % total_count {

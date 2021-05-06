@@ -64,7 +64,7 @@ pub use primitives::{
 
 /// Import pallets.
 // pub use pallet_certificate;
-pub use pallet_nft;
+pub use pallet_nft_multi;
 pub use pallet_nicks;
 pub use pallet_rewards;
 pub use pallet_staking;
@@ -541,10 +541,10 @@ impl pallet_names::Trait for Runtime {
 
 }
 
-/// Used for the module nft in `./nft.rs`
-impl pallet_nft::Trait for Runtime {
+/// Used for the module nft-multi in `./nft-multi.rs`
+impl pallet_nft_multi::Trait for Runtime {
 	type ModuleId = UniArtsNftModuleId;
-	type Currency = Uart;
+	type MultiCurrency = Currencies;
 	type Event = Event;
 	type WeightInfo = ();
 }
@@ -1035,7 +1035,7 @@ construct_runtime!(
 		Sudo: pallet_sudo::{Module, Call, Config<T>, Storage, Event<T>},
 
 		Names: pallet_names::{Module, Call, Storage, Event<T>},
-		Nft: pallet_nft::{Module, Call, Storage, Event<T>},
+		Nft: pallet_nft_multi::{Module, Call, Storage, Event<T>},
 		BlindBox: pallet_nft_blindbox::{Module, Call, Storage, Event<T>},
 		Token: pallet_token::{Module, Call, Storage, Event<T>},
 		Trade: pallet_trade::{Module, Call, Storage, Event<T>},

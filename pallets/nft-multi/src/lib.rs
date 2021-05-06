@@ -37,7 +37,8 @@ use sp_std::prelude::*;
 use sp_core::H160;
 use sha3::{Digest, Keccak256};
 use support::{NftManager};
-use uniarts_primitives::CurrencyId;
+use uniarts_primitives::{CurrencyId, Balance as CurrencyBalance};
+use orml_traits::{MultiCurrency, MultiCurrencyExtended, MultiLockableCurrency};
 
 mod default_weight;
 
@@ -213,6 +214,7 @@ pub struct SaleOrder<AccountId> {
     pub order_id: u64,
     pub collection_id: u64,
     pub item_id: u64,
+    pub currency_id: CurrencyId,
     pub value: u64,
     pub owner: AccountId,
     pub price: u64, // maker order's price\
@@ -224,6 +226,7 @@ pub struct SplitSaleOrder<AccountId> {
     pub order_id: u64,
     pub collection_id: u64,
     pub item_id: u64,
+    pub currency_id: CurrencyId,
     pub value: u64,
     pub balance: u64,
     pub owner: AccountId,
@@ -235,6 +238,7 @@ pub struct SplitSaleOrder<AccountId> {
 pub struct SaleOrderHistory<AccountId, BlockNumber> {
     pub collection_id: u64,
     pub item_id: u64,
+    pub currency_id: CurrencyId,
     pub value: u64,
     pub seller: AccountId,
     pub buyer: AccountId,
@@ -248,6 +252,7 @@ pub struct Auction<AccountId, BlockNumber> {
     pub id: u64,
     pub collection_id: u64,
     pub item_id: u64,
+    pub currency_id: CurrencyId,
     pub value: u64,
     pub owner: AccountId,
     pub start_price: u64,
@@ -261,6 +266,7 @@ pub struct Auction<AccountId, BlockNumber> {
 #[cfg_attr(feature = "std", derive(Debug))]
 pub struct BidHistory<AccountId, BlockNumber> {
     pub auction_id: u64,
+    pub currency_id: CurrencyId,
     pub bidder: AccountId,
     pub bid_price: u64,
     pub bid_time: BlockNumber,
@@ -281,7 +287,6 @@ pub enum TransferFromAccountError {
     InsufficientBalance,
 }
 
-pub type CurrencyBalanceOf<T> = <<T as Trait>::Currency as Currency<<T as frame_system::Trait>::AccountId>>::Balance;
 pub type AccountId<T> = <T as frame_system::Trait>::AccountId;
 // pub type Name<T> = <T as frame_system::Trait>::Name;
 
@@ -290,9 +295,8 @@ pub trait Trait: system::Trait + pallet_names::Trait {
     /// The NFT's module id, used for deriving its sovereign account ID.
     type ModuleId: Get<ModuleId>;
 
-    /// The transaction locking balance.
-    // type Currency: Currency<AccountId<Self>> + Send + Sync;
-    type Currency: Currency<AccountId<Self>> + LockableCurrency<AccountId<Self>, Moment=Self::BlockNumber> + Send + Sync;
+    /// The Currency for managing assets
+    type MultiCurrency: MultiCurrencyExtended<Self::AccountId, CurrencyId = CurrencyId, Balance = CurrencyBalance> + MultiLockableCurrency<Self::AccountId> ;
 
     type Event: From<Event<Self>> + Into<<Self as system::Trait>::Event>;
 
@@ -716,7 +720,7 @@ decl_module! {
 
 
 
-                    // Create nft item
+                    // Create nft-multi item
                     let item = NftItemType {
                         collection: collection_id,
                         owner: owner,
@@ -938,7 +942,7 @@ decl_module! {
         }
 
         #[weight = T::WeightInfo::create_sale_order()]
-        pub fn create_sale_order(origin, collection_id: u64, item_id: u64, value: u64, price: u64 ) -> DispatchResult {
+        pub fn create_sale_order(origin, collection_id: u64, item_id: u64, value: u64, currency_id: CurrencyId, price: u64) -> DispatchResult {
             let sender = ensure_signed(origin)?;
 
             let item_owner = Self::is_item_owner(sender.clone(), collection_id, item_id);
@@ -969,6 +973,7 @@ decl_module! {
                 order_id: order_id,
                 collection_id: collection_id,
                 item_id: item_id,
+                currency_id: currency_id,
                 value: card_value,
                 owner: sender.clone(),
                 price: price,
@@ -1025,27 +1030,17 @@ decl_module! {
             let nft_owner = target_sale_order.owner;
             let price = target_sale_order.price;
             let order_id = target_sale_order.order_id;
+            let currency_id = target_sale_order.currency_id;
             let buy_time = <system::Module<T>>::block_number();
 
             let target_collection = <Collection<T>>::get(collection_id);
             let locker = Self::nft_account_id();
-            let balance_price = CurrencyBalanceOf::<T>::saturated_from(price.into());
-            let currency_id = CurrencyId::default();
 
             Self::charge_royalty(sender.clone(), collection_id, item_id, currency_id, price, buy_time)?;
 
-            // Moves funds from buyer account into the owner's account
-            // We don't use T::Currency::transfer() to prevent fees being incurred.
-            let negative_imbalance = <T as Trait>::Currency::withdraw(
-                &sender,
-                balance_price,
-                WithdrawReasons::all(),
-                ExistenceRequirement::AllowDeath,
-            )?;
+            <T as Trait>::MultiCurrency::transfer(currency_id, &sender, &nft_owner, price.saturated_into())?;
 
-            <T as Trait>::Currency::resolve_creating(&nft_owner, negative_imbalance);
-
-            // Moves nft from locker account into the buyer's account
+            // Moves nft-multi from locker account into the buyer's account
             match target_collection.mode
             {
                 CollectionMode::NFT(_) => Self::transfer_nft(collection_id, item_id, locker, sender.clone())?,
@@ -1058,6 +1053,7 @@ decl_module! {
             let order_history = SaleOrderHistory {
                 collection_id: collection_id,
                 item_id: item_id,
+                currency_id: currency_id,
                 value: target_sale_order.value,
                 seller: nft_owner.clone(),
                 buyer: sender.clone(),
@@ -1085,7 +1081,7 @@ decl_module! {
         }
 
         #[weight = T::WeightInfo::create_separable_sale_order()]
-        pub fn create_separable_sale_order(origin, collection_id: u64, item_id: u64, value: u64, price: u64 ) -> DispatchResult {
+        pub fn create_separable_sale_order(origin, collection_id: u64, item_id: u64, value: u64, currency_id: CurrencyId, price: u64) -> DispatchResult {
             let sender = ensure_signed(origin)?;
 
             let item_owner = Self::is_item_owner(sender.clone(), collection_id, item_id);
@@ -1117,6 +1113,7 @@ decl_module! {
                 order_id: order_id,
                 collection_id: collection_id,
                 item_id: item_id,
+                currency_id: currency_id,
                 value: card_value,
                 balance: card_value,
                 owner: sender.clone(),
@@ -1193,6 +1190,7 @@ decl_module! {
             let collection_id = target_sale_order.collection_id;
             let item_id = target_sale_order.item_id;
             let nft_owner = target_sale_order.owner;
+            let currency_id = target_sale_order.currency_id;
             let price = target_sale_order.price;
             let order_value = target_sale_order.value;
             let balance = target_sale_order.balance;
@@ -1203,27 +1201,13 @@ decl_module! {
 
             ensure!(target_sale_order.balance >= value, "Value not enough");
             let remain_value = balance.checked_sub(value).unwrap();
-
-            let accept_price = CurrencyBalanceOf::<T>::saturated_from(price.into());
-            let accept_value = CurrencyBalanceOf::<T>::saturated_from(value.into());
-            let balance_price = accept_price.saturating_mul(accept_value);
             let checked_value = price.checked_mul(value).unwrap();
-            let currency_id = CurrencyId::default();
 
             Self::charge_royalty(sender.clone(), collection_id, item_id, currency_id, checked_value, buy_time)?;
 
-            // Moves funds from buyer account into the owner's account
-            // We don't use T::Currency::transfer() to prevent fees being incurred.
-            let negative_imbalance = <T as Trait>::Currency::withdraw(
-                &sender,
-                balance_price,
-                WithdrawReasons::all(),
-                ExistenceRequirement::AllowDeath,
-            )?;
+            <T as Trait>::MultiCurrency::transfer(currency_id, &sender, &nft_owner, checked_value.into())?;
 
-            <T as Trait>::Currency::resolve_creating(&nft_owner, negative_imbalance);
-
-            // Moves nft from locker account into the buyer's account
+            // Moves nft-multi from locker account into the buyer's account
             match target_collection.mode
             {
                 CollectionMode::NFT(_) => Self::transfer_nft(collection_id, item_id, locker, sender.clone())?,
@@ -1236,6 +1220,7 @@ decl_module! {
             let order_history = SaleOrderHistory {
                 collection_id: collection_id,
                 item_id: item_id,
+                currency_id: currency_id,
                 value: value,
                 seller: nft_owner.clone(),
                 buyer: sender.clone(),
@@ -1247,6 +1232,7 @@ decl_module! {
                 order_id: order_id,
                 collection_id: collection_id,
                 item_id: item_id,
+                currency_id: currency_id,
                 value: order_value,
                 balance: remain_value,
                 owner: nft_owner.clone(),
@@ -1325,7 +1311,7 @@ decl_module! {
         }
 
         #[weight = T::WeightInfo::create_auction()]
-        pub fn create_auction(origin, collection_id: u64, item_id: u64, value: u64, start_price: u64, increment: u64, start_time: T::BlockNumber, end_time: T::BlockNumber) -> DispatchResult {
+        pub fn create_auction(origin, collection_id: u64, item_id: u64, value: u64, currency_id: CurrencyId, start_price: u64, increment: u64, start_time: T::BlockNumber, end_time: T::BlockNumber) -> DispatchResult {
             let sender = ensure_signed(origin)?;
             let now = <system::Module<T>>::block_number();
             ensure!(now < end_time, "Invalid end_time");
@@ -1353,6 +1339,7 @@ decl_module! {
                 id: NextAuctionID::get(),
                 collection_id: collection_id,
                 item_id: item_id,
+                currency_id: currency_id,
                 value: value,
                 owner: sender.clone(),
                 start_price: start_price,
@@ -1380,16 +1367,17 @@ decl_module! {
             ensure!(now >= auction.start_time, "Not start");
             ensure!(now <= auction.end_time, "Ended");
             let price = auction.current_price.saturating_add(auction.increment);
-            let balance_price = CurrencyBalanceOf::<T>::saturated_from(price.into());
-            let free_balance = <T as Trait>::Currency::free_balance(&sender);
-            ensure!(free_balance > balance_price, "Insufficient balance");
+            let currency_id = auction.currency_id;
+            let free_balance = <T as Trait>::MultiCurrency::free_balance(currency_id, &sender);
+            ensure!(free_balance > price.into(), "Insufficient balance");
 
             let lock_id = Self::auction_lock_id(auction.id);
-            <T as Trait>::Currency::extend_lock(lock_id, &sender, balance_price, WithdrawReasons::all());
+            <T as Trait>::MultiCurrency::extend_lock(lock_id, currency_id, &sender, price.into());
 
 
             let bid_history = BidHistory {
                 auction_id: auction.id,
+                currency_id: currency_id,
                 bidder: sender.clone(),
                 bid_price: price,
                 bid_time: now,
@@ -1413,6 +1401,7 @@ decl_module! {
         pub fn finish_auction(origin, collection_id: u64, item_id: u64) -> DispatchResult { 
             let _ = ensure_signed(origin)?;
             let auction = Self::get_auction(collection_id, item_id);
+            let currency_id = auction.currency_id;
             ensure!(auction.id > 0, "The collection is not on auction");
 
             let now = <system::Module<T>>::block_number();
@@ -1433,26 +1422,19 @@ decl_module! {
                 };
 
                 let lock_id = Self::auction_lock_id(auction.id);
-                <T as Trait>::Currency::remove_lock(lock_id, &winner.bidder);
-                let balance = CurrencyBalanceOf::<T>::saturated_from(winner.bid_price.into());
-                let negative_imbalance = <T as Trait>::Currency::withdraw(
-                    &winner.bidder,
-                    balance,
-                    WithdrawReasons::all(),
-                    ExistenceRequirement::AllowDeath,
-                )?;
-
-                <T as Trait>::Currency::resolve_creating(&auction.owner, negative_imbalance);
+                <T as Trait>::MultiCurrency::remove_lock(lock_id, currency_id, &winner.bidder);
+                <T as Trait>::MultiCurrency::transfer(currency_id, &winner.bidder, &auction.owner, winner.bid_price.into())?;
 
                 for i in 0..(histories.len() - 1) {
                     let h = &histories[i];
-                    <T as Trait>::Currency::remove_lock(lock_id, &h.bidder);
+                    <T as Trait>::MultiCurrency::remove_lock(lock_id, currency_id, &h.bidder);
                 }
 
                 // Create order history
                 let order_history = SaleOrderHistory {
                     collection_id: collection_id,
                     item_id: item_id,
+                    currency_id: currency_id,
                     value: auction.value,
                     seller: auction.owner.clone(),
                     buyer: winner.bidder.clone(),
@@ -1463,7 +1445,6 @@ decl_module! {
                     list.push(order_history);
                 });
 
-                let currency_id = CurrencyId::default();
                 Self::charge_royalty(winner.bidder.clone(), collection_id, item_id, currency_id, winner.bid_price, winner.bid_time)?;
 
                 Self::deposit_event(RawEvent::AuctionSucceed(auction.id, collection_id, item_id, auction.value, winner.bid_price, winner.bidder.clone(), auction.owner));
@@ -1498,7 +1479,7 @@ decl_module! {
             let target_collection = <Collection<T>>::get(collection_id);
             let locker = Self::nft_account_id();
 
-            // Moves nft from locker account into the owner's account
+            // Moves nft-multi from locker account into the owner's account
             match target_collection.mode {
                 CollectionMode::NFT(_) => Self::transfer_nft(collection_id, item_id, locker, sender.clone())?,
                 CollectionMode::Fungible(_)  => Self::transfer_fungible(collection_id, item_id, auction.value, locker, sender.clone())?,
@@ -1789,7 +1770,7 @@ impl<T: Trait> Module<T> {
 
     fn auction_lock_id(id: u64) -> [u8; 8] {
         let mut lock_id = id.to_be_bytes();
-        lock_id[0..3].copy_from_slice(&*b"nft");
+        lock_id[0..3].copy_from_slice(&*b"nft-multi");
         lock_id
     }
 }
@@ -2038,20 +2019,14 @@ impl<T: Trait> NftManager<T::AccountId, T::BlockNumber> for Module<T> {
         }
     }
 
-    fn charge_royalty(buyer: T::AccountId, collection_id: u64, item_id: u64, _currency_id: CurrencyId, order_price: u64, now: T::BlockNumber) -> DispatchResult {
+    fn charge_royalty(buyer: T::AccountId, collection_id: u64, item_id: u64, currency_id: CurrencyId, order_price: u64, now: T::BlockNumber) -> DispatchResult {
         let royalty = <ItemRoyalty<T>>::get(collection_id, item_id);
         if royalty.expired_at >= now && royalty.rate >= Zero::zero() {
-            let fee_rate = CurrencyBalanceOf::<T>::saturated_from(royalty.rate.into());
-            let fee_max = CurrencyBalanceOf::<T>::saturated_from(10000u64.into());
-            let royalty_fee = CurrencyBalanceOf::<T>::saturated_from(order_price.into()).saturating_mul(fee_rate) / fee_max;
-
-            let imbalance = <T as Trait>::Currency::withdraw(
-                &buyer,
-                royalty_fee,
-                WithdrawReasons::all(),
-                ExistenceRequirement::AllowDeath,
-            )?;
-            <T as Trait>::Currency::resolve_creating(&royalty.owner, imbalance);
+            // let fee_rate = CurrencyBalanceOf::<T>::saturated_from(royalty.rate.into());
+            // let fee_max = CurrencyBalanceOf::<T>::saturated_from(10000u64.into());
+            // let royalty_fee = CurrencyBalanceOf::<T>::saturated_from(order_price.into()).saturating_mul(fee_rate) / fee_max;
+            let royalty_fee = order_price.checked_mul(royalty.rate).unwrap() / 10000u64;
+            <T as Trait>::MultiCurrency::transfer(currency_id, &buyer, &royalty.owner, royalty_fee.into())?;
         }
         Ok(())
     }

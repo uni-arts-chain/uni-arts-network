@@ -12,7 +12,7 @@ members = [
     'pallets/assets',
     'pallets/names',
     'pallets/forum',
-    'pallets/nft',
+    'pallets/nft-multi',
     'pallets/nft-blindbox',
     'pallets/nft-trade',
     'pallets/nft-auction',

@@ -20,11 +20,14 @@ pub use frame_support::{
 use frame_system::{self as system, ensure_signed};
 use sp_runtime::sp_std::prelude::Vec;
 use sp_runtime::{
-    ModuleId, SaturatedConversion,
+    ModuleId,
     traits::{AccountIdConversion}, RuntimeDebug,
 };
 use sp_std::prelude::*;
 use module_support::NftManager;
+use uniarts_primitives::CurrencyId;
+use orml_traits::{MultiCurrency, MultiLockableCurrency};
+use pallet_nft_multi as pallet_nft;
 
 mod default_weight;
 
@@ -40,6 +43,7 @@ pub struct Auction<AccountId, BlockNumber> {
     pub id: u64,
     pub collection_id: u64,
     pub item_id: u64,
+    pub currency_id: CurrencyId,
     pub value: u64,
     pub owner: AccountId,
     pub start_price: u64,
@@ -52,6 +56,7 @@ pub struct Auction<AccountId, BlockNumber> {
 #[derive(Encode, Decode, Default, Clone, PartialEq, RuntimeDebug)]
 pub struct BidHistory<AccountId, BlockNumber> {
     pub auction_id: u64,
+    pub currency_id: CurrencyId,
     pub bidder: AccountId,
     pub bid_price: u64,
     pub bid_time: BlockNumber,
@@ -61,14 +66,13 @@ pub struct BidHistory<AccountId, BlockNumber> {
 pub struct SaleOrderHistory<AccountId, BlockNumber> {
     pub collection_id: u64,
     pub item_id: u64,
+    pub currency_id: CurrencyId,
     pub value: u64,
     pub seller: AccountId,
     pub buyer: AccountId,
     pub price: u64,
     pub buy_time: BlockNumber,
 }
-
-pub type CurrencyBalanceOf<T> = <<T as pallet_nft::Trait>::Currency as Currency<<T as frame_system::Trait>::AccountId>>::Balance;
 
 pub trait Trait: system::Trait + pallet_nft::Trait {
     /// The NFT's module id, used for deriving its sovereign account ID.
@@ -129,7 +133,7 @@ decl_module! {
         fn deposit_event() = default;
 
         #[weight = <T as Trait>::WeightInfo::create_auction()]
-        pub fn create_auction(origin, collection_id: u64, item_id: u64, value: u64, start_price: u64, increment: u64, start_time: T::BlockNumber, end_time: T::BlockNumber) -> DispatchResult {
+        pub fn create_auction(origin, collection_id: u64, item_id: u64, value: u64, currency_id: CurrencyId, start_price: u64, increment: u64, start_time: T::BlockNumber, end_time: T::BlockNumber) -> DispatchResult {
             let sender = ensure_signed(origin)?;
             let now = <system::Module<T>>::block_number();
             ensure!(now < end_time, Error::<T>::NftInvalidEndTime);
@@ -156,6 +160,7 @@ decl_module! {
                 id: NextAuctionID::get(),
                 collection_id: collection_id,
                 item_id: item_id,
+                currency_id: currency_id,
                 value: value,
                 owner: sender.clone(),
                 start_price: start_price,
@@ -183,16 +188,17 @@ decl_module! {
             ensure!(now >= auction.start_time, "Not start");
             ensure!(now <= auction.end_time, "Ended");
             let price = auction.current_price.saturating_add(auction.increment);
-            let balance_price = CurrencyBalanceOf::<T>::saturated_from(price.into());
-            let free_balance = <T as pallet_nft::Trait>::Currency::free_balance(&sender);
-            ensure!(free_balance > balance_price, "Insufficient balance");
+            let currency_id = auction.currency_id;
+            let free_balance = <T as pallet_nft::Trait>::MultiCurrency::free_balance(currency_id, &sender);
+            ensure!(free_balance > price.into(), "Insufficient balance");
 
             let lock_id = Self::auction_lock_id(auction.id);
-            <T as pallet_nft::Trait>::Currency::extend_lock(lock_id, &sender, balance_price, WithdrawReasons::all());
+            <T as pallet_nft::Trait>::MultiCurrency::extend_lock(lock_id, currency_id, &sender, price.into());
 
 
             let bid_history = BidHistory {
                 auction_id: auction.id,
+                currency_id: currency_id,
                 bidder: sender.clone(),
                 bid_price: price,
                 bid_time: now,
@@ -216,6 +222,7 @@ decl_module! {
         pub fn finish_auction(origin, collection_id: u64, item_id: u64) -> DispatchResult {
             let _ = ensure_signed(origin)?;
             let auction = Self::get_auction(collection_id, item_id);
+            let currency_id = auction.currency_id;
             ensure!(auction.id > 0, "The collection is not on auction");
 
             let now = <system::Module<T>>::block_number();
@@ -236,26 +243,19 @@ decl_module! {
                 };
 
                 let lock_id = Self::auction_lock_id(auction.id);
-                <T as pallet_nft::Trait>::Currency::remove_lock(lock_id, &winner.bidder);
-                let balance = CurrencyBalanceOf::<T>::saturated_from(winner.bid_price.into());
-                let negative_imbalance = <T as pallet_nft::Trait>::Currency::withdraw(
-                    &winner.bidder,
-                    balance,
-                    WithdrawReasons::all(),
-                    ExistenceRequirement::AllowDeath,
-                )?;
-
-                <T as pallet_nft::Trait>::Currency::resolve_creating(&auction.owner, negative_imbalance);
+                <T as pallet_nft::Trait>::MultiCurrency::remove_lock(lock_id, currency_id, &winner.bidder);
+                <T as pallet_nft::Trait>::MultiCurrency::transfer(currency_id, &winner.bidder, &auction.owner, winner.bid_price.into())?;
 
                 for i in 0..(histories.len() - 1) {
                     let h = &histories[i];
-                    <T as pallet_nft::Trait>::Currency::remove_lock(lock_id, &h.bidder);
+                    <T as pallet_nft::Trait>::MultiCurrency::remove_lock(lock_id, currency_id, &h.bidder);
                 }
 
                 // Create order history
                 let order_history = SaleOrderHistory {
                     collection_id: collection_id,
                     item_id: item_id,
+                    currency_id: currency_id,
                     value: auction.value,
                     seller: auction.owner.clone(),
                     buyer: winner.bidder.clone(),
@@ -266,7 +266,7 @@ decl_module! {
                     list.push(order_history);
                 });
 
-                T::NftHandler::charge_royalty(winner.bidder.clone(), collection_id, item_id, winner.bid_price, winner.bid_time)?;
+                T::NftHandler::charge_royalty(winner.bidder.clone(), collection_id, item_id, currency_id, winner.bid_price, winner.bid_time)?;
 
                 Self::deposit_event(RawEvent::AuctionSucceed(auction.id, collection_id, item_id, auction.value, winner.bid_price, winner.bidder.clone(), auction.owner));
 
@@ -300,7 +300,7 @@ decl_module! {
             let target_collection = pallet_nft::Module::<T>::collection(collection_id);
             let locker = Self::nft_account_id();
 
-            // Moves nft from locker account into the owner's account
+            // Moves nft-multi from locker account into the owner's account
             match target_collection.mode {
                 pallet_nft::CollectionMode::NFT(_) => T::NftHandler::transfer_nft(collection_id, item_id, locker, sender.clone())?,
                 pallet_nft::CollectionMode::Fungible(_)  => T::NftHandler::transfer_fungible(collection_id, item_id, auction.value, locker, sender.clone())?,
@@ -327,7 +327,7 @@ impl<T: Trait> Module<T> {
 
     fn auction_lock_id(id: u64) -> [u8; 8] {
         let mut lock_id = id.to_be_bytes();
-        lock_id[0..3].copy_from_slice(&*b"nft");
+        lock_id[0..3].copy_from_slice(&*b"nft-multi");
         lock_id
     }
 }

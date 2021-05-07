@@ -29,7 +29,7 @@ const UNI_ARTS_ADDRESS_FORMAT_ID: u8 = 45;
 
 impl SubstrateCli for Cli {
 	fn impl_name() -> String {
-		"Uni-arts Node".into()
+		"UniArts Node".into()
 	}
 
 	fn impl_version() -> String {
@@ -72,6 +72,7 @@ impl SubstrateCli for Cli {
 			"staging" => Box::new(uniarts_service::chain_spec::staging_config()?),
 			"uart" => Box::new(uniarts_service::chain_spec::pangu_config()?),
 			"pangu" => Box::new(uniarts_service::chain_spec::pangu_config()?),
+			"fuxi_staging" => Box::new(uniarts_service::chain_spec::fuxi_staging_config()?),
 			"fuxi" => Box::new(uniarts_service::chain_spec::fuxi_config()?),
 			path => Box::new(uniarts_service::chain_spec::PanguChainSpec::from_json_file(
 				std::path::PathBuf::from(path),
@@ -279,7 +280,7 @@ pub fn run() -> sc_cli::Result<()> {
 			info!("  \\____/|_| |_|_|    /_/    \\_\\_|   \\__|___/  \\_____|_| |_|\\__,_|_|_| |_|");
 			info!("                                                                         ");
 			info!("                                                                         ");
-			info!("  by Uni-Arts Network, 2018-2020");
+			info!("  by UniArts Network, 2018-2020");
 
 			if chain_spec.is_pangu_network() {
 				runner.run_node_until_exit(|config| match config.role {

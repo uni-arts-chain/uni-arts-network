@@ -86,14 +86,18 @@ pub fn fuxi_staging_config() -> Result<FuxiChainSpec, String> {
 	];
 
 	let endowed_accounts: Vec<(AccountId, Balance)> = vec![
-		// IPO
+		// Parachain award 20%
 		(hex!("90e8e5d81d429880185694c4175b0720d2c336aedf026d3f47b05643fcad6a2d").into(), 20_000_000 * UART),
-		// Team
-		(hex!("22818069e4959c3130ae728ddb532dad9c27f179c64a0fe4de1ba2ef15035841").into(), 25_000_000 * UART),
-		// Pre-sale
-		(hex!("9cb78b6b82c7007f6bf4f55d95535d10f98a3c6cbbb27f5f216c9c030bab983f").into(), 30_000_000 * UART),
-		// Treasury
-		(hex!("58390913ec4a2371fee5bc8a81d1fd6d500012adc0f408f1aa56267c0414501b").into(), 25_000_000 * UART),
+		// Team 20%
+		(hex!("22818069e4959c3130ae728ddb532dad9c27f179c64a0fe4de1ba2ef15035841").into(), 20_000_000 * UART),
+		// Token sale 26%
+		(hex!("9cb78b6b82c7007f6bf4f55d95535d10f98a3c6cbbb27f5f216c9c030bab983f").into(), 26_000_000 * UART),
+		// Treasury 20%
+		(hex!("58390913ec4a2371fee5bc8a81d1fd6d500012adc0f408f1aa56267c0414501b").into(), 20_000_000 * UART),
+		// Adivsors 6%
+		(hex!("827287f438297be6947dce38caf80ddbf750fa0db16a18bbf77cbc6a1e5a551e").into(), 6_000_000 * UART),
+		// Ecosystem & Artists %8
+		(hex!("ac2d4a632aedf3157f1c872d0778b3a5f75f38622f36f53e93025963acb6b709").into(), 8_000_000 * UART),
 	];
 
 	let council_members: Vec<AccountId> = vec![
@@ -118,7 +122,7 @@ pub fn fuxi_staging_config() -> Result<FuxiChainSpec, String> {
 
 	Ok(FuxiChainSpec::from_genesis(
 		// Name
-		"Uni-Arts Staging network",
+		"UniArts Staging network",
 		// ID
 		"fuxi_staging",
 		ChainType::Live,

@@ -9,6 +9,7 @@ Uni-Arts provides the one - stop solution for Businesses and Individual creators
 [![Substrate version](https://img.shields.io/badge/Substrate-2.0.0-brightgreen?logo=Parity%20Substrate)](https://substrate.dev/)
 [![Discord](https://img.shields.io/badge/Discord-gray?logo=discord)](https://discord.gg/ZBDGY79X)
 [![Telegram](https://img.shields.io/badge/Telegram-gray?logo=telegram)](https://t.me/uniarts)
+[![Twitter](https://img.shields.io/badge/Twitter-gray?logo=twitter)](https://twitter.com/UniartsNetwork)
 
 
 

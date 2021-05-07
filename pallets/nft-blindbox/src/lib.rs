@@ -105,9 +105,9 @@ decl_event!(
     where
         AccountId = <T as frame_system::Trait>::AccountId,
     {
-        BlindBoxCreated(u64, u64, AccountId),
+        BlindBoxCreated(u64, u64, AccountId, CurrencyId),
         BlindBoxAddCardGroup(u64, u64, u64, u64, u64, AccountId),
-        BlindBoxDraw(u64, u64, u64, u64, AccountId, AccountId, u64),
+        BlindBoxDraw(u64, u64, u64, u64, AccountId, AccountId, u64, CurrencyId),
         BlindBoxClose(u64, AccountId),
         BlindBoxCancel(u64, AccountId),
     }
@@ -156,7 +156,7 @@ decl_module! {
             NextBlindBoxID::mutate(|id| *id += 1);
 
             // call event
-            Self::deposit_event(RawEvent::BlindBoxCreated(blind_box_id, price, sender));
+            Self::deposit_event(RawEvent::BlindBoxCreated(blind_box_id, price, sender, currency_id));
             Ok(())
         }
 
@@ -311,7 +311,7 @@ decl_module! {
             });
 
             // call event
-            Self::deposit_event(RawEvent::BlindBoxDraw(blind_box_id, choose_group_id, card_group.collection_id, card_group.item_id, sender, blind_box.owner, blind_box.price));
+            Self::deposit_event(RawEvent::BlindBoxDraw(blind_box_id, choose_group_id, card_group.collection_id, card_group.item_id, sender, blind_box.owner, blind_box.price, currency_id));
             Ok(())
         }
 

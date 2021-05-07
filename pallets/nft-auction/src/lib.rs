@@ -109,9 +109,9 @@ decl_event!(
     where
         AccountId = <T as frame_system::Trait>::AccountId,
     {
-        AuctionCreated(u64, u64, u64, u64, u64, AccountId),
-        AuctionBid(u64, u64, u64, u64, u64, AccountId),
-        AuctionSucceed(u64, u64, u64, u64, u64, AccountId, AccountId),
+        AuctionCreated(u64, u64, u64, u64, u64, AccountId, CurrencyId),
+        AuctionBid(u64, u64, u64, u64, u64, AccountId, CurrencyId),
+        AuctionSucceed(u64, u64, u64, u64, u64, AccountId, AccountId, CurrencyId),
         AuctionCancel(u64, u64, u64),
     }
 );
@@ -174,7 +174,7 @@ decl_module! {
 
             NextAuctionID::mutate(|id| *id += 1);
 
-            Self::deposit_event(RawEvent::AuctionCreated(auction_id, collection_id, item_id, value, start_price, sender));
+            Self::deposit_event(RawEvent::AuctionCreated(auction_id, collection_id, item_id, value, start_price, sender, currency_id));
 
             Ok(())
         }
@@ -213,7 +213,7 @@ decl_module! {
             });
 
 
-            Self::deposit_event(RawEvent::AuctionBid(auction.id, collection_id, item_id, auction.value, price, sender));
+            Self::deposit_event(RawEvent::AuctionBid(auction.id, collection_id, item_id, auction.value, price, sender, currency_id));
 
             Ok(())
         }
@@ -268,7 +268,7 @@ decl_module! {
 
                 T::NftHandler::charge_royalty(winner.bidder.clone(), collection_id, item_id, currency_id, winner.bid_price, winner.bid_time)?;
 
-                Self::deposit_event(RawEvent::AuctionSucceed(auction.id, collection_id, item_id, auction.value, winner.bid_price, winner.bidder.clone(), auction.owner));
+                Self::deposit_event(RawEvent::AuctionSucceed(auction.id, collection_id, item_id, auction.value, winner.bid_price, winner.bidder.clone(), auction.owner, currency_id));
 
             } else {
                 // Cancel the auction

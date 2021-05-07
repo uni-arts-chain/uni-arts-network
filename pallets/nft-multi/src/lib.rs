@@ -384,16 +384,16 @@ decl_event!(
         ItemCreated(u64, u64),
         ItemDestroyed(u64, u64),
         ItemTransfer(u64, u64, u64, AccountId, AccountId),
-        ItemOrderCreated(u64, u64, u64, u64, AccountId, u64),
+        ItemOrderCreated(u64, u64, u64, u64, AccountId, u64, CurrencyId),
         ItemOrderCancel(u64, u64, u64),
-        ItemOrderSucceed(u64, u64, AccountId, AccountId, u64, u64, u64),
-        ItemSeparableOrderCreated(u64, u64, u64, u64, u64, AccountId),
+        ItemOrderSucceed(u64, u64, AccountId, AccountId, u64, u64, u64, CurrencyId),
+        ItemSeparableOrderCreated(u64, u64, u64, u64, u64, AccountId, CurrencyId),
         ItemSeparableOrderCancel(u64, u64, u64),
-        ItemSeparableOrderSucceed(u64, u64, u64, u64, AccountId, AccountId, u64),
+        ItemSeparableOrderSucceed(u64, u64, u64, u64, AccountId, AccountId, u64, CurrencyId),
         ItemAddSignature(u64, u64, AccountId),
-        AuctionCreated(u64, u64, u64, u64, u64, AccountId),
-        AuctionBid(u64, u64, u64, u64, u64, AccountId),
-        AuctionSucceed(u64, u64, u64, u64, u64, AccountId, AccountId),
+        AuctionCreated(u64, u64, u64, u64, u64, AccountId, CurrencyId),
+        AuctionBid(u64, u64, u64, u64, u64, AccountId, CurrencyId),
+        AuctionSucceed(u64, u64, u64, u64, u64, AccountId, AccountId, CurrencyId),
         AuctionCancel(u64, u64, u64),
     }
 );
@@ -984,7 +984,7 @@ decl_module! {
             <SaleOrderByIdList<T>>::insert(order_id, order);
 
             // call event
-            Self::deposit_event(RawEvent::ItemOrderCreated(collection_id, item_id, card_value, price, sender, order_id));
+            Self::deposit_event(RawEvent::ItemOrderCreated(collection_id, item_id, card_value, price, sender, order_id, currency_id));
             Ok(())
         }
 
@@ -1076,7 +1076,7 @@ decl_module! {
             <SaleOrderByIdList<T>>::remove(order_id);
 
             // call event
-            Self::deposit_event(RawEvent::ItemOrderSucceed(collection_id, item_id, sender, nft_owner.clone(), order_id, target_sale_order.value, price));
+            Self::deposit_event(RawEvent::ItemOrderSucceed(collection_id, item_id, sender, nft_owner.clone(), order_id, target_sale_order.value, price, currency_id));
             Ok(())
         }
 
@@ -1134,7 +1134,7 @@ decl_module! {
             }
 
             // call event
-            Self::deposit_event(RawEvent::ItemSeparableOrderCreated(order_id, collection_id, item_id, card_value, price, sender));
+            Self::deposit_event(RawEvent::ItemSeparableOrderCreated(order_id, collection_id, item_id, card_value, price, sender, currency_id));
             Ok(())
         }
 
@@ -1270,7 +1270,7 @@ decl_module! {
             }
 
             // call event
-            Self::deposit_event(RawEvent::ItemSeparableOrderSucceed(order_id, collection_id, item_id, value, sender, nft_owner, price));
+            Self::deposit_event(RawEvent::ItemSeparableOrderSucceed(order_id, collection_id, item_id, value, sender, nft_owner, price, currency_id));
             Ok(())
         }
 
@@ -1353,7 +1353,7 @@ decl_module! {
 
             NextAuctionID::mutate(|id| *id += 1);
             
-            Self::deposit_event(RawEvent::AuctionCreated(auction_id, collection_id, item_id, value, start_price, sender));
+            Self::deposit_event(RawEvent::AuctionCreated(auction_id, collection_id, item_id, value, start_price, sender, currency_id));
 
             Ok(())
         }
@@ -1392,7 +1392,7 @@ decl_module! {
             });
 
 
-            Self::deposit_event(RawEvent::AuctionBid(auction.id, collection_id, item_id, auction.value, price, sender));
+            Self::deposit_event(RawEvent::AuctionBid(auction.id, collection_id, item_id, auction.value, price, sender, currency_id));
 
             Ok(())
         }
@@ -1447,7 +1447,7 @@ decl_module! {
 
                 Self::charge_royalty(winner.bidder.clone(), collection_id, item_id, currency_id, winner.bid_price, winner.bid_time)?;
 
-                Self::deposit_event(RawEvent::AuctionSucceed(auction.id, collection_id, item_id, auction.value, winner.bid_price, winner.bidder.clone(), auction.owner));
+                Self::deposit_event(RawEvent::AuctionSucceed(auction.id, collection_id, item_id, auction.value, winner.bid_price, winner.bidder.clone(), auction.owner, currency_id));
 
             } else {
                 // Cancel the auction

@@ -116,12 +116,12 @@ decl_event!(
     where
         AccountId = <T as frame_system::Trait>::AccountId,
     {
-        ItemOrderCreated(u64, u64, u64, u64, AccountId, u64),
+        ItemOrderCreated(u64, u64, u64, u64, AccountId, u64, CurrencyId),
         ItemOrderCancel(u64, u64, u64),
-        ItemOrderSucceed(u64, u64, AccountId, AccountId, u64, u64, u64),
-        ItemSeparableOrderCreated(u64, u64, u64, u64, u64, AccountId),
+        ItemOrderSucceed(u64, u64, AccountId, AccountId, u64, u64, u64, CurrencyId),
+        ItemSeparableOrderCreated(u64, u64, u64, u64, u64, AccountId, CurrencyId),
         ItemSeparableOrderCancel(u64, u64, u64),
-        ItemSeparableOrderSucceed(u64, u64, u64, u64, AccountId, AccountId, u64),
+        ItemSeparableOrderSucceed(u64, u64, u64, u64, AccountId, AccountId, u64, CurrencyId),
     }
 );
 
@@ -183,7 +183,7 @@ decl_module! {
             <SaleOrderByIdList<T>>::insert(order_id, order);
 
             // call event
-            Self::deposit_event(RawEvent::ItemOrderCreated(collection_id, item_id, card_value, price, sender, order_id));
+            Self::deposit_event(RawEvent::ItemOrderCreated(collection_id, item_id, card_value, price, sender, order_id, currency_id));
             Ok(())
         }
 
@@ -275,7 +275,7 @@ decl_module! {
             <SaleOrderByIdList<T>>::remove(order_id);
 
             // call event
-            Self::deposit_event(RawEvent::ItemOrderSucceed(collection_id, item_id, sender, nft_owner.clone(), order_id, target_sale_order.value, price));
+            Self::deposit_event(RawEvent::ItemOrderSucceed(collection_id, item_id, sender, nft_owner.clone(), order_id, target_sale_order.value, price, currency_id));
             Ok(())
         }
 
@@ -331,7 +331,7 @@ decl_module! {
             }
 
             // call event
-            Self::deposit_event(RawEvent::ItemSeparableOrderCreated(order_id, collection_id, item_id, card_value, price, sender));
+            Self::deposit_event(RawEvent::ItemSeparableOrderCreated(order_id, collection_id, item_id, card_value, price, sender, currency_id));
             Ok(())
         }
 
@@ -467,7 +467,7 @@ decl_module! {
             }
 
             // call event
-            Self::deposit_event(RawEvent::ItemSeparableOrderSucceed(order_id, collection_id, item_id, value, sender, nft_owner, price));
+            Self::deposit_event(RawEvent::ItemSeparableOrderSucceed(order_id, collection_id, item_id, value, sender, nft_owner, price, currency_id));
             Ok(())
         }
     }

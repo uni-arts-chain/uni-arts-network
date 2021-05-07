@@ -276,7 +276,7 @@ parameter_types! {
 	pub const RewardThreshold: Balance = 30 * (BlocksPerDay::get() as Balance) * MiningRewardPerBlock::get();
 	pub const StakingRewardPerBlock: Balance = 1 * UART;
 	pub const AmpFactor: Balance = 1e12 as Balance;
-	pub const BlocksPerYear: u32 = 10; //365 * BlocksPerDay::get();
+	pub const BlocksPerYear: u32 = 365 * BlocksPerDay::get();
 	pub const MiningCap: Balance = 150_000_000 * UART;
 }
 

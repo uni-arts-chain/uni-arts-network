@@ -4,7 +4,7 @@ description = 'FRAME pallet nft'
 edition = '2018'
 homepage = 'https://substrate.io'
 license = 'Unlicense'
-name = 'pallet-nft'
+name = 'pallet-nft-multi'
 version = '2.0.1'
 
 [package.metadata.docs.rs]
@@ -25,6 +25,10 @@ serde = { version = "1.0.102", features = ["derive"] }
 log = "0.4.8"
 sha3 = { version = "0.8", default-features = false }
 support = { package = "module-support", path = "../support", default-features = false }
+# orml
+orml-currencies = { default-features = false, version = '0.3.0' }
+orml-tokens = { default-features = false, version = '0.3.0' }
+orml-traits = { default-features = false, version = '0.3.0' }
 
 uniarts-primitives = { version = "2.0.1", default-features = false, path = "../../primitives" }
 
@@ -45,5 +49,8 @@ std = [
     'sp-std/std',
     "sp-core/std",
     "sha3/std",
+    "orml-traits/std",
+    "orml-currencies/std",
+    "orml-tokens/std",
     "uniarts-primitives/std",
 ]

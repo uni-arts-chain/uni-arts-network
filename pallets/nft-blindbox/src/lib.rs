@@ -20,11 +20,14 @@ pub use frame_support::{
 use frame_system::{self as system, ensure_signed};
 use sp_runtime::sp_std::prelude::Vec;
 use sp_runtime::{
-    ModuleId, SaturatedConversion,
+    ModuleId,
     traits::{AccountIdConversion}, RuntimeDebug,
 };
 use sp_std::prelude::*;
 use module_support::NftManager;
+use uniarts_primitives::CurrencyId;
+use orml_traits::MultiCurrency;
+use pallet_nft_multi as pallet_nft;
 
 mod default_weight;
 
@@ -54,14 +57,12 @@ pub struct BlindboxItem<AccountId, BlockNumber> {
     pub card_group: Vec<u64>,
     pub total_count: u64,
     pub remaind_count: u64,
+    pub currency_id: CurrencyId,
     pub price: u64,
     pub start_time: BlockNumber,
     pub end_time: BlockNumber,
     pub has_ended: bool,
 }
-
-pub type CurrencyBalanceOf<T> = <<T as pallet_nft::Trait>::Currency as Currency<<T as frame_system::Trait>::AccountId>>::Balance;
-
 
 pub trait Trait: system::Trait + pallet_nft::Trait {
     /// The NFT's module id, used for deriving its sovereign account ID.
@@ -103,10 +104,11 @@ decl_event!(
     pub enum Event<T>
     where
         AccountId = <T as frame_system::Trait>::AccountId,
+        CurrencyId = CurrencyId,
     {
-        BlindBoxCreated(u64, u64, AccountId),
+        BlindBoxCreated(u64, u64, AccountId, CurrencyId),
         BlindBoxAddCardGroup(u64, u64, u64, u64, u64, AccountId),
-        BlindBoxDraw(u64, u64, u64, u64, AccountId, AccountId, u64),
+        BlindBoxDraw(u64, u64, u64, u64, AccountId, AccountId, u64, CurrencyId),
         BlindBoxClose(u64, AccountId),
         BlindBoxCancel(u64, AccountId),
     }
@@ -134,13 +136,14 @@ decl_module! {
         fn deposit_event() = default;
 
         #[weight = <T as Trait>::WeightInfo::create_blind_box()]
-        pub fn create_blind_box(origin, start_time: T::BlockNumber, end_time: T::BlockNumber, price: u64 ) -> DispatchResult {
+        pub fn create_blind_box(origin, start_time: T::BlockNumber, end_time: T::BlockNumber, currency_id: CurrencyId, price: u64) -> DispatchResult {
             let sender = ensure_signed(origin)?;
 
             let blind_box = BlindboxItem {
                 id: NextBlindBoxID::get(),
                 owner: sender.clone(),
                 card_group: vec![],
+                currency_id: currency_id,
                 price: price,
                 start_time: start_time,
                 end_time: end_time,
@@ -154,7 +157,7 @@ decl_module! {
             NextBlindBoxID::mutate(|id| *id += 1);
 
             // call event
-            Self::deposit_event(RawEvent::BlindBoxCreated(blind_box_id, price, sender));
+            Self::deposit_event(RawEvent::BlindBoxCreated(blind_box_id, price, sender, currency_id));
             Ok(())
         }
 
@@ -228,6 +231,7 @@ decl_module! {
             ensure!(blind_box_id > 0, Error::<T>::BlindBoxNotExists);
 
             let blind_box = Self::get_blind_box(blind_box_id);
+            let currency_id = blind_box.currency_id;
             let now = <system::Module<T>>::block_number();
             ensure!(now >= blind_box.start_time, Error::<T>::BlindBoxNotInSalesPeriod);
             ensure!(now <= blind_box.end_time, Error::<T>::BlindBoxNotInSalesPeriod);
@@ -287,14 +291,7 @@ decl_module! {
             let locker = Self::nft_account_id();
 
             if blind_box.price > 0 {
-                let price = CurrencyBalanceOf::<T>::saturated_from(blind_box.price.into());
-                let negative_imbalance = <T as pallet_nft::Trait>::Currency::withdraw(
-                    &sender,
-                    price,
-                    WithdrawReasons::all(),
-                    ExistenceRequirement::AllowDeath,
-                )?;
-                <T as pallet_nft::Trait>::Currency::resolve_creating(&blind_box.owner, negative_imbalance);
+                <T as pallet_nft::Trait>::MultiCurrency::transfer(currency_id, &sender, &blind_box.owner, blind_box.price.into())?;
             }
 
             let target_collection = pallet_nft::Module::<T>::collection(card_group.collection_id);
@@ -315,7 +312,7 @@ decl_module! {
             });
 
             // call event
-            Self::deposit_event(RawEvent::BlindBoxDraw(blind_box_id, choose_group_id, card_group.collection_id, card_group.item_id, sender, blind_box.owner, blind_box.price));
+            Self::deposit_event(RawEvent::BlindBoxDraw(blind_box_id, choose_group_id, card_group.collection_id, card_group.item_id, sender, blind_box.owner, blind_box.price, currency_id));
             Ok(())
         }
 

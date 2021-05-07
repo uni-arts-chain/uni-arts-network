@@ -1896,8 +1896,8 @@ dependencies = [
  "pallet-membership",
  "pallet-multisig",
  "pallet-names",
- "pallet-nft",
  "pallet-nft-blindbox",
+ "pallet-nft-multi",
  "pallet-nicks",
  "pallet-proxy",
  "pallet-randomness-collective-flip",
@@ -4208,6 +4208,7 @@ dependencies = [
  "sp-io",
  "sp-runtime",
  "sp-std",
+ "uniarts-primitives",
 ]
 
 [[package]]
@@ -4218,8 +4219,11 @@ dependencies = [
  "frame-system",
  "log",
  "module-support",
+ "orml-currencies",
+ "orml-tokens",
+ "orml-traits",
  "pallet-balances",
- "pallet-nft",
+ "pallet-nft-multi",
  "pallet-transaction-payment",
  "parity-scale-codec",
  "serde",
@@ -4227,6 +4231,7 @@ dependencies = [
  "sp-io",
  "sp-runtime",
  "sp-std",
+ "uniarts-primitives",
 ]
 
 [[package]]
@@ -4237,8 +4242,11 @@ dependencies = [
  "frame-system",
  "log",
  "module-support",
+ "orml-currencies",
+ "orml-tokens",
+ "orml-traits",
  "pallet-balances",
- "pallet-nft",
+ "pallet-nft-multi",
  "pallet-transaction-payment",
  "parity-scale-codec",
  "serde",
@@ -4247,6 +4255,31 @@ dependencies = [
  "sp-io",
  "sp-runtime",
  "sp-std",
+ "uniarts-primitives",
+]
+
+[[package]]
+name = "pallet-nft-multi"
+version = "2.0.1"
+dependencies = [
+ "frame-support",
+ "frame-system",
+ "log",
+ "module-support",
+ "orml-currencies",
+ "orml-tokens",
+ "orml-traits",
+ "pallet-balances",
+ "pallet-names",
+ "pallet-transaction-payment",
+ "parity-scale-codec",
+ "serde",
+ "sha3 0.8.2",
+ "sp-core",
+ "sp-io",
+ "sp-runtime",
+ "sp-std",
+ "uniarts-primitives",
 ]
 
 [[package]]
@@ -4257,8 +4290,11 @@ dependencies = [
  "frame-system",
  "log",
  "module-support",
+ "orml-currencies",
+ "orml-tokens",
+ "orml-traits",
  "pallet-balances",
- "pallet-nft",
+ "pallet-nft-multi",
  "pallet-transaction-payment",
  "parity-scale-codec",
  "serde",
@@ -4267,6 +4303,7 @@ dependencies = [
  "sp-io",
  "sp-runtime",
  "sp-std",
+ "uniarts-primitives",
 ]
 
 [[package]]

@@ -20,9 +20,14 @@ transaction-payment = { version = "2.0.1", package = 'pallet-transaction-payment
 serde = { version = "1.0.102", features = ["derive"] }
 log = "0.4.8"
 sha3 = { version = "0.8", default-features = false }
+# orml
+orml-currencies = { default-features = false, version = '0.3.0' }
+orml-tokens = { default-features = false, version = '0.3.0' }
+orml-traits = { default-features = false, version = '0.3.0' }
 
-pallet-nft = { path = "../nft", default-features = false }
+pallet-nft-multi = { path = "../nft-multi", default-features = false }
 module-support = { version = "0.1.0", default-features = false, path = "../support" }
+uniarts-primitives = { version = "2.0.1", default-features = false, path = "../../primitives" }
 
 [dev-dependencies]
 sp-core = { version = "2.0.1"}
@@ -41,7 +46,11 @@ std = [
     "sp-core/std",
     "sha3/std",
     "module-support/std",
-    "pallet-nft/std",
+    "pallet-nft-multi/std",
+    "orml-traits/std",
+    "orml-currencies/std",
+    "orml-tokens/std",
+    "uniarts-primitives/std",
 ]
 
 

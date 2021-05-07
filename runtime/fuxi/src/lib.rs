@@ -64,7 +64,7 @@ pub use primitives::{
 
 /// Import pallets.
 // pub use pallet_certificate;
-pub use pallet_nft;
+pub use pallet_nft_multi;
 pub use pallet_nicks;
 pub use pallet_rewards;
 pub use pallet_staking;
@@ -103,7 +103,7 @@ pub const VERSION: RuntimeVersion = RuntimeVersion {
 	spec_name: create_runtime_str!("uart"),
 	impl_name: create_runtime_str!("uart"),
 	authoring_version: 1,
-	spec_version: 38,
+	spec_version: 39,
 	impl_version: 1,
 	apis: RUNTIME_API_VERSIONS,
 	transaction_version: 1,
@@ -276,7 +276,7 @@ parameter_types! {
 	pub const RewardThreshold: Balance = 30 * (BlocksPerDay::get() as Balance) * MiningRewardPerBlock::get();
 	pub const StakingRewardPerBlock: Balance = 1 * UART;
 	pub const AmpFactor: Balance = 1e12 as Balance;
-	pub const BlocksPerYear: u32 = 10; //365 * BlocksPerDay::get();
+	pub const BlocksPerYear: u32 = 365 * BlocksPerDay::get();
 	pub const MiningCap: Balance = 150_000_000 * UART;
 }
 
@@ -541,10 +541,10 @@ impl pallet_names::Trait for Runtime {
 
 }
 
-/// Used for the module nft in `./nft.rs`
-impl pallet_nft::Trait for Runtime {
+/// Used for the module nft-multi in `./nft-multi.rs`
+impl pallet_nft_multi::Trait for Runtime {
 	type ModuleId = UniArtsNftModuleId;
-	type Currency = Uart;
+	type MultiCurrency = Currencies;
 	type Event = Event;
 	type WeightInfo = ();
 }
@@ -1035,7 +1035,7 @@ construct_runtime!(
 		Sudo: pallet_sudo::{Module, Call, Config<T>, Storage, Event<T>},
 
 		Names: pallet_names::{Module, Call, Storage, Event<T>},
-		Nft: pallet_nft::{Module, Call, Storage, Event<T>},
+		Nft: pallet_nft_multi::{Module, Call, Storage, Event<T>},
 		BlindBox: pallet_nft_blindbox::{Module, Call, Storage, Event<T>},
 		Token: pallet_token::{Module, Call, Storage, Event<T>},
 		Trade: pallet_trade::{Module, Call, Storage, Event<T>},

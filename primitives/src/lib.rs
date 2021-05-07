@@ -73,6 +73,12 @@ pub enum CurrencyId {
     Token(TokenSymbol),
 }
 
+impl Default for CurrencyId {
+    fn default() -> Self {
+        CurrencyId::Native
+    }
+}
+
 #[ignore]
 #[test]
 fn print_module_account() {

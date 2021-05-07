@@ -21,10 +21,13 @@ use frame_system::{self as system, ensure_signed};
 use sp_runtime::sp_std::prelude::Vec;
 use sp_runtime::{
     ModuleId, SaturatedConversion,
-    traits::{AccountIdConversion, Saturating}, RuntimeDebug,
+    traits::{AccountIdConversion}, RuntimeDebug,
 };
 use sp_std::prelude::*;
 use module_support::NftManager;
+use uniarts_primitives::CurrencyId;
+use orml_traits::MultiCurrency;
+use pallet_nft_multi as pallet_nft;
 
 mod default_weight;
 
@@ -42,6 +45,7 @@ pub struct SaleOrder<AccountId> {
     pub order_id: u64,
     pub collection_id: u64,
     pub item_id: u64,
+    pub currency_id: CurrencyId,
     pub value: u64,
     pub owner: AccountId,
     pub price: u64, // maker order's price\
@@ -52,6 +56,7 @@ pub struct SplitSaleOrder<AccountId> {
     pub order_id: u64,
     pub collection_id: u64,
     pub item_id: u64,
+    pub currency_id: CurrencyId,
     pub value: u64,
     pub balance: u64,
     pub owner: AccountId,
@@ -62,14 +67,13 @@ pub struct SplitSaleOrder<AccountId> {
 pub struct SaleOrderHistory<AccountId, BlockNumber> {
     pub collection_id: u64,
     pub item_id: u64,
+    pub currency_id: CurrencyId,
     pub value: u64,
     pub seller: AccountId,
     pub buyer: AccountId,
     pub price: u64,
     pub buy_time: BlockNumber,
 }
-
-pub type CurrencyBalanceOf<T> = <<T as pallet_nft::Trait>::Currency as Currency<<T as frame_system::Trait>::AccountId>>::Balance;
 
 pub trait Trait: system::Trait + pallet_nft::Trait {
     /// The NFT's module id, used for deriving its sovereign account ID.
@@ -111,13 +115,14 @@ decl_event!(
     pub enum Event<T>
     where
         AccountId = <T as frame_system::Trait>::AccountId,
+        CurrencyId = CurrencyId,
     {
-        ItemOrderCreated(u64, u64, u64, u64, AccountId, u64),
+        ItemOrderCreated(u64, u64, u64, u64, AccountId, u64, CurrencyId),
         ItemOrderCancel(u64, u64, u64),
-        ItemOrderSucceed(u64, u64, AccountId, AccountId, u64, u64, u64),
-        ItemSeparableOrderCreated(u64, u64, u64, u64, u64, AccountId),
+        ItemOrderSucceed(u64, u64, AccountId, AccountId, u64, u64, u64, CurrencyId),
+        ItemSeparableOrderCreated(u64, u64, u64, u64, u64, AccountId, CurrencyId),
         ItemSeparableOrderCancel(u64, u64, u64),
-        ItemSeparableOrderSucceed(u64, u64, u64, u64, AccountId, AccountId, u64),
+        ItemSeparableOrderSucceed(u64, u64, u64, u64, AccountId, AccountId, u64, CurrencyId),
     }
 );
 
@@ -139,7 +144,7 @@ decl_module! {
         fn deposit_event() = default;
 
         #[weight = <T as Trait>::WeightInfo::create_sale_order()]
-        pub fn create_sale_order(origin, collection_id: u64, item_id: u64, value: u64, price: u64 ) -> DispatchResult {
+        pub fn create_sale_order(origin, collection_id: u64, item_id: u64, value: u64, currency_id: CurrencyId, price: u64) -> DispatchResult {
             let sender = ensure_signed(origin)?;
 
             let item_owner = T::NftHandler::is_item_owner(sender.clone(), collection_id, item_id);
@@ -168,6 +173,7 @@ decl_module! {
                 order_id: order_id,
                 collection_id: collection_id,
                 item_id: item_id,
+                currency_id: currency_id,
                 value: card_value,
                 owner: sender.clone(),
                 price: price,
@@ -178,7 +184,7 @@ decl_module! {
             <SaleOrderByIdList<T>>::insert(order_id, order);
 
             // call event
-            Self::deposit_event(RawEvent::ItemOrderCreated(collection_id, item_id, card_value, price, sender, order_id));
+            Self::deposit_event(RawEvent::ItemOrderCreated(collection_id, item_id, card_value, price, sender, order_id, currency_id));
             Ok(())
         }
 
@@ -224,26 +230,17 @@ decl_module! {
             let nft_owner = target_sale_order.owner;
             let price = target_sale_order.price;
             let order_id = target_sale_order.order_id;
+            let currency_id = target_sale_order.currency_id;
             let buy_time = <system::Module<T>>::block_number();
 
             let target_collection = pallet_nft::Module::<T>::collection(collection_id);
             let locker = Self::nft_account_id();
-            let balance_price = CurrencyBalanceOf::<T>::saturated_from(price.into());
 
-            T::NftHandler::charge_royalty(sender.clone(), collection_id, item_id, price, buy_time)?;
+            T::NftHandler::charge_royalty(sender.clone(), collection_id, item_id, currency_id, price, buy_time)?;
 
-            // Moves funds from buyer account into the owner's account
-            // We don't use T::Currency::transfer() to prevent fees being incurred.
-            let negative_imbalance = <T as pallet_nft::Trait>::Currency::withdraw(
-                &sender,
-                balance_price,
-                WithdrawReasons::all(),
-                ExistenceRequirement::AllowDeath,
-            )?;
+            <T as pallet_nft::Trait>::MultiCurrency::transfer(currency_id, &sender, &nft_owner, price.saturated_into())?;
 
-            <T as pallet_nft::Trait>::Currency::resolve_creating(&nft_owner, negative_imbalance);
-
-            // Moves nft from locker account into the buyer's account
+            // Moves nft-multi from locker account into the buyer's account
             match target_collection.mode
             {
                 pallet_nft::CollectionMode::NFT(_) => T::NftHandler::transfer_nft(collection_id, item_id, locker, sender.clone())?,
@@ -256,6 +253,7 @@ decl_module! {
             let order_history = SaleOrderHistory {
                 collection_id: collection_id,
                 item_id: item_id,
+                currency_id: currency_id,
                 value: target_sale_order.value,
                 seller: nft_owner.clone(),
                 buyer: sender.clone(),
@@ -278,12 +276,12 @@ decl_module! {
             <SaleOrderByIdList<T>>::remove(order_id);
 
             // call event
-            Self::deposit_event(RawEvent::ItemOrderSucceed(collection_id, item_id, sender, nft_owner.clone(), order_id, target_sale_order.value, price));
+            Self::deposit_event(RawEvent::ItemOrderSucceed(collection_id, item_id, sender, nft_owner.clone(), order_id, target_sale_order.value, price, currency_id));
             Ok(())
         }
 
         #[weight = <T as Trait>::WeightInfo::create_separable_sale_order()]
-        pub fn create_separable_sale_order(origin, collection_id: u64, item_id: u64, value: u64, price: u64 ) -> DispatchResult {
+        pub fn create_separable_sale_order(origin, collection_id: u64, item_id: u64, value: u64, currency_id: CurrencyId, price: u64 ) -> DispatchResult {
             let sender = ensure_signed(origin)?;
 
             let item_owner = T::NftHandler::is_item_owner(sender.clone(), collection_id, item_id);
@@ -313,6 +311,7 @@ decl_module! {
                 order_id: order_id,
                 collection_id: collection_id,
                 item_id: item_id,
+                currency_id: currency_id,
                 value: card_value,
                 balance: card_value,
                 owner: sender.clone(),
@@ -333,7 +332,7 @@ decl_module! {
             }
 
             // call event
-            Self::deposit_event(RawEvent::ItemSeparableOrderCreated(order_id, collection_id, item_id, card_value, price, sender));
+            Self::deposit_event(RawEvent::ItemSeparableOrderCreated(order_id, collection_id, item_id, card_value, price, sender, currency_id));
             Ok(())
         }
 
@@ -389,6 +388,7 @@ decl_module! {
             let collection_id = target_sale_order.collection_id;
             let item_id = target_sale_order.item_id;
             let nft_owner = target_sale_order.owner;
+            let currency_id = target_sale_order.currency_id;
             let price = target_sale_order.price;
             let order_value = target_sale_order.value;
             let balance = target_sale_order.balance;
@@ -399,26 +399,13 @@ decl_module! {
 
             ensure!(target_sale_order.balance >= value, "Value not enough");
             let remain_value = balance.checked_sub(value).unwrap();
-
-            let accept_price = CurrencyBalanceOf::<T>::saturated_from(price.into());
-            let accept_value = CurrencyBalanceOf::<T>::saturated_from(value.into());
-            let balance_price = accept_price.saturating_mul(accept_value);
             let checked_value = price.checked_mul(value).unwrap();
 
-            T::NftHandler::charge_royalty(sender.clone(), collection_id, item_id, checked_value, buy_time)?;
+            T::NftHandler::charge_royalty(sender.clone(), collection_id, item_id, currency_id, checked_value, buy_time)?;
 
-            // Moves funds from buyer account into the owner's account
-            // We don't use T::Currency::transfer() to prevent fees being incurred.
-            let negative_imbalance = <T as pallet_nft::Trait>::Currency::withdraw(
-                &sender,
-                balance_price,
-                WithdrawReasons::all(),
-                ExistenceRequirement::AllowDeath,
-            )?;
+            <T as pallet_nft::Trait>::MultiCurrency::transfer(currency_id, &sender, &nft_owner, checked_value.into())?;
 
-            <T as pallet_nft::Trait>::Currency::resolve_creating(&nft_owner, negative_imbalance);
-
-            // Moves nft from locker account into the buyer's account
+            // Moves nft-multi from locker account into the buyer's account
             match target_collection.mode
             {
                 pallet_nft::CollectionMode::NFT(_) => T::NftHandler::transfer_nft(collection_id, item_id, locker, sender.clone())?,
@@ -431,6 +418,7 @@ decl_module! {
             let order_history = SaleOrderHistory {
                 collection_id: collection_id,
                 item_id: item_id,
+                currency_id: currency_id,
                 value: value,
                 seller: nft_owner.clone(),
                 buyer: sender.clone(),
@@ -442,6 +430,7 @@ decl_module! {
                 order_id: order_id,
                 collection_id: collection_id,
                 item_id: item_id,
+                currency_id: currency_id,
                 value: order_value,
                 balance: remain_value,
                 owner: nft_owner.clone(),
@@ -479,7 +468,7 @@ decl_module! {
             }
 
             // call event
-            Self::deposit_event(RawEvent::ItemSeparableOrderSucceed(order_id, collection_id, item_id, value, sender, nft_owner, price));
+            Self::deposit_event(RawEvent::ItemSeparableOrderSucceed(order_id, collection_id, item_id, value, sender, nft_owner, price, currency_id));
             Ok(())
         }
     }

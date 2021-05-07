@@ -379,6 +379,7 @@ decl_event!(
     pub enum Event<T>
     where
         AccountId = <T as system::Trait>::AccountId,
+        CurrencyId = CurrencyId,
     {
         Created(u64, u8, AccountId),
         ItemCreated(u64, u64),

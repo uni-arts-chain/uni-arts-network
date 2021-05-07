@@ -108,6 +108,7 @@ decl_event!(
     pub enum Event<T>
     where
         AccountId = <T as frame_system::Trait>::AccountId,
+        CurrencyId = CurrencyId,
     {
         AuctionCreated(u64, u64, u64, u64, u64, AccountId, CurrencyId),
         AuctionBid(u64, u64, u64, u64, u64, AccountId, CurrencyId),

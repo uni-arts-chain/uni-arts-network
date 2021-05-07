@@ -104,6 +104,7 @@ decl_event!(
     pub enum Event<T>
     where
         AccountId = <T as frame_system::Trait>::AccountId,
+        CurrencyId = CurrencyId,
     {
         BlindBoxCreated(u64, u64, AccountId, CurrencyId),
         BlindBoxAddCardGroup(u64, u64, u64, u64, u64, AccountId),

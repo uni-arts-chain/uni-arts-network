@@ -34,7 +34,7 @@ COPY primitives ./primitives/
 COPY README.md README.md
 COPY Cargo* ./
 
-RUN	cargo +nightly-2020-09-30 build "--$PROFILE"
+RUN	cargo +nightly-2020-10-06 build "--$PROFILE"
 
 
 # ===== RUN ======

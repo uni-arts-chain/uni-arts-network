@@ -3,7 +3,7 @@
 FROM phusion/baseimage:0.11 as builder
 
 ENV DEBIAN_FRONTEND=noninteractive
-ENV RUST_TOOLCHAIN=nightly-2020-09-30
+ENV RUST_TOOLCHAIN=nightly-2020-10-06
 ENV PATH="$PATH:/root/.cargo/bin"
 ARG PROFILE=release
 

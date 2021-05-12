@@ -225,7 +225,7 @@ decl_module! {
         }
 
         #[weight = <T as Trait>::WeightInfo::buy_blind_box()]
-        pub fn buy_blind_box(origin, blind_box_id: u64) -> DispatchResult {
+        pub fn buy_blind_box(origin, blind_box_id: u64, receive: Option<T::AccountId>) -> DispatchResult {
             let sender = ensure_signed(origin)?;
 
             ensure!(blind_box_id > 0, Error::<T>::BlindBoxNotExists);
@@ -241,9 +241,14 @@ decl_module! {
                 ensure!(blind_box.owner == sender, Error::<T>::BlindBoxOnlyOwerBuy);
             }
 
+            let mut receive_user = receive.clone().unwrap();
+            if receive.is_none() {
+                receive_user = sender.clone()
+            }
+
             let mut winner_number = Self::get_winner_number(blind_box.total_count as u32);
 
-            debug::info!("------ winner_number {:?}", winner_number);
+            // debug::info!("------ winner_number {:?}", winner_number);
 
             // Two drawing modes are adopted, It's guaranteed to win
             // 1. Global mode: draw lots no matter whether there are cards sold or not
@@ -297,9 +302,9 @@ decl_module! {
             let target_collection = pallet_nft::Module::<T>::collection(card_group.collection_id);
             match target_collection.mode
             {
-                pallet_nft::CollectionMode::NFT(_) => T::NftHandler::transfer_nft(card_group.collection_id, card_group.item_id, locker, sender.clone())?,
-                pallet_nft::CollectionMode::Fungible(_)  => T::NftHandler::transfer_fungible(card_group.collection_id, card_group.item_id, 1, locker, sender.clone())?,
-                pallet_nft::CollectionMode::ReFungible(_, _)  => T::NftHandler::transfer_refungible(card_group.collection_id, card_group.item_id, 1, locker, sender.clone())?,
+                pallet_nft::CollectionMode::NFT(_) => T::NftHandler::transfer_nft(card_group.collection_id, card_group.item_id, locker, receive_user.clone())?,
+                pallet_nft::CollectionMode::Fungible(_)  => T::NftHandler::transfer_fungible(card_group.collection_id, card_group.item_id, 1, locker, receive_user.clone())?,
+                pallet_nft::CollectionMode::ReFungible(_, _)  => T::NftHandler::transfer_refungible(card_group.collection_id, card_group.item_id, 1, locker, receive_user.clone())?,
                 _ => ()
             };
 
@@ -312,7 +317,7 @@ decl_module! {
             });
 
             // call event
-            Self::deposit_event(RawEvent::BlindBoxDraw(blind_box_id, choose_group_id, card_group.collection_id, card_group.item_id, sender, blind_box.owner, blind_box.price, currency_id));
+            Self::deposit_event(RawEvent::BlindBoxDraw(blind_box_id, choose_group_id, card_group.collection_id, card_group.item_id, receive_user, blind_box.owner, blind_box.price, currency_id));
             Ok(())
         }
 

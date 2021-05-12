@@ -39,6 +39,21 @@ pub trait WeightInfo {
     fn cancel_blind_box() -> Weight;
 }
 
+/// Storage version.
+#[derive(Encode, Decode, Eq, PartialEq)]
+pub enum StorageVersion {
+    /// Initial version.
+    V1_0_0,
+    /// multi-currency.
+    V2_0_0,
+}
+
+impl Default for StorageVersion {
+    fn default() -> Self {
+        StorageVersion::V1_0_0
+    }
+}
+
 #[derive(Encode, Decode, Default, Clone, PartialEq, RuntimeDebug)]
 pub struct NftCard {
     pub group_id: u64,
@@ -48,6 +63,19 @@ pub struct NftCard {
     pub remaind_value: u64,
     pub draw_start: u64,
     pub draw_end: u64,
+}
+
+#[derive(Encode, Decode, Default, Clone, PartialEq, RuntimeDebug)]
+pub struct BlindboxItemV1<AccountId, BlockNumber> {
+    pub id: u64,
+    pub owner: AccountId,
+    pub card_group: Vec<u64>,
+    pub total_count: u64,
+    pub remaind_count: u64,
+    pub price: u64,
+    pub start_time: BlockNumber,
+    pub end_time: BlockNumber,
+    pub has_ended: bool,
 }
 
 #[derive(Encode, Decode, Default, Clone, PartialEq, RuntimeDebug)]
@@ -97,6 +125,10 @@ decl_storage! {
 
         /// BlindBox List
         pub BlindBoxList get(fn get_blind_box): map hasher(identity) u64 => BlindboxItem<T::AccountId, T::BlockNumber>;
+
+        /// Pallet Storage Version
+        pub PalletStorageVersion get(fn pallet_storage_version)
+			build(|_| StorageVersion::V2_0_0): StorageVersion = StorageVersion::V1_0_0;
     }
 }
 
@@ -134,6 +166,11 @@ decl_module! {
 		const ModuleId: ModuleId = T::LockModuleId::get();
 
         fn deposit_event() = default;
+
+        fn on_runtime_upgrade() -> Weight {
+			Self::migrate_v1_to_t2();
+            0
+		}
 
         #[weight = <T as Trait>::WeightInfo::create_blind_box()]
         pub fn create_blind_box(origin, start_time: T::BlockNumber, end_time: T::BlockNumber, currency_id: CurrencyId, price: u64) -> DispatchResult {
@@ -385,6 +422,35 @@ impl<T: Trait> Module<T> {
     pub fn nft_account_id() -> T::AccountId {
         T::LockModuleId::get().into_account()
     }
+
+    pub fn migrate_v1_to_t2() -> bool {
+        if PalletStorageVersion::get() == StorageVersion::V1_0_0 {
+            PalletStorageVersion::put(StorageVersion::V2_0_0);
+
+            // Storage
+            // pub BlindBoxList get(fn get_blind_box): map hasher(identity) u64 => BlindboxItem<T::AccountId, T::BlockNumber>;
+
+            BlindBoxList::<T>::translate::<BlindboxItemV1<T::AccountId, T::BlockNumber>, _>(|_, p: BlindboxItemV1<T::AccountId, T::BlockNumber>|{
+                let new_data: BlindboxItem<T::AccountId, T::BlockNumber> = BlindboxItem {
+                    id: p.id,
+                    owner: p.owner,
+                    card_group: p.card_group,
+                    currency_id: CurrencyId::default(),
+                    price: p.price,
+                    start_time: p.start_time,
+                    end_time: p.end_time,
+                    has_ended: p.has_ended,
+                    total_count: p.total_count,
+                    remaind_count: p.remaind_count
+                };
+                Some(new_data)
+            });
+            true
+        } else {
+            false
+        }
+    }
+
 
     fn is_blind_box_owner(owner: T::AccountId, blind_box_id: u64) -> bool {
         let target_blind_box = <BlindBoxList<T>>::get(blind_box_id);

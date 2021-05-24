@@ -128,6 +128,7 @@ decl_event!(
     {
         BlindBoxCreated(u64, u64, AccountId, CurrencyId),
         BlindBoxAddCardGroup(u64, u64, u64, u64, u64, AccountId),
+        BlindBoxRemoveCardGroup(u64, u64, u64, u64, u64, AccountId),
         BlindBoxDraw(u64, u64, u64, u64, AccountId, AccountId, u64, CurrencyId),
         BlindBoxClose(u64, AccountId),
         BlindBoxCancel(u64, AccountId),
@@ -245,6 +246,51 @@ decl_module! {
 
             // call event
             Self::deposit_event(RawEvent::BlindBoxAddCardGroup(blind_box_id, group_id, collection_id, item_id, value, sender));
+            Ok(())
+        }
+
+        #[weight = <T as Trait>::WeightInfo::blind_box_add_card_group()]
+        pub fn blind_box_remove_card_group(origin, blind_box_id: u64, card_group_id: u64) -> DispatchResult {
+            let sender = ensure_signed(origin)?;
+
+            let blind_box = Self::get_blind_box(blind_box_id);
+            let card_group = Self::get_card_group(card_group_id);
+            let collection_id: u64 = card_group.collection_id;
+            let card_value: u64 = card_group.remaind_value;
+            let total_count: u64 = blind_box.total_count.checked_sub(card_value).unwrap();
+            let remaind_count: u64 = blind_box.remaind_count.checked_sub(card_value).unwrap();
+
+            let blind_box_owner = Self::is_blind_box_owner(sender.clone(), blind_box_id);
+            if !blind_box_owner
+            {
+                let mes = "Account is not blind box owner";
+                panic!(mes);
+            }
+
+            let target_collection = pallet_nft::Module::<T>::collection(collection_id);
+            let locker = Self::nft_account_id();
+            if card_value > 0 {
+                match target_collection.mode {
+                    pallet_nft::CollectionMode::NFT(_) => T::NftHandler::transfer_nft(card_group.collection_id, card_group.item_id, locker.clone(), sender.clone())?,
+                    pallet_nft::CollectionMode::Fungible(_)  => T::NftHandler::transfer_fungible(card_group.collection_id, card_group.item_id, card_value, locker.clone(), sender.clone())?,
+                    pallet_nft::CollectionMode::ReFungible(_, _)  => T::NftHandler::transfer_refungible(card_group.collection_id, card_group.item_id, card_value, locker.clone(), sender.clone())?,
+                    _ => ()
+                };
+                CardGroupList::remove(card_group_id);
+
+                let mut card_group = blind_box.clone().card_group;
+
+                let index = card_group.iter().position(|x| *x == card_group_id).unwrap();
+                card_group.remove(index);
+                <BlindBoxList<T>>::mutate(blind_box_id, |blind_box| {
+                    blind_box.card_group = card_group;
+                    blind_box.total_count = total_count;
+                    blind_box.remaind_count = remaind_count;
+                });
+            }
+
+            // call event
+            Self::deposit_event(RawEvent::BlindBoxRemoveCardGroup(blind_box_id, card_group_id, collection_id, card_group.item_id, card_value, sender));
             Ok(())
         }
 

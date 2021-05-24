@@ -35,8 +35,10 @@ pub mod migration;
 pub trait WeightInfo {
     fn create_blind_box() -> Weight;
     fn blind_box_add_card_group() -> Weight;
+    fn blind_box_remove_card_group() -> Weight;
     fn buy_blind_box() -> Weight;
     fn close_blind_box() -> Weight;
+    fn open_blind_box() -> Weight;
     fn cancel_blind_box() -> Weight;
 }
 
@@ -131,6 +133,7 @@ decl_event!(
         BlindBoxRemoveCardGroup(u64, u64, u64, u64, u64, AccountId),
         BlindBoxDraw(u64, u64, u64, u64, AccountId, AccountId, u64, CurrencyId),
         BlindBoxClose(u64, AccountId),
+        BlindBoxOpen(u64, AccountId),
         BlindBoxCancel(u64, AccountId),
     }
 );
@@ -249,7 +252,7 @@ decl_module! {
             Ok(())
         }
 
-        #[weight = <T as Trait>::WeightInfo::blind_box_add_card_group()]
+        #[weight = <T as Trait>::WeightInfo::blind_box_remove_card_group()]
         pub fn blind_box_remove_card_group(origin, blind_box_id: u64, card_group_id: u64) -> DispatchResult {
             let sender = ensure_signed(origin)?;
 
@@ -408,6 +411,26 @@ decl_module! {
 
             // call event
             Self::deposit_event(RawEvent::BlindBoxClose(blind_box_id, sender));
+            Ok(())
+        }
+
+        #[weight = <T as Trait>::WeightInfo::open_blind_box()]
+        pub fn open_blind_box(origin, blind_box_id: u64) -> DispatchResult {
+            let sender = ensure_signed(origin)?;
+
+            let blind_box_owner = Self::is_blind_box_owner(sender.clone(), blind_box_id);
+            if !blind_box_owner
+            {
+                let mes = "Account is not blind box owner";
+                panic!(mes);
+            }
+
+            <BlindBoxList<T>>::mutate(blind_box_id, |blind_box| {
+                blind_box.has_ended = false;
+            });
+
+            // call event
+            Self::deposit_event(RawEvent::BlindBoxOpen(blind_box_id, sender));
             Ok(())
         }
 

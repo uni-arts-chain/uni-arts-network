@@ -18,6 +18,12 @@ impl crate::WeightInfo for () {
             .saturating_add(DbWeight::get().writes(3 as Weight))
     }
 
+    fn blind_box_remove_card_group() -> Weight {
+        (66_234_000 as Weight)
+            .saturating_add(DbWeight::get().reads(5 as Weight))
+            .saturating_add(DbWeight::get().writes(3 as Weight))
+    }
+
     fn buy_blind_box() -> Weight {
         (66_234_000 as Weight)
             .saturating_add(DbWeight::get().reads(5 as Weight))
@@ -25,6 +31,12 @@ impl crate::WeightInfo for () {
     }
 
     fn close_blind_box() -> Weight {
+        (66_234_000 as Weight)
+            .saturating_add(DbWeight::get().reads(5 as Weight))
+            .saturating_add(DbWeight::get().writes(3 as Weight))
+    }
+
+    fn open_blind_box() -> Weight {
         (66_234_000 as Weight)
             .saturating_add(DbWeight::get().reads(5 as Weight))
             .saturating_add(DbWeight::get().writes(3 as Weight))

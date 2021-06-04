@@ -64,18 +64,18 @@ pallet-transaction-payment-rpc-runtime-api = { version = "2.0.1", default-featur
 pallet-staking-rpc-runtime-api = { version = "0.1.0", default-features = false, path = "../../pallets/staking/rpc/runtime-api"}
 
 # Uni-Arts pallets
-uniarts-common = { path = "../../pallets/common", default-features = false }
-pallet-certificate = { path = "../../pallets/certificate", default-features = false }
-pallet-assets = { path = "../../pallets/assets", default-features = false }
-pallet-names = { path = "../../pallets/names", default-features = false }
-pallet-nft = { path = "../../pallets/nft", default-features = false }
-pallet-rewards = { path = "../../pallets/rewards", default-features = false }
-pallet-staking = { path = "../../pallets/staking", default-features = false }
-pallet-validator-set = { path = "../../pallets/validator-set", default-features = false }
-pallet-token = { path = "../../pallets/token", default-features = false }
-pallet-trade = { path = "../../pallets/trade", default-features = false }
+uniarts-common = { git = "https://github.com/uni-arts-chain/uni-arts-common.git", tag = "v2.0.1", default-features = false }
+pallet-certificate = { git = "https://github.com/uni-arts-chain/uni-arts-common.git", tag = "v2.0.1" , default-features = false }
+pallet-assets = { git = "https://github.com/uni-arts-chain/uni-arts-common.git", tag = "v2.0.1" , default-features = false }
+pallet-names = { git = "https://github.com/uni-arts-chain/uni-arts-common.git", tag = "v2.0.1" , default-features = false }
+pallet-nft = { git = "https://github.com/uni-arts-chain/uni-arts-common.git", tag = "v2.0.1" , default-features = false }
+pallet-rewards = { git = "https://github.com/uni-arts-chain/uni-arts-common.git", tag = "v2.0.1" , default-features = false }
+pallet-staking = { git = "https://github.com/uni-arts-chain/uni-arts-common.git", tag = "v2.0.1" , default-features = false }
+pallet-validator-set = { git = "https://github.com/uni-arts-chain/uni-arts-common.git", tag = "v2.0.1" , default-features = false }
+pallet-token = { git = "https://github.com/uni-arts-chain/uni-arts-common.git", tag = "v2.0.1" , default-features = false }
+pallet-trade = { git = "https://github.com/uni-arts-chain/uni-arts-common.git", tag = "v2.0.1" , default-features = false }
 # pallet-lotteries = { path = "../../pallets/lotteries", default-features = false }
-primitives = { package = "uniarts-primitives", path = "../../primitives", default-features = false }
+primitives = { package = "uniarts-primitives", git = "https://github.com/uni-arts-chain/uni-arts-common.git", tag = "v2.0.1" , default-features = false }
 
 # Used for runtime benchmarking
 frame-benchmarking = { version = "2.0.1", default-features = false, optional = true }

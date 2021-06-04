@@ -1907,7 +1907,7 @@ dependencies = [
  "pallet-session",
  "pallet-society",
  "pallet-staking 0.1.0 (git+https://github.com/uni-arts-chain/uni-arts-common.git?tag=v2.0.1)",
- "pallet-staking-rpc-runtime-api",
+ "pallet-staking-rpc-runtime-api 0.1.0 (git+https://github.com/uni-arts-chain/uni-arts-common.git?tag=v2.0.1)",
  "pallet-sudo",
  "pallet-timestamp",
  "pallet-token 2.0.1 (git+https://github.com/uni-arts-chain/uni-arts-common.git?tag=v2.0.1)",
@@ -4597,11 +4597,12 @@ dependencies = [
 [[package]]
 name = "pallet-staking-rpc"
 version = "0.1.0"
+source = "git+https://github.com/uni-arts-chain/uni-arts-common.git?tag=v2.0.1#10ae2dbb1a6027f87afa3134d1d872047c32fd4a"
 dependencies = [
  "jsonrpc-core",
  "jsonrpc-core-client",
  "jsonrpc-derive",
- "pallet-staking-rpc-runtime-api",
+ "pallet-staking-rpc-runtime-api 0.1.0 (git+https://github.com/uni-arts-chain/uni-arts-common.git?tag=v2.0.1)",
  "parity-scale-codec",
  "serde",
  "sp-api",
@@ -4614,6 +4615,19 @@ dependencies = [
 [[package]]
 name = "pallet-staking-rpc-runtime-api"
 version = "0.1.0"
+dependencies = [
+ "frame-support",
+ "parity-scale-codec",
+ "serde",
+ "sp-api",
+ "sp-runtime",
+ "sp-std",
+]
+
+[[package]]
+name = "pallet-staking-rpc-runtime-api"
+version = "0.1.0"
+source = "git+https://github.com/uni-arts-chain/uni-arts-common.git?tag=v2.0.1#10ae2dbb1a6027f87afa3134d1d872047c32fd4a"
 dependencies = [
  "frame-support",
  "parity-scale-codec",
@@ -4892,7 +4906,7 @@ dependencies = [
  "pallet-session",
  "pallet-society",
  "pallet-staking 0.1.0 (git+https://github.com/uni-arts-chain/uni-arts-common.git?tag=v2.0.1)",
- "pallet-staking-rpc-runtime-api",
+ "pallet-staking-rpc-runtime-api 0.1.0",
  "pallet-sudo",
  "pallet-timestamp",
  "pallet-token 2.0.1 (git+https://github.com/uni-arts-chain/uni-arts-common.git?tag=v2.0.1)",
@@ -8638,7 +8652,7 @@ dependencies = [
  "sp-trie",
  "structopt",
  "substrate-build-script-utils",
- "uniarts-primitives 2.0.1",
+ "uniarts-primitives 2.0.1 (git+https://github.com/uni-arts-chain/uni-arts-common.git?tag=v2.0.1)",
  "uniarts-service",
 ]
 
@@ -8730,7 +8744,7 @@ dependencies = [
  "sp-runtime",
  "sp-transaction-pool",
  "substrate-frame-rpc-system",
- "uniarts-primitives 2.0.1",
+ "uniarts-primitives 2.0.1 (git+https://github.com/uni-arts-chain/uni-arts-common.git?tag=v2.0.1)",
 ]
 
 [[package]]
@@ -8783,7 +8797,7 @@ dependencies = [
  "substrate-build-script-utils",
  "substrate-frame-rpc-system",
  "substrate-prometheus-endpoint",
- "uniarts-primitives 2.0.1",
+ "uniarts-primitives 2.0.1 (git+https://github.com/uni-arts-chain/uni-arts-common.git?tag=v2.0.1)",
  "uniarts-rpc",
 ]
 

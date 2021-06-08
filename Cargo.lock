@@ -1883,7 +1883,7 @@ dependencies = [
  "pallet-aura",
  "pallet-authorship",
  "pallet-balances",
- "pallet-bridge 2.0.1 (git+https://github.com/uni-arts-chain/uni-arts-common.git?tag=v2.0.1)",
+ "pallet-bridge",
  "pallet-certificate",
  "pallet-collective",
  "pallet-contracts",
@@ -1895,28 +1895,28 @@ dependencies = [
  "pallet-indices",
  "pallet-membership",
  "pallet-multisig",
- "pallet-names 1.0.0 (git+https://github.com/uni-arts-chain/uni-arts-common.git?tag=v2.0.1)",
- "pallet-nft-blindbox 2.0.1 (git+https://github.com/uni-arts-chain/uni-arts-common.git?tag=v2.0.1)",
- "pallet-nft-multi 2.0.1 (git+https://github.com/uni-arts-chain/uni-arts-common.git?tag=v2.0.1)",
+ "pallet-names",
+ "pallet-nft-blindbox",
+ "pallet-nft-multi",
  "pallet-nicks",
  "pallet-proxy",
  "pallet-randomness-collective-flip",
  "pallet-recovery",
- "pallet-rewards 0.1.0 (git+https://github.com/uni-arts-chain/uni-arts-common.git?tag=v2.0.1)",
+ "pallet-rewards",
  "pallet-scheduler",
  "pallet-session",
  "pallet-society",
- "pallet-staking 0.1.0 (git+https://github.com/uni-arts-chain/uni-arts-common.git?tag=v2.0.1)",
+ "pallet-staking",
  "pallet-staking-rpc-runtime-api",
  "pallet-sudo",
  "pallet-timestamp",
- "pallet-token 2.0.1 (git+https://github.com/uni-arts-chain/uni-arts-common.git?tag=v2.0.1)",
- "pallet-trade 2.0.1 (git+https://github.com/uni-arts-chain/uni-arts-common.git?tag=v2.0.1)",
+ "pallet-token",
+ "pallet-trade",
  "pallet-transaction-payment",
  "pallet-transaction-payment-rpc-runtime-api",
  "pallet-treasury",
  "pallet-utility",
- "pallet-validator-set 0.1.0 (git+https://github.com/uni-arts-chain/uni-arts-common.git?tag=v2.0.1)",
+ "pallet-validator-set",
  "pallet-vesting",
  "parity-scale-codec",
  "serde",
@@ -1932,7 +1932,7 @@ dependencies = [
  "sp-transaction-pool",
  "sp-version",
  "substrate-wasm-builder-runner",
- "uniarts-common 2.0.1 (git+https://github.com/uni-arts-chain/uni-arts-common.git?tag=v2.0.1)",
+ "uniarts-common",
  "uniarts-primitives 2.0.1 (git+https://github.com/uni-arts-chain/uni-arts-common.git?tag=v2.0.1)",
 ]
 
@@ -3522,38 +3522,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "module-prices"
-version = "0.1.0"
-dependencies = [
- "frame-support",
- "frame-system",
- "log",
- "module-support 0.1.0",
- "orml-traits",
- "orml-utilities",
- "parity-scale-codec",
- "serde",
- "sp-core",
- "sp-io",
- "sp-runtime",
- "sp-std",
- "uniarts-primitives 2.0.1",
-]
-
-[[package]]
-name = "module-support"
-version = "0.1.0"
-dependencies = [
- "frame-support",
- "frame-system",
- "parity-scale-codec",
- "sp-core",
- "sp-runtime",
- "sp-std",
- "uniarts-primitives 2.0.1",
-]
-
-[[package]]
 name = "module-support"
 version = "0.1.0"
 source = "git+https://github.com/uni-arts-chain/uni-arts-common.git?tag=v2.0.1#7144efafb81fdf4d1cbc5444396a9286e76d2605"
@@ -3851,37 +3819,12 @@ dependencies = [
 ]
 
 [[package]]
-name = "orml-utilities"
-version = "0.3.2"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "12b86e9fe38ffd16632353a497483fc76692999ee0b5216152e70773e7f108dd"
-dependencies = [
- "frame-support",
- "parity-scale-codec",
- "serde",
- "sp-io",
- "sp-runtime",
- "sp-std",
-]
-
-[[package]]
 name = "owning_ref"
 version = "0.4.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "6ff55baddef9e4ad00f88b6c743a2a8062d4c6ade126c2a528644b8e444d52ce"
 dependencies = [
  "stable_deref_trait",
-]
-
-[[package]]
-name = "pallet-assets"
-version = "2.0.1"
-dependencies = [
- "frame-support",
- "frame-system",
- "parity-scale-codec",
- "sp-runtime",
- "sp-std",
 ]
 
 [[package]]
@@ -3945,28 +3888,6 @@ dependencies = [
  "serde",
  "sp-runtime",
  "sp-std",
-]
-
-[[package]]
-name = "pallet-bridge"
-version = "2.0.1"
-dependencies = [
- "frame-support",
- "frame-system",
- "log",
- "orml-currencies",
- "orml-tokens",
- "orml-traits",
- "pallet-balances",
- "pallet-timestamp",
- "parity-scale-codec",
- "serde",
- "sha3 0.8.2",
- "sp-core",
- "sp-io",
- "sp-runtime",
- "sp-std",
- "uniarts-primitives 2.0.1",
 ]
 
 [[package]]
@@ -4120,22 +4041,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "pallet-forum"
-version = "2.0.1"
-dependencies = [
- "frame-support",
- "frame-system",
- "log",
- "pallet-timestamp",
- "parity-scale-codec",
- "serde",
- "sp-core",
- "sp-io",
- "sp-runtime",
- "sp-std",
-]
-
-[[package]]
 name = "pallet-grandpa"
 version = "2.0.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -4226,23 +4131,6 @@ dependencies = [
 [[package]]
 name = "pallet-names"
 version = "1.0.0"
-dependencies = [
- "enumflags2",
- "frame-benchmarking",
- "frame-support",
- "frame-system",
- "pallet-balances",
- "parity-scale-codec",
- "serde",
- "sp-core",
- "sp-io",
- "sp-runtime",
- "sp-std",
-]
-
-[[package]]
-name = "pallet-names"
-version = "1.0.0"
 source = "git+https://github.com/uni-arts-chain/uni-arts-common.git?tag=v2.0.1#7144efafb81fdf4d1cbc5444396a9286e76d2605"
 dependencies = [
  "enumflags2",
@@ -4263,8 +4151,8 @@ dependencies = [
  "frame-support",
  "frame-system",
  "log",
- "module-support 0.1.0 (git+https://github.com/uni-arts-chain/uni-arts-common.git?tag=v2.0.1)",
- "pallet-names 1.0.0 (git+https://github.com/uni-arts-chain/uni-arts-common.git?tag=v2.0.1)",
+ "module-support",
+ "pallet-names",
  "pallet-transaction-payment",
  "parity-scale-codec",
  "serde",
@@ -4277,53 +4165,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "pallet-nft-auction"
-version = "2.0.1"
-dependencies = [
- "frame-support",
- "frame-system",
- "log",
- "module-support 0.1.0",
- "orml-currencies",
- "orml-tokens",
- "orml-traits",
- "pallet-balances",
- "pallet-nft-multi 2.0.1",
- "pallet-transaction-payment",
- "parity-scale-codec",
- "serde",
- "sp-core",
- "sp-io",
- "sp-runtime",
- "sp-std",
- "uniarts-primitives 2.0.1",
-]
-
-[[package]]
-name = "pallet-nft-blindbox"
-version = "2.0.1"
-dependencies = [
- "frame-support",
- "frame-system",
- "log",
- "module-support 0.1.0",
- "orml-currencies",
- "orml-tokens",
- "orml-traits",
- "pallet-balances",
- "pallet-nft-multi 2.0.1",
- "pallet-transaction-payment",
- "parity-scale-codec",
- "serde",
- "sha3 0.8.2",
- "sp-core",
- "sp-io",
- "sp-runtime",
- "sp-std",
- "uniarts-primitives 2.0.1",
-]
-
-[[package]]
 name = "pallet-nft-blindbox"
 version = "2.0.1"
 source = "git+https://github.com/uni-arts-chain/uni-arts-common.git?tag=v2.0.1#7144efafb81fdf4d1cbc5444396a9286e76d2605"
@@ -4331,11 +4172,11 @@ dependencies = [
  "frame-support",
  "frame-system",
  "log",
- "module-support 0.1.0 (git+https://github.com/uni-arts-chain/uni-arts-common.git?tag=v2.0.1)",
+ "module-support",
  "orml-currencies",
  "orml-tokens",
  "orml-traits",
- "pallet-nft-multi 2.0.1 (git+https://github.com/uni-arts-chain/uni-arts-common.git?tag=v2.0.1)",
+ "pallet-nft-multi",
  "pallet-transaction-payment",
  "parity-scale-codec",
  "serde",
@@ -4350,40 +4191,16 @@ dependencies = [
 [[package]]
 name = "pallet-nft-multi"
 version = "2.0.1"
-dependencies = [
- "frame-support",
- "frame-system",
- "log",
- "module-support 0.1.0",
- "orml-currencies",
- "orml-tokens",
- "orml-traits",
- "pallet-balances",
- "pallet-names 1.0.0",
- "pallet-transaction-payment",
- "parity-scale-codec",
- "serde",
- "sha3 0.8.2",
- "sp-core",
- "sp-io",
- "sp-runtime",
- "sp-std",
- "uniarts-primitives 2.0.1",
-]
-
-[[package]]
-name = "pallet-nft-multi"
-version = "2.0.1"
 source = "git+https://github.com/uni-arts-chain/uni-arts-common.git?tag=v2.0.1#7144efafb81fdf4d1cbc5444396a9286e76d2605"
 dependencies = [
  "frame-support",
  "frame-system",
  "log",
- "module-support 0.1.0 (git+https://github.com/uni-arts-chain/uni-arts-common.git?tag=v2.0.1)",
+ "module-support",
  "orml-currencies",
  "orml-tokens",
  "orml-traits",
- "pallet-names 1.0.0 (git+https://github.com/uni-arts-chain/uni-arts-common.git?tag=v2.0.1)",
+ "pallet-names",
  "pallet-transaction-payment",
  "parity-scale-codec",
  "serde",
@@ -4393,30 +4210,6 @@ dependencies = [
  "sp-runtime",
  "sp-std",
  "uniarts-primitives 2.0.1 (git+https://github.com/uni-arts-chain/uni-arts-common.git?tag=v2.0.1)",
-]
-
-[[package]]
-name = "pallet-nft-trade"
-version = "2.0.1"
-dependencies = [
- "frame-support",
- "frame-system",
- "log",
- "module-support 0.1.0",
- "orml-currencies",
- "orml-tokens",
- "orml-traits",
- "pallet-balances",
- "pallet-nft-multi 2.0.1",
- "pallet-transaction-payment",
- "parity-scale-codec",
- "serde",
- "sha3 0.8.2",
- "sp-core",
- "sp-io",
- "sp-runtime",
- "sp-std",
- "uniarts-primitives 2.0.1",
 ]
 
 [[package]]
@@ -4476,23 +4269,6 @@ dependencies = [
  "parity-scale-codec",
  "serde",
  "sp-io",
- "sp-runtime",
- "sp-std",
-]
-
-[[package]]
-name = "pallet-rewards"
-version = "0.1.0"
-dependencies = [
- "frame-benchmarking",
- "frame-support",
- "frame-system",
- "log",
- "pallet-aura",
- "pallet-session",
- "parity-scale-codec",
- "sp-consensus-aura",
- "sp-core",
  "sp-runtime",
  "sp-std",
 ]
@@ -4561,20 +4337,6 @@ dependencies = [
  "parity-scale-codec",
  "rand_chacha 0.2.2",
  "serde",
- "sp-runtime",
- "sp-std",
-]
-
-[[package]]
-name = "pallet-staking"
-version = "0.1.0"
-dependencies = [
- "frame-support",
- "frame-system",
- "parity-scale-codec",
- "serde",
- "sp-api",
- "sp-core",
  "sp-runtime",
  "sp-std",
 ]
@@ -4662,21 +4424,6 @@ dependencies = [
 [[package]]
 name = "pallet-token"
 version = "2.0.1"
-dependencies = [
- "frame-support",
- "frame-system",
- "pallet-balances",
- "pallet-randomness-collective-flip",
- "parity-scale-codec",
- "sp-core",
- "sp-io",
- "sp-runtime",
- "sp-std",
-]
-
-[[package]]
-name = "pallet-token"
-version = "2.0.1"
 source = "git+https://github.com/uni-arts-chain/uni-arts-common.git?tag=v2.0.1#7144efafb81fdf4d1cbc5444396a9286e76d2605"
 dependencies = [
  "frame-support",
@@ -4684,26 +4431,6 @@ dependencies = [
  "pallet-balances",
  "pallet-randomness-collective-flip",
  "parity-scale-codec",
- "sp-io",
- "sp-runtime",
- "sp-std",
-]
-
-[[package]]
-name = "pallet-trade"
-version = "2.0.1"
-dependencies = [
- "byteorder 1.4.3",
- "frame-support",
- "frame-system",
- "num-traits",
- "pallet-balances",
- "pallet-randomness-collective-flip",
- "pallet-token 2.0.1",
- "parity-scale-codec",
- "safe-mix",
- "sp-arithmetic",
- "sp-core",
  "sp-io",
  "sp-runtime",
  "sp-std",
@@ -4720,7 +4447,7 @@ dependencies = [
  "num-traits",
  "pallet-balances",
  "pallet-randomness-collective-flip",
- "pallet-token 2.0.1 (git+https://github.com/uni-arts-chain/uni-arts-common.git?tag=v2.0.1)",
+ "pallet-token",
  "parity-scale-codec",
  "safe-mix",
  "sp-arithmetic",
@@ -4815,21 +4542,6 @@ dependencies = [
 [[package]]
 name = "pallet-validator-set"
 version = "0.1.0"
-dependencies = [
- "frame-support",
- "frame-system",
- "pallet-session",
- "parity-scale-codec",
- "serde",
- "sp-core",
- "sp-io",
- "sp-runtime",
- "sp-std",
-]
-
-[[package]]
-name = "pallet-validator-set"
-version = "0.1.0"
 source = "git+https://github.com/uni-arts-chain/uni-arts-common.git?tag=v2.0.1#7144efafb81fdf4d1cbc5444396a9286e76d2605"
 dependencies = [
  "frame-support",
@@ -4868,7 +4580,7 @@ dependencies = [
  "frame-system-benchmarking",
  "frame-system-rpc-runtime-api",
  "hex-literal 0.3.1",
- "pallet-assets 2.0.1 (git+https://github.com/uni-arts-chain/uni-arts-common.git?tag=v2.0.1)",
+ "pallet-assets",
  "pallet-aura",
  "pallet-authorship",
  "pallet-balances",
@@ -4883,27 +4595,27 @@ dependencies = [
  "pallet-indices",
  "pallet-membership",
  "pallet-multisig",
- "pallet-names 1.0.0 (git+https://github.com/uni-arts-chain/uni-arts-common.git?tag=v2.0.1)",
+ "pallet-names",
  "pallet-nft",
  "pallet-nicks",
  "pallet-proxy",
  "pallet-randomness-collective-flip",
  "pallet-recovery",
- "pallet-rewards 0.1.0 (git+https://github.com/uni-arts-chain/uni-arts-common.git?tag=v2.0.1)",
+ "pallet-rewards",
  "pallet-scheduler",
  "pallet-session",
  "pallet-society",
- "pallet-staking 0.1.0 (git+https://github.com/uni-arts-chain/uni-arts-common.git?tag=v2.0.1)",
+ "pallet-staking",
  "pallet-staking-rpc-runtime-api",
  "pallet-sudo",
  "pallet-timestamp",
- "pallet-token 2.0.1 (git+https://github.com/uni-arts-chain/uni-arts-common.git?tag=v2.0.1)",
- "pallet-trade 2.0.1 (git+https://github.com/uni-arts-chain/uni-arts-common.git?tag=v2.0.1)",
+ "pallet-token",
+ "pallet-trade",
  "pallet-transaction-payment",
  "pallet-transaction-payment-rpc-runtime-api",
  "pallet-treasury",
  "pallet-utility",
- "pallet-validator-set 0.1.0 (git+https://github.com/uni-arts-chain/uni-arts-common.git?tag=v2.0.1)",
+ "pallet-validator-set",
  "pallet-vesting",
  "parity-scale-codec",
  "serde",
@@ -4919,7 +4631,7 @@ dependencies = [
  "sp-transaction-pool",
  "sp-version",
  "substrate-wasm-builder-runner",
- "uniarts-common 2.0.1 (git+https://github.com/uni-arts-chain/uni-arts-common.git?tag=v2.0.1)",
+ "uniarts-common",
  "uniarts-primitives 2.0.1 (git+https://github.com/uni-arts-chain/uni-arts-common.git?tag=v2.0.1)",
 ]
 
@@ -8642,21 +8354,6 @@ dependencies = [
  "substrate-build-script-utils",
  "uniarts-primitives 2.0.1 (git+https://github.com/uni-arts-chain/uni-arts-common.git?tag=v2.0.1)",
  "uniarts-service",
-]
-
-[[package]]
-name = "uniarts-common"
-version = "2.0.1"
-dependencies = [
- "frame-support",
- "frame-system",
- "pallet-authorship",
- "pallet-balances",
- "pallet-transaction-payment",
- "parity-scale-codec",
- "sp-runtime",
- "sp-std",
- "uniarts-primitives 2.0.1",
 ]
 
 [[package]]

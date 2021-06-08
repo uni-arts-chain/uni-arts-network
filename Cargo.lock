@@ -1907,7 +1907,7 @@ dependencies = [
  "pallet-session",
  "pallet-society",
  "pallet-staking 0.1.0 (git+https://github.com/uni-arts-chain/uni-arts-common.git?tag=v2.0.1)",
- "pallet-staking-rpc-runtime-api 0.1.0 (git+https://github.com/uni-arts-chain/uni-arts-common.git?tag=v2.0.1)",
+ "pallet-staking-rpc-runtime-api",
  "pallet-sudo",
  "pallet-timestamp",
  "pallet-token 2.0.1 (git+https://github.com/uni-arts-chain/uni-arts-common.git?tag=v2.0.1)",
@@ -4602,7 +4602,7 @@ dependencies = [
  "jsonrpc-core",
  "jsonrpc-core-client",
  "jsonrpc-derive",
- "pallet-staking-rpc-runtime-api 0.1.0 (git+https://github.com/uni-arts-chain/uni-arts-common.git?tag=v2.0.1)",
+ "pallet-staking-rpc-runtime-api",
  "parity-scale-codec",
  "serde",
  "sp-api",
@@ -4610,18 +4610,6 @@ dependencies = [
  "sp-core",
  "sp-rpc",
  "sp-runtime",
-]
-
-[[package]]
-name = "pallet-staking-rpc-runtime-api"
-version = "0.1.0"
-dependencies = [
- "frame-support",
- "parity-scale-codec",
- "serde",
- "sp-api",
- "sp-runtime",
- "sp-std",
 ]
 
 [[package]]
@@ -4906,7 +4894,7 @@ dependencies = [
  "pallet-session",
  "pallet-society",
  "pallet-staking 0.1.0 (git+https://github.com/uni-arts-chain/uni-arts-common.git?tag=v2.0.1)",
- "pallet-staking-rpc-runtime-api 0.1.0",
+ "pallet-staking-rpc-runtime-api",
  "pallet-sudo",
  "pallet-timestamp",
  "pallet-token 2.0.1 (git+https://github.com/uni-arts-chain/uni-arts-common.git?tag=v2.0.1)",

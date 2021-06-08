@@ -61,7 +61,7 @@ pallet-contracts-rpc-runtime-api = { version = "0.8.0", default-features = false
 
 # Used for RPCs
 pallet-transaction-payment-rpc-runtime-api = { version = "2.0.1", default-features = false }
-pallet-staking-rpc-runtime-api = { version = "0.1.0", default-features = false, path = "../../pallets/staking/rpc/runtime-api"}
+pallet-staking-rpc-runtime-api = { version = "0.1.0", default-features = false, git = "https://github.com/uni-arts-chain/uni-arts-common.git", tag = "v2.0.1" }
 
 # Uni-Arts pallets
 uniarts-common = { git = "https://github.com/uni-arts-chain/uni-arts-common.git", tag = "v2.0.1", default-features = false }

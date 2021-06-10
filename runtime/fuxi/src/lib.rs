@@ -160,7 +160,7 @@ parameter_types! {
 
 // Configure FRAME pallets to include in runtime.
 
-impl frame_system::Trait for Runtime {
+impl frame_system::Config for Runtime {
 	/// The basic call filter to use in dispatchable.
 	type BaseCallFilter = ();
 	/// The identifier used to distinguish between accounts.
@@ -222,7 +222,7 @@ parameter_types! {
 	pub const ValidatorMortgageLimit: Balance = 10_000 * UART;
 }
 
-impl pallet_validator_set::Trait for Runtime {
+impl pallet_validator_set::Config for Runtime {
 	type Event = Event;
 	type Currency = Uart;
 	type ValidatorMortgageLimit = ValidatorMortgageLimit;
@@ -235,7 +235,7 @@ impl<T> Convert<T, Option<T>> for ValidatorIdOf {
 	}
 }
 
-impl pallet_session::Trait for Runtime {
+impl pallet_session::Config for Runtime {
 	type Event = Event;
 	type ValidatorId = AccountId;
 	type ValidatorIdOf = ValidatorIdOf;
@@ -248,11 +248,11 @@ impl pallet_session::Trait for Runtime {
 	type WeightInfo = weights::pallet_session::WeightInfo<Runtime>;
 }
 
-impl pallet_aura::Trait for Runtime {
+impl pallet_aura::Config for Runtime {
 	type AuthorityId = AuraId;
 }
 
-impl pallet_grandpa::Trait for Runtime {
+impl pallet_grandpa::Config for Runtime {
 	type Event = Event;
 	type Call = Call;
 
@@ -295,7 +295,7 @@ impl<BlockNumber, Balance: Bounded + core::convert::From<BlockNumber>> Convert<B
 }
 
 
-impl pallet_rewards::Trait for Runtime {
+impl pallet_rewards::Config for Runtime {
 	type AccountIdOf = AccountIdOf;
 	type Balance = Balance;
 	type Currency = Uart;
@@ -309,7 +309,7 @@ impl pallet_rewards::Trait for Runtime {
 
 
 
-impl pallet_staking::Trait for Runtime {
+impl pallet_staking::Config for Runtime {
 	type ModuleId = StakingModuleId;
 	type Event = Event;
 	type Currency = Uart;
@@ -324,7 +324,7 @@ parameter_types! {
 	pub const MinVestedTransfer: Balance = 100 * DOLLARS;
 }
 
-impl pallet_vesting::Trait for Runtime {
+impl pallet_vesting::Config for Runtime {
 	type Event = Event;
 	type Currency = Uart;
 	type BlockNumberToBalance = ConvertInto;
@@ -336,7 +336,7 @@ parameter_types! {
 	pub const MinimumPeriod: u64 = SLOT_DURATION / 2;
 }
 
-impl pallet_timestamp::Trait for Runtime {
+impl pallet_timestamp::Config for Runtime {
 	/// A timestamp: milliseconds since the unix epoch.
 	type Moment = u64;
 	type OnTimestampSet = Aura;
@@ -351,7 +351,7 @@ parameter_types! {
 	pub const MaxLocks: u32 = 50;
 }
 
-impl pallet_balances::Trait for Runtime {
+impl pallet_balances::Config for Runtime {
 	/// The type for recording an account's balance.
 	type Balance = Balance;
 	/// The ubiquitous event type.
@@ -363,7 +363,7 @@ impl pallet_balances::Trait for Runtime {
 	type WeightInfo = weights::pallet_balances::WeightInfo<Runtime>;
 }
 
-// impl pallet_balances::Trait<UartInstance> for Runtime {
+// impl pallet_balances::Config<UartInstance> for Runtime {
 // 	/// The type for recording an account's balance.
 // 	type Balance = Balance;
 // 	/// The ubiquitous event type.
@@ -378,7 +378,7 @@ parameter_types! {
 	pub const UncleGenerations: BlockNumber = 0;
 }
 
-impl pallet_authorship::Trait for Runtime {
+impl pallet_authorship::Config for Runtime {
 	type FindAuthor = AuraAccountAdapter;
 	type UncleGenerations = UncleGenerations;
 	type FilterUncle = ();
@@ -422,7 +422,7 @@ parameter_types! {
 	pub const TransactionByteFee: Balance = 1 * MICRO;
 }
 
-impl pallet_transaction_payment::Trait for Runtime {
+impl pallet_transaction_payment::Config for Runtime {
 	type Currency = Uart;
 	type OnTransactionPayment = DealWithFees;
 	type TransactionByteFee = TransactionByteFee;
@@ -438,8 +438,8 @@ parameter_types! {
     pub const MaxNickLength: usize = 32;
 }
 
-impl pallet_nicks::Trait for Runtime {
-	/// The Balances pallet implements the ReservableCurrency trait.
+impl pallet_nicks::Config for Runtime {
+	/// The Balances pallet implements the ReservableCurrency Config.
 	type Currency = Uart;
 	/// Use the NickReservationFee from the parameter_types block.
 	type ReservationFee = NickReservationFee;
@@ -455,12 +455,12 @@ impl pallet_nicks::Trait for Runtime {
 	type Event = Event;
 }
 
-impl pallet_sudo::Trait for Runtime {
+impl pallet_sudo::Config for Runtime {
 	type Event = Event;
 	type Call = Call;
 }
 
-impl orml_tokens::Trait for Runtime {
+impl orml_tokens::Config for Runtime {
 	type Event = Event;
 	type Balance = Balance;
 	type Amount = Amount;
@@ -473,7 +473,7 @@ parameter_types! {
 	pub const GetNativeCurrencyId: CurrencyId = CurrencyId::Native;
 }
 
-impl orml_currencies::Trait for Runtime {
+impl orml_currencies::Config for Runtime {
 	type Event = Event;
 	type MultiCurrency = UniTokens;
 	type NativeCurrency = BasicCurrencyAdapter<Runtime, Balances, Amount, BlockNumber>;
@@ -481,12 +481,12 @@ impl orml_currencies::Trait for Runtime {
 	type WeightInfo = ();
 }
 
-// impl pallet_certificate::Trait for Runtime {
+// impl pallet_certificate::Config for Runtime {
 // 	type Event = Event;
 // 	type WorkId = u32;
 // }
 
-impl pallet_token::Trait for Runtime {
+impl pallet_token::Config for Runtime {
 	type Event = Event;
 }
 
@@ -497,7 +497,7 @@ parameter_types! {
     pub const ClosedOrdersArrayCap: u8 = 100;
 }
 
-impl pallet_trade::Trait for Runtime {
+impl pallet_trade::Config for Runtime {
 	type Event = Event;
 	type Price = u128;
 	type PriceFactor = PriceFactor;
@@ -506,7 +506,7 @@ impl pallet_trade::Trait for Runtime {
 	type ClosedOrdersArrayCap = ClosedOrdersArrayCap;
 }
 
-impl pallet_names::Trait for Runtime {
+impl pallet_names::Config for Runtime {
 	type Name = Vec<u8>;
 	type Value = Vec<u8>;
 	type Currency = Uart;
@@ -542,14 +542,14 @@ impl pallet_names::Trait for Runtime {
 }
 
 /// Used for the module nft-multi in `./nft-multi.rs`
-impl pallet_nft_multi::Trait for Runtime {
+impl pallet_nft_multi::Config for Runtime {
 	type ModuleId = UniArtsNftModuleId;
 	type MultiCurrency = Currencies;
 	type Event = Event;
 	type WeightInfo = ();
 }
 
-impl pallet_nft_blindbox::Trait for Runtime {
+impl pallet_nft_blindbox::Config for Runtime {
 	type LockModuleId = UniArtsBlindBoxModuleId;
 	type NftHandler = Nft;
 	type Event = Event;
@@ -567,7 +567,7 @@ parameter_types! {
 	pub const ChallengePeriod: BlockNumber = 7 * DAYS;
 }
 
-impl pallet_society::Trait for Runtime {
+impl pallet_society::Config for Runtime {
 	type Event = Event;
 	type ModuleId = SocietyModuleId;
 	type Currency = Uart;
@@ -595,7 +595,7 @@ parameter_types! {
 }
 
 type CouncilInstance = pallet_collective::Instance0;
-impl pallet_collective::Trait<CouncilInstance> for Runtime {
+impl pallet_collective::Config<CouncilInstance> for Runtime {
 	type Origin = Origin;
 	type Proposal = Call;
 	type Event = Event;
@@ -607,7 +607,7 @@ impl pallet_collective::Trait<CouncilInstance> for Runtime {
 }
 
 type TechnicalCollective = pallet_collective::Instance1;
-impl pallet_collective::Trait<TechnicalCollective> for Runtime {
+impl pallet_collective::Config<TechnicalCollective> for Runtime {
 	type Origin = Origin;
 	type Proposal = Call;
 	type Event = Event;
@@ -636,7 +636,7 @@ impl ChangeMembers<AccountId> for MembershipChangedGroup {
 }
 
 type CouncilMembershipInstance = pallet_membership::Instance0;
-impl pallet_membership::Trait<CouncilMembershipInstance> for Runtime {
+impl pallet_membership::Config<CouncilMembershipInstance> for Runtime {
 	type Event = Event;
 	type AddOrigin = EnsureRootOrMoreThanHalfCouncil;
 	type RemoveOrigin = EnsureRootOrMoreThanHalfCouncil;
@@ -648,7 +648,7 @@ impl pallet_membership::Trait<CouncilMembershipInstance> for Runtime {
 }
 
 type TechnicalCommitteeMembershipInstance = pallet_membership::Instance1;
-impl pallet_membership::Trait<TechnicalCommitteeMembershipInstance> for Runtime {
+impl pallet_membership::Config<TechnicalCommitteeMembershipInstance> for Runtime {
 	type Event = Event;
 	type AddOrigin = EnsureRootOrMoreThanHalfCouncil;
 	type RemoveOrigin = EnsureRootOrMoreThanHalfCouncil;
@@ -667,7 +667,7 @@ parameter_types! {
 	pub const DesiredRunnersUp: u32 = 7;
 }
 
-impl pallet_elections_phragmen::Trait for Runtime {
+impl pallet_elections_phragmen::Config for Runtime {
 	type ModuleId = ElectionsPhragmenModuleId;
 	type Event = Event;
 	type Currency = Uart;
@@ -712,7 +712,7 @@ parameter_types! {
 	pub const MaximumReasonLength: u32 = 16384;
 }
 
-impl pallet_treasury::Trait for Runtime {
+impl pallet_treasury::Config for Runtime {
 	type ModuleId = UniArtsTreasuryModuleId;
 	type Currency = Uart;
 	type ApproveOrigin = ApproveOrigin;
@@ -746,7 +746,7 @@ parameter_types! {
 	pub const MaxAdditionalFields: u32 = 100;
 	pub const MaxRegistrars: u32 = 20;
 }
-impl pallet_identity::Trait for Runtime {
+impl pallet_identity::Config for Runtime {
 	type Event = Event;
 	type Currency = Uart;
 	type BasicDeposit = BasicDeposit;
@@ -764,7 +764,7 @@ impl pallet_identity::Trait for Runtime {
 parameter_types! {
 	pub const MaxScheduledPerBlock: u32 = 50;
 }
-impl pallet_scheduler::Trait for Runtime {
+impl pallet_scheduler::Config for Runtime {
 	type Event = Event;
 	type Origin = Origin;
 	type PalletsOrigin = OriginCaller;
@@ -782,7 +782,7 @@ parameter_types! {
     pub const SurchargeReward: Balance = 150 * UART;
 }
 
-impl pallet_contracts::Trait for Runtime {
+impl pallet_contracts::Config for Runtime {
 	type Time = Timestamp;
 	type Randomness = RandomnessCollectiveFlip;
 	type Currency = Uart;
@@ -894,7 +894,7 @@ parameter_types! {
 	pub const MaxPending: u16 = 32;
 }
 
-impl pallet_proxy::Trait for Runtime {
+impl pallet_proxy::Config for Runtime {
 	type Event = Event;
 	type Call = Call;
 	type Currency = Uart;
@@ -909,7 +909,7 @@ impl pallet_proxy::Trait for Runtime {
 	type WeightInfo = weights::pallet_proxy::WeightInfo<Runtime>;
 }
 
-impl pallet_utility::Trait for Runtime {
+impl pallet_utility::Config for Runtime {
 	type Event = Event;
 	type Call = Call;
 	type WeightInfo = weights::pallet_utility::WeightInfo<Runtime>;
@@ -923,7 +923,7 @@ parameter_types! {
 	pub const MaxSignatories: u16 = 100;
 }
 
-impl pallet_multisig::Trait for Runtime {
+impl pallet_multisig::Config for Runtime {
 	type Event = Event;
 	type Call = Call;
 	type Currency = Uart;
@@ -936,7 +936,7 @@ impl pallet_multisig::Trait for Runtime {
 parameter_types! {
 	pub const IndexDeposit: Balance = 1 * UART;
 }
-impl pallet_indices::Trait for Runtime {
+impl pallet_indices::Config for Runtime {
 	type AccountIndex = AccountIndex;
 	type Currency = Uart;
 	type Deposit = IndexDeposit;
@@ -951,7 +951,7 @@ parameter_types! {
 	pub const RecoveryDeposit: Balance = 10 * MILLI;
 }
 
-impl pallet_recovery::Trait for Runtime {
+impl pallet_recovery::Config for Runtime {
 	type Event = Event;
 	type Call = Call;
 	type Currency = Uart;
@@ -965,7 +965,7 @@ parameter_types! {
 	pub const GetBridgeCurrencyId: CurrencyId = CurrencyId::Token(TokenSymbol::USDT);
 }
 
-impl pallet_bridge::Trait for Runtime {
+impl pallet_bridge::Config for Runtime {
 	type Event = Event;
 	type Currency = Currencies;
 	type GetBridgeCurrencyId = GetBridgeCurrencyId;
@@ -976,7 +976,7 @@ impl pallet_bridge::Trait for Runtime {
 // 	pub const LuckyPeriod: BlockNumber = 1200;
 // }
 //
-// impl pallet_lotteries::Trait for Runtime {
+// impl pallet_lotteries::Config for Runtime {
 // 	type Event = Event;
 // 	type Call = Call;
 // 	type ModuleId = LotteryModuleId;
@@ -1260,7 +1260,7 @@ impl_runtime_apis! {
 			use frame_benchmarking::{Benchmarking, BenchmarkBatch, add_benchmark, TrackedStorageKey};
 
 			use frame_system_benchmarking::Module as SystemBench;
-			impl frame_system_benchmarking::Trait for Runtime {}
+			impl frame_system_benchmarking::Config for Runtime {}
 
 			let whitelist: Vec<TrackedStorageKey> = vec![
 				// Block Number

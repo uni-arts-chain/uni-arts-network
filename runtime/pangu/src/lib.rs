@@ -69,11 +69,8 @@ pub use pallet_nicks;
 pub use pallet_rewards;
 pub use pallet_staking;
 pub use pallet_validator_set;
-pub use pallet_token;
-pub use pallet_trade;
 pub use uniarts_common::*;
 // pub use pallet_lotteries;
-pub use pallet_contracts::Gas;
 
 /// Opaque types. These are used by the CLI to instantiate machinery that don't need to know
 /// the specifics of the runtime. They can then be made to be agnostic over specific formats
@@ -491,26 +488,6 @@ impl pallet_assets::Config for Runtime {
 	type Event = Event;
 	type Balance = Balance;
 	type AssetId = u32;
-}
-
-impl pallet_token::Config for Runtime {
-	type Event = Event;
-}
-
-parameter_types! {
-	pub const PriceFactor: u128 = 100_000_000;
-    pub const BlocksPerDay: u32 = 6 * 60 * 24;
-    pub const OpenedOrdersArrayCap: u8 = 20;
-    pub const ClosedOrdersArrayCap: u8 = 100;
-}
-
-impl pallet_trade::Config for Runtime {
-	type Event = Event;
-	type Price = u128;
-	type PriceFactor = PriceFactor;
-	type BlocksPerDay = BlocksPerDay;
-	type OpenedOrdersArrayCap = OpenedOrdersArrayCap;
-	type ClosedOrdersArrayCap = ClosedOrdersArrayCap;
 }
 
 impl pallet_names::Config for Runtime {
@@ -1022,8 +999,6 @@ construct_runtime!(
 		Assets: pallet_assets::{Module, Call, Storage, Event<T>},
 		Names: pallet_names::{Module, Call, Storage, Event<T>},
 		Nft: pallet_nft::{Module, Call, Storage, Event<T>},
-		Token: pallet_token::{Module, Call, Storage, Event<T>},
-		Trade: pallet_trade::{Module, Call, Storage, Event<T>},
 		Utility: pallet_utility::{Module, Call, Event},
 		Proxy: pallet_proxy::{Module, Call, Storage, Event<T>},
 		Multisig: pallet_multisig::{Module, Call, Storage, Event<T>},

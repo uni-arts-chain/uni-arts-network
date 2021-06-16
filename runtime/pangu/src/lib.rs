@@ -7,8 +7,10 @@
 include!(concat!(env!("OUT_DIR"), "/wasm_binary.rs"));
 
 pub mod constants;
+pub mod configs;
+pub use configs::*;
 
-/// Weights for pallets used in the runtime.
+/// Weights for configs used in the runtime.
 mod weights;
 
 // --- crates ---
@@ -56,12 +58,12 @@ pub use frame_support::{
 	},
 };
 
-pub use primitives::{
+pub use uniarts_primitives::{
 	BlockNumber, Signature, AccountId, AccountIndex, Balance, Index, Hash, DigestItem,
 	TokenSymbol, CurrencyId,
 };
 
-/// Import pallets.
+/// Import configs.
 // pub use pallet_certificate;
 pub use pallet_assets;
 pub use pallet_nft;
@@ -154,64 +156,7 @@ parameter_types! {
 	pub const Version: RuntimeVersion = VERSION;
 }
 
-// Configure FRAME pallets to include in runtime.
-
-impl frame_system::Config for Runtime {
-	/// The basic call filter to use in dispatchable.
-	type BaseCallFilter = ();
-	/// The identifier used to distinguish between accounts.
-	type AccountId = AccountId;
-	/// The aggregated dispatch type that is available for extrinsics.
-	type Call = Call;
-	/// The lookup mechanism to get account ID from whatever is passed in dispatchers.
-	type Lookup = IdentityLookup<AccountId>;
-	/// The index type for storing how many extrinsics an account has signed.
-	type Index = Index;
-	/// The index type for blocks.
-	type BlockNumber = BlockNumber;
-	/// The type for hashing blocks and tries.
-	type Hash = Hash;
-	/// The hashing algorithm used.
-	type Hashing = BlakeTwo256;
-	/// The header type.
-	type Header = generic::Header<BlockNumber, BlakeTwo256>;
-	/// The ubiquitous event type.
-	type Event = Event;
-	/// The ubiquitous origin type.
-	type Origin = Origin;
-	/// Maximum number of block number to block hash mappings to keep (oldest pruned first).
-	type BlockHashCount = BlockHashCount;
-	/// Maximum weight of each block.
-	type MaximumBlockWeight = MaximumBlockWeight;
-	/// The weight of database operations that the runtime can invoke.
-	type DbWeight = RocksDbWeight;
-	/// The weight of the overhead invoked on the block import process, independent of the
-	/// extrinsics included in that block.
-	type BlockExecutionWeight = BlockExecutionWeight;
-	/// The base weight of any extrinsic processed by the runtime, independent of the
-	/// logic of that extrinsic. (Signature verification, nonce increment, fee, etc...)
-	type ExtrinsicBaseWeight = ExtrinsicBaseWeight;
-	/// The maximum weight that a single extrinsic of `Normal` dispatch class can have,
-	/// idependent of the logic of that extrinsics. (Roughly max block weight - average on
-	/// initialize cost).
-	type MaximumExtrinsicWeight = MaximumExtrinsicWeight;
-	/// Maximum size of all encoded transactions (in bytes) that are allowed in one block.
-	type MaximumBlockLength = MaximumBlockLength;
-	/// Portion of the block weight that is available to all normal transactions.
-	type AvailableBlockRatio = AvailableBlockRatio;
-	/// Version of the runtime.
-	type Version = Version;
-
-	type PalletInfo = PalletInfo;
-	/// What to do if a new account is created.
-	type OnNewAccount = ();
-	/// What to do if an account is fully reaped from the system.
-	type OnKilledAccount = ();
-	/// The data to be stored in an account.
-	type AccountData = pallet_balances::AccountData<Balance>;
-	/// Weight information for the extrinsics of this pallet.
-	type SystemWeightInfo = ();
-}
+// Configure FRAME configs to include in runtime.
 
 parameter_types! {
 	pub const DisabledValidatorsThreshold: Perbill = Perbill::from_percent(17);
@@ -375,8 +320,8 @@ impl pallet_balances::Config for Runtime {
 
 type UinkAccountStore = StorageMapShim<
 		pallet_balances::Account<Runtime, UinkInstance>,
-		frame_system::CallOnCreatedAccount<Runtime>,
-		frame_system::CallKillAccount<Runtime>,
+		frame_system_config::CallOnCreatedAccount<Runtime>,
+		frame_system_config::CallKillAccount<Runtime>,
 		AccountId,
 		pallet_balances::AccountData<Balance>
 	>;
@@ -438,18 +383,6 @@ impl OnUnbalanced<NegativeImbalance<Runtime>> for DealWithFees {
 }
 
 parameter_types! {
-	pub const TransactionByteFee: Balance = 1 * MICRO;
-}
-
-impl pallet_transaction_payment::Config for Runtime {
-	type Currency = Uart;
-	type OnTransactionPayment = DealWithFees;
-	type TransactionByteFee = TransactionByteFee;
-	type WeightToFee = IdentityFee<Balance>;
-	type FeeMultiplierUpdate = ();
-}
-
-parameter_types! {
     // Choose a fee that incentivizes desireable behavior.
     pub const NickReservationFee: u128 = 100;
     pub const MinNickLength: usize = 6;
@@ -465,7 +398,7 @@ impl pallet_nicks::Config for Runtime {
 	/// No action is taken when deposits are forfeited.
 	type Slashed = Treasury;
 	/// Configure the FRAME System Root origin as the Nick pallet admin.
-	type ForceOrigin = frame_system::EnsureRoot<AccountId>;
+	type ForceOrigin = frame_system_config::EnsureRoot<AccountId>;
 	/// Use the MinNickLength from the parameter_types block.
 	type MinLength = MinNickLength;
 	/// Use the MaxNickLength from the parameter_types block.
@@ -635,84 +568,12 @@ impl pallet_membership::Config<TechnicalCommitteeMembershipInstance> for Runtime
 	type MembershipChanged = MembershipChangedGroup;
 }
 
-parameter_types! {
-	pub const CandidacyBond: Balance = 10 * UART;
-	pub const VotingBond: Balance = 1 * UART;
-	pub const TermDuration: BlockNumber = 24 * HOURS;
-	pub const DesiredMembers: u32 = 13;
-	pub const DesiredRunnersUp: u32 = 7;
-}
-
-impl pallet_elections_phragmen::Config for Runtime {
-	type ModuleId = ElectionsPhragmenModuleId;
-	type Event = Event;
-	type Currency = Uart;
-	type CurrencyToVote = uniarts_common::currency::CurrencyToVoteHandler;
-	type ChangeMembers = Council;
-	type InitializeMembers = Council;
-	type CandidacyBond = CandidacyBond;
-	type VotingBond = VotingBond;
-	type TermDuration = TermDuration;
-	type DesiredMembers = DesiredMembers;
-	type DesiredRunnersUp = DesiredRunnersUp;
-	type LoserCandidate = Treasury;
-	type KickedMember = Treasury;
-	type BadReport = Treasury;
-	type WeightInfo = weights::pallet_elections_phragmen::WeightInfo<Runtime>;
-}
-
 // Uni-Art Treasury
 type ApproveOrigin = EnsureOneOf<
 	AccountId,
 	EnsureRoot<AccountId>,
 	pallet_collective::EnsureProportionAtLeast<_3, _5, AccountId, CouncilInstance>,
 >;
-
-parameter_types! {
-	pub const ProposalBond: Permill = Permill::from_percent(5);
-	pub const ProposalBondMinimum: Balance = 1 * UART;
-	pub const SpendPeriod: BlockNumber = 1 * DAYS;
-	pub const Burn: Permill = Permill::from_percent(0);
-	pub const TipCountdown: BlockNumber = 1 * DAYS;
-	pub const TipFindersFee: Percent = Percent::from_percent(10);
-	pub const TipReportDepositBase: Balance = 1 * UART;
-	pub const SevenDays: BlockNumber = 7 * DAYS;
-	pub const ZeroDay: BlockNumber = 0;
-	pub const OneDay: BlockNumber = DAYS;
-	pub const DataDepositPerByte: Balance = 1 * MILLI;
-	pub const BountyDepositBase: Balance = 1 * UART;
-	pub const BountyDepositPayoutDelay: BlockNumber = 4 * DAYS;
-	pub const BountyUpdatePeriod: BlockNumber = 90 * DAYS;
-	pub const BountyCuratorDeposit: Permill = Permill::from_percent(50);
-	pub const BountyValueMinimum: Balance = 10 * UART;
-	pub const MaximumReasonLength: u32 = 16384;
-}
-
-impl pallet_treasury::Config for Runtime {
-	type ModuleId = UniArtsTreasuryModuleId;
-	type Currency = Uart;
-	type ApproveOrigin = ApproveOrigin;
-	type RejectOrigin = EnsureRootOrMoreThanHalfCouncil;
-	type Tippers = ElectionsPhragmen;
-	type TipCountdown = TipCountdown;
-	type TipFindersFee = TipFindersFee;
-	type TipReportDepositBase = TipReportDepositBase;
-	type Event = Event;
-	type ProposalBond = ProposalBond;
-	type ProposalBondMinimum = ProposalBondMinimum;
-	type SpendPeriod = SpendPeriod;
-	type Burn = Burn;
-	type BurnDestination = Society;
-	type DataDepositPerByte = DataDepositPerByte;
-	type OnSlash = Treasury;
-	type BountyDepositBase = BountyDepositBase;
-	type BountyDepositPayoutDelay = BountyDepositPayoutDelay;
-	type BountyUpdatePeriod = BountyUpdatePeriod;
-	type BountyCuratorDeposit = BountyCuratorDeposit;
-	type BountyValueMinimum = BountyValueMinimum;
-	type MaximumReasonLength = MaximumReasonLength;
-	type WeightInfo = weights::pallet_treasury::WeightInfo<Runtime>;
-}
 
 parameter_types! {
 	pub const BasicDeposit: Balance = 10 * UART;            // 258 bytes on-chain
@@ -749,32 +610,6 @@ impl pallet_scheduler::Config for Runtime {
 	type ScheduleOrigin = EnsureRoot<AccountId>;
 	type MaxScheduledPerBlock = MaxScheduledPerBlock;
 	type WeightInfo = weights::pallet_scheduler::WeightInfo<Runtime>;
-}
-
-parameter_types! {
-    pub const TombstoneDeposit: Balance = 1 * UART;
-    pub const RentByteFee: Balance = 1 * MILLI;
-    pub const RentDepositOffset: Balance = 100 * UART;
-    pub const SurchargeReward: Balance = 150 * UART;
-}
-
-impl pallet_contracts::Config for Runtime {
-	type Time = Timestamp;
-	type Randomness = RandomnessCollectiveFlip;
-	type Currency = Uart;
-	type Event = Event;
-	type DetermineContractAddress = pallet_contracts::SimpleAddressDeterminer<Runtime>;
-	type TrieIdGenerator = pallet_contracts::TrieIdFromParentCounter<Runtime>;
-	type RentPayment = ();
-	type SignedClaimHandicap = pallet_contracts::DefaultSignedClaimHandicap;
-	type TombstoneDeposit = TombstoneDeposit;
-	type StorageSizeOffset = pallet_contracts::DefaultStorageSizeOffset;
-	type RentByteFee = RentByteFee;
-	type RentDepositOffset = RentDepositOffset;
-	type SurchargeReward = SurchargeReward;
-	type MaxDepth = pallet_contracts::DefaultMaxDepth;
-	type MaxValueSize = pallet_contracts::DefaultMaxValueSize;
-	type WeightPrice = pallet_transaction_payment::Module<Self>;
 }
 
 /// The type used to represent the kinds of proxying allowed.
@@ -952,7 +787,7 @@ impl pallet_recovery::Config for Runtime {
 // 	type Randomness = RandomnessCollectiveFlip;
 // }
 
-// Create the runtime by composing the FRAME pallets that were previously configured.
+// Create the runtime by composing the FRAME configs that were previously configured.
 construct_runtime!(
 	pub enum Runtime where
 		Block = Block,
@@ -1018,12 +853,12 @@ pub type SignedBlock = generic::SignedBlock<Block>;
 pub type BlockId = generic::BlockId<Block>;
 /// The SignedExtension to the basic transaction logic.
 pub type SignedExtra = (
-	frame_system::CheckSpecVersion<Runtime>,
-	frame_system::CheckTxVersion<Runtime>,
-	frame_system::CheckGenesis<Runtime>,
-	frame_system::CheckEra<Runtime>,
-	frame_system::CheckNonce<Runtime>,
-	frame_system::CheckWeight<Runtime>,
+	frame_system_config::CheckSpecVersion<Runtime>,
+	frame_system_config::CheckTxVersion<Runtime>,
+	frame_system_config::CheckGenesis<Runtime>,
+	frame_system_config::CheckEra<Runtime>,
+	frame_system_config::CheckNonce<Runtime>,
+	frame_system_config::CheckWeight<Runtime>,
 	pallet_transaction_payment::ChargeTransactionPayment<Runtime>
 );
 /// Unchecked extrinsic type as expected by this runtime.
@@ -1034,7 +869,7 @@ pub type CheckedExtrinsic = generic::CheckedExtrinsic<AccountId, Call, SignedExt
 pub type Executive = frame_executive::Executive<
 	Runtime,
 	Block,
-	frame_system::ChainContext<Runtime>,
+	frame_system_config::ChainContext<Runtime>,
 	Runtime,
 	AllModules,
 >;

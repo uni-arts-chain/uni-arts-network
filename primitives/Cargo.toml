@@ -1,5 +1,5 @@
 [package]
-name = "uniarts-network-primitives"
+name = "uniarts-chain-primitives"
 version = "3.0.0"
 authors = ["terry.tu <tuminfei1981@gmail.com>"]
 edition = "2018"
@@ -13,7 +13,7 @@ codec = { package = "parity-scale-codec", version = "2.0.0", default-features = 
 sp-core = { version = "3.0.0", default-features = false }
 sp-runtime = { version = "3.0.0", default-features = false }
 sp-std = { version = "3.0.0", default-features = false }
-sp-consensus-aura = { version = "0.9.0", default-features = false }
+uniarts-primitives = { git = "https://github.com/uni-arts-chain/uni-arts-common.git", tag = "v3.0.0" , default-features = false }
 
 [features]
 default = ["std"]
@@ -21,7 +21,7 @@ std = [
     "serde",
     "codec/std",
     "sp-runtime/std",
-    "sp-consensus-aura/std",
     "sp-core/std",
     "sp-std/std",
+    "uniarts-primitives/std",
 ]

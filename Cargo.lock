@@ -8557,6 +8557,18 @@ dependencies = [
 ]
 
 [[package]]
+name = "uniarts-chain-primitives"
+version = "3.0.0"
+dependencies = [
+ "parity-scale-codec",
+ "serde",
+ "sp-core",
+ "sp-runtime",
+ "sp-std",
+ "uniarts-primitives",
+]
+
+[[package]]
 name = "uniarts-cli"
 version = "3.0.0"
 dependencies = [
@@ -8587,18 +8599,6 @@ dependencies = [
  "sp-runtime",
  "sp-std",
  "uniarts-primitives",
-]
-
-[[package]]
-name = "uniarts-network-primitives"
-version = "3.0.0"
-dependencies = [
- "parity-scale-codec",
- "serde",
- "sp-consensus-aura",
- "sp-core",
- "sp-runtime",
- "sp-std",
 ]
 
 [[package]]

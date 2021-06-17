@@ -4,9 +4,7 @@ use uniarts_primitives::*;
 pub use crate::constants::currency::*;
 pub use crate::constants::time::*;
 
-/// We assume that ~10% of the block weight is consumed by `on_initalize` handlers.
-/// This is used to limit the maximal weight of a single extrinsic.
-const AVERAGE_ON_INITIALIZE_RATIO: Perbill = Perbill::from_percent(10);
+use crate::{weights::frame_system::WeightInfo, *};
 
 frame_support::parameter_types! {
 	pub TombstoneDeposit: Balance = deposit(

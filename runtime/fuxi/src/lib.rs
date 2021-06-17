@@ -209,7 +209,6 @@ impl InstanceFilter<Call> for ProxyType {
 				Call::Scheduler(..) |
 				Call::Proxy(..) |
 				Call::Multisig(..) |
-				Call::Nicks(..) |
 				Call::Nft(..) |
 				Call::BlindBox(..) |
 				Call::Token(..) |

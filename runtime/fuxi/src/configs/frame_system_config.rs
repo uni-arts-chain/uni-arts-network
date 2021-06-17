@@ -1,4 +1,4 @@
-use frame_support::{traits::Filter, weights::{constants::RocksDbWeight, DispatchClass}};
+use frame_support::{weights::{constants::RocksDbWeight, DispatchClass}};
 use sp_runtime::traits::BlakeTwo256;
 use sp_version::RuntimeVersion;
 use frame_system::{Config, limits::{BlockWeights, BlockLength} };

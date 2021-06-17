@@ -1,8 +1,6 @@
-use sp_runtime::Perbill;
 use uniarts_primitives::*;
 use pallet_session::Config;
 use super::pallet_validator_set_config::DisabledValidatorsThreshold;
-use crate::constants::currency::*;
 use crate::*;
 
 pub struct ValidatorIdOf;

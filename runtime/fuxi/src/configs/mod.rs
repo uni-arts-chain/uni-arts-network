@@ -6,3 +6,5 @@ pub mod pallet_treasury_config;
 pub mod pallet_rewards_config;
 pub mod pallet_validator_set_config;
 pub mod pallet_session_config;
+pub mod pallet_aura_config;
+pub mod pallet_grandpa_config;

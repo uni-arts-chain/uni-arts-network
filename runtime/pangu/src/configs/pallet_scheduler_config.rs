@@ -1,6 +1,5 @@
 use pallet_scheduler::Config;
 use uniarts_primitives::*;
-use crate::*;
 use crate::{weights::pallet_scheduler::WeightInfo, *};
 
 frame_support::parameter_types! {

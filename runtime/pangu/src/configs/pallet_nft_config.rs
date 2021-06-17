@@ -1,5 +1,4 @@
 use pallet_nft::Config;
-use uniarts_primitives::*;
 use crate::*;
 
 /// Used for the module nft in `./nft.rs`

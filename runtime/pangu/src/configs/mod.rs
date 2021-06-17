@@ -17,3 +17,6 @@ pub mod pallet_assets_config;
 pub mod pallet_society_config;
 pub mod pallet_nft_config;
 pub mod pallet_scheduler_config;
+pub mod pallet_collective_config;
+pub mod pallet_membership_config;
+pub mod pallet_identity_config;

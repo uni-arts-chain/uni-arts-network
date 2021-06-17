@@ -21,3 +21,6 @@ pub mod pallet_nft_multi_config;
 pub mod pallet_nft_blindbox_config;
 pub mod pallet_society_config;
 pub mod pallet_scheduler_config;
+pub mod pallet_collective_config;
+pub mod pallet_membership_config;
+pub mod pallet_identity_config;

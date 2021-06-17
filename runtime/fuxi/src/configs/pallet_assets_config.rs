@@ -1,7 +1,6 @@
 use pallet_assets::Config;
 use uniarts_primitives::*;
 use crate::*;
-use crate::constants::currency::*;
 
 frame_support::parameter_types! {
 	pub const AssetDepositBase: Balance = 100 * DOLLARS;

@@ -4,7 +4,7 @@ use uniarts_primitives::*;
 pub use crate::constants::currency::*;
 pub use crate::constants::time::*;
 
-use crate::{weights::frame_system::WeightInfo, *};
+use crate::*;
 use crate::frame_system_config::RuntimeBlockWeights;
 
 

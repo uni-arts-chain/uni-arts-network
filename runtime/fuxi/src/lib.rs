@@ -24,7 +24,7 @@ use sp_runtime::{
 	transaction_validity::{TransactionValidity, TransactionSource}
 };
 use sp_runtime::traits::{
-	BlakeTwo256, Block as BlockT, IdentityLookup, NumberFor, Saturating, ConvertInto, AccountIdConversion,
+	BlakeTwo256, Block as BlockT, NumberFor, Saturating, ConvertInto, AccountIdConversion,
 	Convert, OpaqueKeys, SaturatedConversion, Bounded
 };
 use frame_system::{EnsureOneOf, EnsureRoot};
@@ -41,7 +41,6 @@ use orml_currencies::BasicCurrencyAdapter;
 pub use pallet_transaction_payment::{Multiplier, TargetedFeeAdjustment, CurrencyAdapter};
 
 // Uni-Arts
-use constants::{currency::*};
 type Uart = Balances;
 
 // A few exports that help ease life for downstream crates.

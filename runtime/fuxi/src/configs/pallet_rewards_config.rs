@@ -1,5 +1,4 @@
 use crate::{weights::pallet_rewards::WeightInfo, *};
-use frame_support::weights::Weight;
 use uniarts_primitives::*;
 use pallet_rewards::Config;
 use pallet_staking;

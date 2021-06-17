@@ -5,6 +5,8 @@ pub use crate::constants::currency::*;
 pub use crate::constants::time::*;
 
 use crate::{weights::frame_system::WeightInfo, *};
+use crate::frame_system_config::RuntimeBlockWeights;
+
 
 frame_support::parameter_types! {
 	pub TombstoneDeposit: Balance = deposit(

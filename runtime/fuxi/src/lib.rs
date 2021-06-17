@@ -38,6 +38,7 @@ use pallet_contracts_rpc_runtime_api::ContractExecResult;
 #[cfg(feature = "std")]
 use sp_version::NativeVersion;
 use orml_currencies::BasicCurrencyAdapter;
+pub use pallet_transaction_payment::{Multiplier, TargetedFeeAdjustment, CurrencyAdapter};
 
 // Uni-Arts
 use constants::{currency::*};

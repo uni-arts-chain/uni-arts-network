@@ -1,7 +1,7 @@
 use frame_support::{traits::Filter, weights::{constants::RocksDbWeight, DispatchClass}};
 use sp_runtime::traits::BlakeTwo256;
 use sp_version::RuntimeVersion;
-use frame_system::Config;
+use frame_system::{Config, limits::{BlockWeights, BlockLength} };
 
 use uniarts_primitives::*;
 use crate::{weights::frame_system::WeightInfo, *};

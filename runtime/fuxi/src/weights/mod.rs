@@ -12,3 +12,4 @@ pub mod pallet_elections_phragmen;
 pub mod pallet_treasury;
 pub mod pallet_identity;
 pub mod pallet_rewards;
+pub mod orml_tokens;

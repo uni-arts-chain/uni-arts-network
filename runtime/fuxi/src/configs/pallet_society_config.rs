@@ -1,7 +1,7 @@
 use pallet_society::Config;
 use uniarts_primitives::*;
 use crate::*;
-use super::pallet_membership_config::EnsureRootOrMoreThanHalfCouncil;
+use crate::pallet_membership_config::EnsureRootOrMoreThanHalfCouncil;
 
 frame_support::parameter_types! {
 	pub const CandidateDeposit: Balance = 10 * UART;

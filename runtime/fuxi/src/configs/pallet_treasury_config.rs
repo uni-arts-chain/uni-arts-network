@@ -1,7 +1,7 @@
 use sp_runtime::{Percent, Permill};
 use crate::{weights::pallet_treasury::WeightInfo, *};
 use pallet_treasury::Config;
-use super::pallet_membership_config::{EnsureRootOrMoreThanHalfCouncil, ApproveOrigin};
+use crate::pallet_membership_config::{EnsureRootOrMoreThanHalfCouncil, ApproveOrigin};
 
 frame_support::parameter_types! {
 	pub const ProposalBond: Permill = Permill::from_percent(5);

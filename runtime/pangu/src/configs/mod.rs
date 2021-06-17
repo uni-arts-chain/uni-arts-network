@@ -20,3 +20,4 @@ pub mod pallet_scheduler_config;
 pub mod pallet_collective_config;
 pub mod pallet_membership_config;
 pub mod pallet_identity_config;
+pub mod pallet_balances_config;

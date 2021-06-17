@@ -313,8 +313,8 @@ impl pallet_balances::Config for Runtime {
 
 type UinkAccountStore = StorageMapShim<
 		pallet_balances::Account<Runtime, UinkInstance>,
-		frame_system_config::CallOnCreatedAccount<Runtime>,
-		frame_system_config::CallKillAccount<Runtime>,
+		frame_system::CallOnCreatedAccount<Runtime>,
+		frame_system::CallKillAccount<Runtime>,
 		AccountId,
 		pallet_balances::AccountData<Balance>
 	>;
@@ -391,7 +391,7 @@ impl pallet_nicks::Config for Runtime {
 	/// No action is taken when deposits are forfeited.
 	type Slashed = Treasury;
 	/// Configure the FRAME System Root origin as the Nick pallet admin.
-	type ForceOrigin = frame_system_config::EnsureRoot<AccountId>;
+	type ForceOrigin = frame_system::EnsureRoot<AccountId>;
 	/// Use the MinNickLength from the parameter_types block.
 	type MinLength = MinNickLength;
 	/// Use the MaxNickLength from the parameter_types block.
@@ -846,12 +846,12 @@ pub type SignedBlock = generic::SignedBlock<Block>;
 pub type BlockId = generic::BlockId<Block>;
 /// The SignedExtension to the basic transaction logic.
 pub type SignedExtra = (
-	frame_system_config::CheckSpecVersion<Runtime>,
-	frame_system_config::CheckTxVersion<Runtime>,
-	frame_system_config::CheckGenesis<Runtime>,
-	frame_system_config::CheckEra<Runtime>,
-	frame_system_config::CheckNonce<Runtime>,
-	frame_system_config::CheckWeight<Runtime>,
+	frame_system::CheckSpecVersion<Runtime>,
+	frame_system::CheckTxVersion<Runtime>,
+	frame_system::CheckGenesis<Runtime>,
+	frame_system::CheckEra<Runtime>,
+	frame_system::CheckNonce<Runtime>,
+	frame_system::CheckWeight<Runtime>,
 	pallet_transaction_payment::ChargeTransactionPayment<Runtime>
 );
 /// Unchecked extrinsic type as expected by this runtime.
@@ -862,7 +862,7 @@ pub type CheckedExtrinsic = generic::CheckedExtrinsic<AccountId, Call, SignedExt
 pub type Executive = frame_executive::Executive<
 	Runtime,
 	Block,
-	frame_system_config::ChainContext<Runtime>,
+	frame_system::ChainContext<Runtime>,
 	Runtime,
 	AllModules,
 >;

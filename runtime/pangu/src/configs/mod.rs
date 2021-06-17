@@ -12,3 +12,5 @@ pub mod pallet_vesting_config;
 pub mod pallet_timestamp_config;
 pub mod pallet_authorship_config;
 pub mod pallet_sudo_config;
+pub mod pallet_names_config;
+pub mod pallet_assets_config;

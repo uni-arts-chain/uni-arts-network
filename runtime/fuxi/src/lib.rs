@@ -188,41 +188,6 @@ impl pallet_balances::Config for Runtime {
 // 	type WeightInfo = ();
 // }
 
-impl pallet_names::Config for Runtime {
-	type Name = Vec<u8>;
-	type Value = Vec<u8>;
-	type Currency = Uart;
-	type Event = Event;
-
-	fn get_name_fee(op: &pallet_names::Operation<Self>) -> Option<Balance> {
-		/* Single-letter names are not allowed (nor the empty name).  Everything
-           else is fine.  */
-		if op.name.len() < 2 {
-			return None
-		}
-
-		Some(match op.operation {
-			pallet_names::OperationType::Registration => 1000,
-			pallet_names::OperationType::Update => 100,
-		})
-	}
-
-	fn get_expiration(op: &pallet_names::Operation<Self>) -> Option<BlockNumber> {
-		/* Short names (up to three characters) will expire after 10 blocks.
-           Longer names will stick around forever.  */
-		if op.name.len() <= 3 {
-			Some(10)
-		} else {
-			None
-		}
-	}
-
-	fn deposit_fee(_b: <Self::Currency as Currency<AccountId>>::NegativeImbalance) {
-		/* Just burn the name fee by dropping the imbalance.  */
-	}
-
-}
-
 /// Used for the module nft-multi in `./nft-multi.rs`
 impl pallet_nft_multi::Config for Runtime {
 	type ModuleId = UniArtsNftModuleId;
@@ -619,6 +584,7 @@ construct_runtime!(
 		Sudo: pallet_sudo::{Module, Call, Config<T>, Storage, Event<T>},
 
 		Names: pallet_names::{Module, Call, Storage, Event<T>},
+		Assets: pallet_assets::{Module, Call, Storage, Event<T>},
 		Nft: pallet_nft_multi::{Module, Call, Storage, Event<T>},
 		BlindBox: pallet_nft_blindbox::{Module, Call, Storage, Event<T>},
 		Bridge: pallet_bridge::{Module, Call, Storage, Event<T>, Config<T>},

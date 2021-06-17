@@ -76,6 +76,7 @@ pallet-rewards = { git = "https://github.com/uni-arts-chain/uni-arts-common.git"
 pallet-staking = { git = "https://github.com/uni-arts-chain/uni-arts-common.git", tag = "v3.0.0", default-features = false }
 pallet-validator-set = { git = "https://github.com/uni-arts-chain/uni-arts-common.git", tag = "v3.0.0", default-features = false }
 pallet-bridge = { git = "https://github.com/uni-arts-chain/uni-arts-common.git", tag = "v3.0.0", default-features = false }
+pallet-assets = { git = "https://github.com/uni-arts-chain/uni-arts-common.git", tag = "v3.0.0" , default-features = false }
 # pallet-lotteries = { path = "../../configs/lotteries", default-features = false }
 uniarts-primitives = { package = "uniarts-primitives", git = "https://github.com/uni-arts-chain/uni-arts-common.git", tag = "v3.0.0", default-features = false }
 
@@ -111,6 +112,7 @@ std = [
     "pallet-session/std",
     "pallet-society/std",
     "pallet-sudo/std",
+    "pallet-assets/std",
     "pallet-timestamp/std",
     "pallet-transaction-payment/std",
     "pallet-transaction-payment-rpc-runtime-api/std",

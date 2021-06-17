@@ -71,11 +71,9 @@ pub use uniarts_primitives::{
 pub use pallet_assets;
 pub use pallet_nft;
 pub use pallet_nicks;
-pub use pallet_rewards;
 pub use pallet_staking;
 pub use pallet_validator_set;
 pub use uniarts_common::*;
-// pub use pallet_lotteries;
 
 /// We assume that ~10% of the block weight is consumed by `on_initalize` handlers.
 /// This is used to limit the maximal weight of a single extrinsic.
@@ -212,55 +210,6 @@ impl pallet_grandpa::Config for Runtime {
 
 	type HandleEquivocation = ();
 
-	type WeightInfo = ();
-}
-
-parameter_types! {
-	pub const MiningRewardPerBlock: Balance = 8 * UART;
-	pub const RewardThreshold: Balance = 30 * (BlocksPerDay::get() as Balance) * MiningRewardPerBlock::get();
-	pub const StakingRewardPerBlock: Balance = 1 * UART;
-	pub const AmpFactor: Balance = 1e12 as Balance;
-	pub const BlocksPerYear: u32 = 10; //365 * BlocksPerDay::get();
-	pub const MiningCap: Balance = 150_000_000 * UART;
-}
-
-pub struct AccountIdOf;
-impl<T> Convert<T, Option<T>> for AccountIdOf {
-	fn convert(a: T) -> Option<T> { 
-		Some(a)
-	}
-}
-
-pub struct ConvertNumberToBalance;
-impl<BlockNumber, Balance: Bounded + core::convert::From<BlockNumber>> Convert<BlockNumber, Balance> for ConvertNumberToBalance {
-	fn convert(a: BlockNumber) -> Balance {
-		Balance::saturated_from::<BlockNumber>(a)
-	}
-}
-
-
-impl pallet_rewards::Config for Runtime {
-	type AccountIdOf = AccountIdOf;
-	type Balance = Balance;
-	type Currency = Uart;
-	type RewardThreshold = RewardThreshold;
-	type RewardPerBlock = MiningRewardPerBlock;
-	type BlocksPerYear = BlocksPerYear;
-	type MiningCap = MiningCap;
-	type Event = Event;
-	type WeightInfo = weights::pallet_rewards::WeightInfo<Runtime>;
-}
-
-
-
-impl pallet_staking::Config for Runtime {
-	type ModuleId = StakingModuleId;
-	type Event = Event;
-	type Currency = Uart;
-	type RewardPerBlock = StakingRewardPerBlock;
-	type Id = u32;
-	type AmpFactor = AmpFactor;
-	type ConvertNumberToBalance = ConvertNumberToBalance;
 	type WeightInfo = ();
 }
 

@@ -64,7 +64,7 @@ pub use frame_support::{
 
 pub use uniarts_primitives::{
 	BlockNumber, Signature, AccountId, AccountIndex, Balance, Index, Hash, DigestItem,
-	TokenSymbol, CurrencyId, Amount,
+	TokenSymbol, CurrencyId, Amount, Header,
 };
 
 /// Import configs.
@@ -805,8 +805,6 @@ construct_runtime!(
 
 /// The address format for describing accounts.
 pub type Address = AccountId;
-/// Block header type as expected by this runtime.
-pub type Header = generic::Header<BlockNumber, BlakeTwo256>;
 /// Block type as expected by this runtime.
 pub type Block = generic::Block<Header, UncheckedExtrinsic>;
 /// A Block signed with a Justification

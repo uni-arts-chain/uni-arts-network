@@ -6,12 +6,12 @@ use frame_system::{Config, limits::{BlockWeights, BlockLength} };
 use uniarts_primitives::*;
 use crate::{weights::frame_system::WeightInfo, *};
 
-pub struct BaseFilter;
-impl Filter<Call> for BaseFilter {
-    fn filter(_: &Call) -> bool {
-        true
-    }
-}
+// pub struct BaseFilter;
+// impl Filter<Call> for BaseFilter {
+//     fn filter(_: &Call) -> bool {
+//         true
+//     }
+// }
 
 frame_support::parameter_types! {
     pub const BlocksPerDay: u32 = 6 * 60 * 24;
@@ -41,7 +41,7 @@ frame_support::parameter_types! {
 
 impl Config for Runtime {
     /// The basic call filter to use in dispatchable.
-    type BaseCallFilter = BaseFilter;
+    type BaseCallFilter = ();
     /// Block & extrinsics weights: base values and limits.
     type BlockWeights = RuntimeBlockWeights;
     /// The maximum length of a block (in bytes).

@@ -24,7 +24,7 @@ use sp_runtime::{
 	transaction_validity::{TransactionValidity, TransactionSource}
 };
 use sp_runtime::traits::{
-	BlakeTwo256, Block as BlockT, NumberFor, Saturating, ConvertInto, AccountIdConversion,
+	BlakeTwo256, Block as BlockT, NumberFor, Saturating, AccountIdConversion,
 	Convert, OpaqueKeys, SaturatedConversion, Bounded
 };
 use frame_system::{EnsureOneOf, EnsureRoot};

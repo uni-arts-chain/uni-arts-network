@@ -188,58 +188,6 @@ impl pallet_balances::Config for Runtime {
 // 	type WeightInfo = ();
 // }
 
-parameter_types! {
-	pub const UncleGenerations: BlockNumber = 0;
-}
-
-impl pallet_authorship::Config for Runtime {
-	type FindAuthor = AuraAccountAdapter;
-	type UncleGenerations = UncleGenerations;
-	type FilterUncle = ();
-	type EventHandler = ();
-}
-
-pub struct AuraAccountAdapter;
-
-impl FindAuthor<AccountId> for AuraAccountAdapter {
-	fn find_author<'a, I>(digests: I) -> Option<AccountId>
-		where I: 'a + IntoIterator<Item=(ConsensusEngineId, &'a [u8])>
-	{
-		if let Some(index) = pallet_aura::Module::<Runtime>::find_author(digests) {
-			let validator = pallet_session::Module::<Runtime>::validators()[index as usize].clone();
-			Some(validator)
-		}
-		else {
-			None
-		}
-	}
-}
-
-parameter_types! {
-    // Choose a fee that incentivizes desireable behavior.
-    pub const NickReservationFee: u128 = 100;
-    pub const MinNickLength: usize = 6;
-    // Maximum bounds on storage are important to secure your chain.
-    pub const MaxNickLength: usize = 32;
-}
-
-impl pallet_nicks::Config for Runtime {
-	/// The Balances pallet implements the ReservableCurrency Config.
-	type Currency = Uart;
-	/// Use the NickReservationFee from the parameter_types block.
-	type ReservationFee = NickReservationFee;
-	/// No action is taken when deposits are forfeited.
-	type Slashed = Treasury;
-	/// Configure the FRAME System Root origin as the Nick pallet admin.
-	type ForceOrigin = frame_system::EnsureRoot<AccountId>;
-	/// Use the MinNickLength from the parameter_types block.
-	type MinLength = MinNickLength;
-	/// Use the MaxNickLength from the parameter_types block.
-	type MaxLength = MaxNickLength;
-	/// The ubiquitous event type.
-	type Event = Event;
-}
-
 impl pallet_sudo::Config for Runtime {
 	type Event = Event;
 	type Call = Call;

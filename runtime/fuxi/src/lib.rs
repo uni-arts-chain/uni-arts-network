@@ -188,48 +188,9 @@ impl pallet_balances::Config for Runtime {
 // 	type WeightInfo = ();
 // }
 
-/// Used for the module nft-multi in `./nft-multi.rs`
-impl pallet_nft_multi::Config for Runtime {
-	type ModuleId = UniArtsNftModuleId;
-	type MultiCurrency = Currencies;
-	type Event = Event;
-	type WeightInfo = ();
-}
 
-impl pallet_nft_blindbox::Config for Runtime {
-	type LockModuleId = UniArtsBlindBoxModuleId;
-	type NftHandler = Nft;
-	type Event = Event;
-	type Randomness = RandomnessCollectiveFlip;
-	type WeightInfo = ();
-}
 
-parameter_types! {
-	pub const CandidateDeposit: Balance = 10 * UART;
-	pub const WrongSideDeduction: Balance = 2 * UART;
-	pub const MaxStrikes: u32 = 10;
-	pub const RotationPeriod: BlockNumber = 80 * HOURS;
-	pub const PeriodSpend: Balance = 500 * UART;
-	pub const MaxLockDuration: BlockNumber = 36 * 30 * DAYS;
-	pub const ChallengePeriod: BlockNumber = 7 * DAYS;
-}
 
-impl pallet_society::Config for Runtime {
-	type Event = Event;
-	type ModuleId = SocietyModuleId;
-	type Currency = Uart;
-	type Randomness = RandomnessCollectiveFlip;
-	type CandidateDeposit = CandidateDeposit;
-	type WrongSideDeduction = WrongSideDeduction;
-	type MaxStrikes = MaxStrikes;
-	type PeriodSpend = PeriodSpend;
-	type MembershipChanged = ();
-	type RotationPeriod = RotationPeriod;
-	type MaxLockDuration = MaxLockDuration;
-	type FounderSetOrigin = EnsureRootOrMoreThanHalfCouncil;
-	type SuspensionJudgementOrigin = pallet_society::EnsureFounder<Runtime>;
-	type ChallengePeriod = ChallengePeriod;
-}
 
 // Uni-Art Treasury
 parameter_types! {

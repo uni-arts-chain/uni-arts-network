@@ -17,3 +17,6 @@ pub mod pallet_names_config;
 pub mod pallet_assets_config;
 pub mod orml_currencies_config;
 pub mod orml_tokens_config;
+pub mod pallet_nft_multi_config;
+pub mod pallet_nft_blindbox_config;
+pub mod pallet_society_config;

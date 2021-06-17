@@ -16,3 +16,4 @@ pub mod pallet_names_config;
 pub mod pallet_assets_config;
 pub mod pallet_society_config;
 pub mod pallet_nft_config;
+pub mod pallet_scheduler_config;

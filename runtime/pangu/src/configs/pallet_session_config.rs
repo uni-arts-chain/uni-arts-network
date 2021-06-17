@@ -2,6 +2,7 @@ use uniarts_primitives::*;
 use pallet_session::Config;
 use super::pallet_validator_set_config::DisabledValidatorsThreshold;
 use crate::*;
+use crate::weights::pallet_session::WeightInfo;
 
 pub struct ValidatorIdOf;
 impl<T> Convert<T, Option<T>> for ValidatorIdOf {
@@ -20,5 +21,5 @@ impl Config for Runtime {
     type SessionHandler = <opaque::SessionKeys as OpaqueKeys>::KeyTypeIdProviders;
     type Keys = opaque::SessionKeys;
     type DisabledValidatorsThreshold = DisabledValidatorsThreshold;
-    type WeightInfo = weights::pallet_session::WeightInfo<Runtime>;
+    type WeightInfo = WeightInfo<Runtime>;
 }

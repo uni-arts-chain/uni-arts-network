@@ -238,23 +238,6 @@ impl FindAuthor<AccountId> for AuraAccountAdapter {
 	}
 }
 
-pub struct DealWithFees;
-
-impl OnUnbalanced<NegativeImbalance<Runtime>> for DealWithFees {
-	fn on_unbalanceds<B>(mut fees_then_tips: impl Iterator<Item = NegativeImbalance<Runtime>>) {
-		if let Some(fees) = fees_then_tips.next() {
-			// for fees, 90% to treasury, 10% to author
-			let mut split = fees.ration(90, 10);
-			if let Some(tips) = fees_then_tips.next() {
-				// for tips, if any, 90% to treasury, 10% to author (though this can be anything)
-				tips.ration_merge_into(90, 10, &mut split);
-			}
-			Treasury::on_unbalanced(split.0);
-			Author::on_unbalanced(split.1);
-		}
-	}
-}
-
 parameter_types! {
     // Choose a fee that incentivizes desireable behavior.
     pub const NickReservationFee: u128 = 100;

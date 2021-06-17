@@ -211,16 +211,6 @@ impl pallet_balances::Config<UinkInstance> for Runtime {
 	type MaxLocks = MaxLocks;
 }
 
-impl pallet_sudo::Config for Runtime {
-	type Event = Event;
-	type Call = Call;
-}
-
-// impl pallet_certificate::Config for Runtime {
-// 	type Event = Event;
-// 	type WorkId = u32;
-// }
-
 impl pallet_assets::Config for Runtime {
 	type Event = Event;
 	type Balance = Balance;

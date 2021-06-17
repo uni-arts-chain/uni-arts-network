@@ -2,7 +2,7 @@ use pallet_vesting::Config;
 use sp_runtime::traits::ConvertInto;
 use crate::*;
 
-parameter_types! {
+frame_support::parameter_types! {
 	pub const MinVestedTransfer: Balance = 100 * DOLLARS;
 }
 

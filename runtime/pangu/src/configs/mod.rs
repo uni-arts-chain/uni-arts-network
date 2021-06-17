@@ -11,3 +11,4 @@ pub mod pallet_grandpa_config;
 pub mod pallet_vesting_config;
 pub mod pallet_timestamp_config;
 pub mod pallet_authorship_config;
+pub mod pallet_sudo_config;

@@ -1,7 +1,7 @@
 use pallet_nicks::Config;
 use crate::*;
 
-parameter_types! {
+frame_support::parameter_types! {
     // Choose a fee that incentivizes desireable behavior.
     pub const NickReservationFee: u128 = 100;
     pub const MinNickLength: usize = 6;

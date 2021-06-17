@@ -1,7 +1,7 @@
 use pallet_timestamp::Config;
 use crate::{weights::pallet_timestamp::WeightInfo, *};
 
-parameter_types! {
+frame_support::parameter_types! {
 	pub const MinimumPeriod: u64 = SLOT_DURATION / 2;
 }
 

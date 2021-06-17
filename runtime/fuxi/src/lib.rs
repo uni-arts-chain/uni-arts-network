@@ -159,18 +159,6 @@ parameter_types! {
 
 // Configure FRAME configs to include in runtime.
 parameter_types! {
-	pub const MinimumPeriod: u64 = SLOT_DURATION / 2;
-}
-
-impl pallet_timestamp::Config for Runtime {
-	/// A timestamp: milliseconds since the unix epoch.
-	type Moment = u64;
-	type OnTimestampSet = Aura;
-	type MinimumPeriod = MinimumPeriod;
-	type WeightInfo = weights::pallet_timestamp::WeightInfo<Runtime>;
-}
-
-parameter_types! {
 	pub const ExistentialDeposit: u128 = 500;
 	// For weight estimation, we assume that the most locks on an individual account will be 50.
 	// This number may need to be adjusted in the future if this assumption no longer holds true.

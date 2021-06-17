@@ -9,3 +9,4 @@ pub mod pallet_session_config;
 pub mod pallet_aura_config;
 pub mod pallet_grandpa_config;
 pub mod pallet_vesting_config;
+pub mod pallet_timestamp_config;

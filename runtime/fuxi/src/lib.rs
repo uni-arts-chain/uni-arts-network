@@ -158,37 +158,6 @@ parameter_types! {
 }
 
 // Configure FRAME configs to include in runtime.
-parameter_types! {
-	pub const DisabledValidatorsThreshold: Perbill = Perbill::from_percent(17);
-	pub const ValidatorMortgageLimit: Balance = 10_000 * UART;
-}
-
-impl pallet_validator_set::Config for Runtime {
-	type Event = Event;
-	type Currency = Uart;
-	type ValidatorMortgageLimit = ValidatorMortgageLimit;
-}
-
-pub struct ValidatorIdOf;
-impl<T> Convert<T, Option<T>> for ValidatorIdOf {
-	fn convert(a: T) -> Option<T> { 
-		Some(a)
-	}
-}
-
-impl pallet_session::Config for Runtime {
-	type Event = Event;
-	type ValidatorId = AccountId;
-	type ValidatorIdOf = ValidatorIdOf;
-	type ShouldEndSession = ValidatorSet;
-	type NextSessionRotation = ValidatorSet;
-	type SessionManager = ValidatorSet;
-	type SessionHandler = <opaque::SessionKeys as OpaqueKeys>::KeyTypeIdProviders;
-	type Keys = opaque::SessionKeys;
-	type DisabledValidatorsThreshold = DisabledValidatorsThreshold;
-	type WeightInfo = weights::pallet_session::WeightInfo<Runtime>;
-}
-
 impl pallet_aura::Config for Runtime {
 	type AuthorityId = AuraId;
 }

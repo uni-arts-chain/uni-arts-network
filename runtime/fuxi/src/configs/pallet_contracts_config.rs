@@ -21,6 +21,7 @@ frame_support::parameter_types! {
 	pub const SignedClaimHandicap: u32 = 2;
     pub const MaxDepth: u32 = 32;
 	pub const MaxValueSize: u32 = 16 * 1024;
+    pub const MaxCodeSize: u32 = 60 * 1024;
 	// The lazy deletion runs inside on_initialize.
 	pub DeletionWeightLimit: Weight = AVERAGE_ON_INITIALIZE_RATIO *
 		RuntimeBlockWeights::get().max_block;
@@ -52,4 +53,5 @@ impl pallet_contracts::Config for Runtime {
     type ChainExtension = ();
     type DeletionQueueDepth = DeletionQueueDepth;
     type DeletionWeightLimit = DeletionWeightLimit;
+    type MaxCodeSize = MaxCodeSize;
 }

@@ -354,7 +354,7 @@ construct_runtime!(
 		Staking: pallet_staking::{Module, Call, Storage, Event<T>},
 		Vesting: pallet_vesting::{Module, Call, Storage, Event<T>, Config<T>},
 
-		Nicks: pallet_nicks::{Module, Call, Storage, Event<T>},
+		// Nicks: pallet_nicks::{Module, Call, Storage, Event<T>},
 		Balances: pallet_balances::{Module, Call, Storage, Config<T>, Event<T>},
 		Contracts: pallet_contracts::{Module, Call, Storage, Event<T>, Config},
 		// Lotteries: pallet_lotteries::{Module, Call, Storage, Event<T>},

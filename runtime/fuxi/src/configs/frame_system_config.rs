@@ -1,5 +1,5 @@
 use frame_support::{weights::{constants::RocksDbWeight, DispatchClass}};
-use sp_runtime::traits::BlakeTwo256;
+use sp_runtime::traits::{BlakeTwo256, AccountIdLookup};
 use sp_version::RuntimeVersion;
 use frame_system::{Config, limits::{BlockWeights, BlockLength} };
 

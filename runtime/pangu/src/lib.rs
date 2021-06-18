@@ -6,6 +6,15 @@
 #[cfg(feature = "std")]
 include!(concat!(env!("OUT_DIR"), "/wasm_binary.rs"));
 
+/// Wasm binary unwrapped. If built with `SKIP_WASM_BUILD`, the function panics.
+#[cfg(feature = "std")]
+pub fn wasm_binary_unwrap() -> &'static [u8] {
+	WASM_BINARY.expect("Development wasm binary is not available. This means the client is \
+						built with `SKIP_WASM_BUILD` flag and it is only usable for \
+						production chains. Please rebuild with the flag disabled.")
+}
+
+/// Constant values used within the runtime.
 pub mod constants;
 pub use constants::time::*;
 pub use constants::currency::*;
@@ -16,7 +25,6 @@ pub use configs::*;
 mod weights;
 
 // --- crates ---
-use codec::{Decode, Encode};
 use sp_std::prelude::*;
 use sp_core::{crypto::KeyTypeId, OpaqueMetadata};
 use sp_runtime::{
@@ -38,6 +46,7 @@ use sp_version::RuntimeVersion;
 use sp_version::NativeVersion;
 use pallet_transaction_payment::{FeeDetails, RuntimeDispatchInfo};
 pub use pallet_transaction_payment::{Multiplier, TargetedFeeAdjustment, CurrencyAdapter};
+use sp_inherents::{InherentData, CheckInherentsResult};
 
 // Uni-Arts
 type Uart = Balances;
@@ -45,6 +54,13 @@ type Uart = Balances;
 // A few exports that help ease life for downstream crates.
 #[cfg(any(feature = "std", test))]
 pub use sp_runtime::BuildStorage;
+#[cfg(any(feature = "std", test))]
+pub use pallet_balances::Call as BalancesCall;
+#[cfg(any(feature = "std", test))]
+pub use frame_system::Call as SystemCall;
+#[cfg(any(feature = "std", test))]
+pub use pallet_staking::StakerStatus;
+
 pub use sp_runtime::{Permill, Perbill, Percent, ModuleId};
 
 pub use pallet_timestamp::Call as TimestampCall;
@@ -114,7 +130,7 @@ pub const VERSION: RuntimeVersion = RuntimeVersion {
 	spec_version: 24,
 	impl_version: 1,
 	apis: RUNTIME_API_VERSIONS,
-	transaction_version: 1,
+	transaction_version: 2,
 };
 
 /// The version information used to identify this runtime when compiled natively.
@@ -158,22 +174,6 @@ parameter_types! {
 
 // Configure FRAME configs to include in runtime.
 // In config mod
-
-// parameter_types! {
-// 	pub const TicketPrice: Balance = 10 * UART;
-// 	pub const LuckyPeriod: BlockNumber = 1200;
-// }
-//
-// impl pallet_lotteries::Config for Runtime {
-// 	type Event = Event;
-// 	type Call = Call;
-// 	type ModuleId = LotteryModuleId;
-// 	type Currency = Uart;
-// 	type LotteryDrawOrigin = EnsureRootOrMoreThanHalfCouncil;
-// 	type TicketPrice = TicketPrice;
-// 	type LuckyPeriod = LuckyPeriod;
-// 	type Randomness = RandomnessCollectiveFlip;
-// }
 
 // Create the runtime by composing the FRAME configs that were previously configured.
 construct_runtime!(
@@ -291,14 +291,11 @@ impl_runtime_apis! {
 			Executive::finalize_block()
 		}
 
-		fn inherent_extrinsics(data: sp_inherents::InherentData) -> Vec<<Block as BlockT>::Extrinsic> {
+		fn inherent_extrinsics(data: InherentData) -> Vec<<Block as BlockT>::Extrinsic> {
 			data.create_extrinsics()
 		}
 
-		fn check_inherents(
-			block: Block,
-			data: sp_inherents::InherentData,
-		) -> sp_inherents::CheckInherentsResult {
+		fn check_inherents(block: Block, data: InherentData) -> CheckInherentsResult {
 			data.check_extrinsics(&block)
 		}
 

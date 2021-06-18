@@ -1,3 +1,5 @@
+use pallet_contracts::Config;
+use pallet_contracts::weights::WeightInfo;
 use sp_runtime::Perbill;
 use frame_support::weights::Weight;
 use uniarts_primitives::*;
@@ -10,13 +12,13 @@ use crate::frame_system_config::RuntimeBlockWeights;
 
 frame_support::parameter_types! {
 	pub TombstoneDeposit: Balance = deposit(
-		1 * UART,
-		<pallet_contracts::Pallet<Runtime>>::contract_info_size(),
+        (1 * UART).try_into().unwrap(),
+		sp_std::mem::size_of::<pallet_contracts::ContractInfo<Runtime>>() as u32,
 	);
 	pub DepositPerContract: Balance = TombstoneDeposit::get();
 	pub const DepositPerStorageByte: Balance = deposit(0, 1);
 	pub const DepositPerStorageItem: Balance = deposit(1, 0);
-	pub RentFraction: Perbill = Perbill::from_rational(1u32, 30 * DAYS);
+	pub RentFraction: Perbill = Perbill::from_rational_approximation(1u32, 30 * DAYS);
 	pub const SurchargeReward: Balance = 150 * MILLI;
 	pub const SignedClaimHandicap: u32 = 2;
     pub const MaxDepth: u32 = 32;
@@ -33,7 +35,7 @@ frame_support::parameter_types! {
 		)) / 5) as u32;
 }
 
-impl pallet_contracts::Config for Runtime {
+impl Config for Runtime {
     type Time = Timestamp;
     type Randomness = RandomnessCollectiveFlip;
     type Currency = Uart;

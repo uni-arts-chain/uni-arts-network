@@ -36,6 +36,7 @@ use pallet_grandpa::fg_primitives;
 use sp_version::RuntimeVersion;
 #[cfg(feature = "std")]
 use sp_version::NativeVersion;
+use pallet_transaction_payment::{FeeDetails, RuntimeDispatchInfo};
 pub use pallet_transaction_payment::{Multiplier, TargetedFeeAdjustment, CurrencyAdapter};
 
 // Uni-Arts
@@ -208,8 +209,6 @@ impl InstanceFilter<Call> for ProxyType {
 				Call::Proxy(..) |
 				Call::Multisig(..) |
 				Call::Nft(..) |
-				Call::Token(..) |
-				Call::Trade(..) |
 				Call::Contracts(..)
 			),
 			ProxyType::Governance => matches!(

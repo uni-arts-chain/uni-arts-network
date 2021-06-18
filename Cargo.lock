@@ -1978,6 +1978,7 @@ dependencies = [
  "hex-literal",
  "orml-currencies",
  "orml-tokens",
+ "orml-traits",
  "pallet-assets",
  "pallet-aura",
  "pallet-authorship",

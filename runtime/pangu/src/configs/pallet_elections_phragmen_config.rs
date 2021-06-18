@@ -1,5 +1,6 @@
 use crate::{weights::pallet_elections_phragmen::WeightInfo, *};
 use pallet_elections_phragmen::Config;
+use frame_support::traits::U128CurrencyToVote;
 
 frame_support::parameter_types! {
 	pub const CandidacyBond: Balance = 10 * UART;
@@ -18,7 +19,7 @@ impl Config for Runtime {
     type Currency = Uart;
     type ChangeMembers = Council;
     type InitializeMembers = Council;
-    type CurrencyToVote = uniarts_common::currency::CurrencyToVoteHandler;
+    type CurrencyToVote = U128CurrencyToVote;
     type CandidacyBond = CandidacyBond;
     type VotingBondBase = VotingBondBase;
     type VotingBondFactor = VotingBondFactor;

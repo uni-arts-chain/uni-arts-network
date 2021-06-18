@@ -30,3 +30,5 @@ pub mod pallet_utility_config;
 pub mod pallet_multisig_config;
 pub mod pallet_indices_config;
 pub mod pallet_recovery_config;
+pub mod pallet_bridge_config;
+pub mod pallet_proxy_config;

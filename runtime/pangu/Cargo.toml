@@ -46,6 +46,7 @@ pallet-vesting = { version = "3.0.0", default-features = false }
 pallet-collective = { version = "3.0.0", default-features = false }
 pallet-membership = { version = "3.0.0", default-features = false }
 pallet-treasury = { version = "3.0.0", default-features = false }
+pallet-bounties = { version = "3.0.0", default-features = false }
 pallet-identity = { version = "3.0.0", default-features = false }
 pallet-scheduler = { version = "3.0.0", default-features = false }
 pallet-multisig = { version = "3.0.0", default-features = false }
@@ -101,6 +102,7 @@ std = [
     "pallet-collective/std",
     "pallet-membership/std",
     "pallet-treasury/std",
+    "pallet-bounties/std",
     "pallet-elections-phragmen/std",
     "pallet-identity/std",
     "pallet-randomness-collective-flip/std",

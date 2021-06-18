@@ -36,4 +36,5 @@ impl Config for Runtime {
     type Burn = Burn;
     type BurnDestination = Society;
     type WeightInfo = WeightInfo<Runtime>;
+	type SpendFunds = Bounties;
 }

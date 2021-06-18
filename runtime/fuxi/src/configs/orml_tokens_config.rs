@@ -11,12 +11,16 @@ parameter_type_with_key! {
 	};
 }
 
+parameter_types! {
+	pub TreasuryModuleAccount: AccountId = UniArtsTreasuryModuleId::get().into_account();
+}
+
 impl Config for Runtime {
     type Event = Event;
     type Balance = Balance;
     type Amount = Amount;
     type CurrencyId = CurrencyId;
     type ExistentialDeposits = ExistentialDeposits;
-    type OnDust = orml_tokens::TransferDust<Runtime, UniArtsTreasuryModuleId>;
+    type OnDust = orml_tokens::TransferDust<Runtime, TreasuryModuleAccount>;
     type WeightInfo = WeightInfo<Runtime>;
 }

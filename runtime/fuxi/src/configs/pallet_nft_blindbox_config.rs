@@ -1,5 +1,4 @@
 use pallet_nft_blindbox::Config;
-use uniarts_primitives::*;
 use crate::*;
 
 impl Config for Runtime {

@@ -42,7 +42,7 @@ pub struct LightDeps<C, F, P> {
 /// Instantiate all full RPC extensions.
 pub fn create_full<C, P>(
     deps: FullDeps<C, P>,
-) -> RpcExtension where
+) -> jsonrpc_core::IoHandler<sc_rpc::Metadata> where
     C: ProvideRuntimeApi<Block>,
     C: HeaderBackend<Block> + HeaderMetadata<Block, Error=BlockChainError> + 'static,
     C: Send + Sync + 'static,
@@ -88,7 +88,7 @@ pub fn create_full<C, P>(
 }
 
 /// Instantiate all RPC extensions for light node.
-pub fn create_light<C, P, F>(deps: LightDeps<C, F, P>) -> RpcExtension
+pub fn create_light<C, P, F>(deps: LightDeps<C, F, P>) -> jsonrpc_core::IoHandler<sc_rpc::Metadata>
     where
         C: 'static + Send + Sync,
         C: ProvideRuntimeApi<Block>,

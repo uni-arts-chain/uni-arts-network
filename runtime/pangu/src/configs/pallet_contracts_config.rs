@@ -5,6 +5,7 @@ use frame_support::weights::Weight;
 use uniarts_primitives::*;
 pub use crate::constants::currency::*;
 pub use crate::constants::time::*;
+use core::convert::TryInto;
 
 use crate::*;
 use crate::frame_system_config::RuntimeBlockWeights;

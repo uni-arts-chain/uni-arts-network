@@ -1,5 +1,5 @@
 use pallet_transaction_payment::Config;
-use sp_runtime::Perquintill;
+use sp_runtime::{Perquintill, FixedPointNumber};
 
 use uniarts_primitives::*;
 pub use crate::constants::currency::*;

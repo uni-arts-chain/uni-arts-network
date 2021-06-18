@@ -26,3 +26,7 @@ pub mod pallet_membership_config;
 pub mod pallet_identity_config;
 pub mod pallet_balances_config;
 pub mod pallet_bounties_config;
+pub mod pallet_utility_config;
+pub mod pallet_multisig_config;
+pub mod pallet_indices_config;
+pub mod pallet_recovery_config;

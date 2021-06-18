@@ -263,58 +263,6 @@ impl pallet_proxy::Config for Runtime {
 	type WeightInfo = weights::pallet_proxy::WeightInfo<Runtime>;
 }
 
-impl pallet_utility::Config for Runtime {
-	type Event = Event;
-	type Call = Call;
-	type WeightInfo = weights::pallet_utility::WeightInfo<Runtime>;
-}
-
-parameter_types! {
-	// One storage item; key size is 32; value is size 4+4+16+32 bytes = 56 bytes.
-	pub const DepositBase: Balance = deposit(1, 88);
-	// Additional storage item size of 32 bytes.
-	pub const DepositFactor: Balance = deposit(0, 32);
-	pub const MaxSignatories: u16 = 100;
-}
-
-impl pallet_multisig::Config for Runtime {
-	type Event = Event;
-	type Call = Call;
-	type Currency = Uart;
-	type DepositBase = DepositBase;
-	type DepositFactor = DepositFactor;
-	type MaxSignatories = MaxSignatories;
-	type WeightInfo = weights::pallet_multisig::WeightInfo<Runtime>;
-}
-
-parameter_types! {
-	pub const IndexDeposit: Balance = 1 * UART;
-}
-impl pallet_indices::Config for Runtime {
-	type AccountIndex = AccountIndex;
-	type Currency = Uart;
-	type Deposit = IndexDeposit;
-	type Event = Event;
-	type WeightInfo = weights::pallet_indices::WeightInfo<Runtime>;
-}
-
-parameter_types! {
-	pub const ConfigDepositBase: Balance = 10 * MILLI;
-	pub const FriendDepositFactor: Balance = MILLI;
-	pub const MaxFriends: u16 = 9;
-	pub const RecoveryDeposit: Balance = 10 * MILLI;
-}
-
-impl pallet_recovery::Config for Runtime {
-	type Event = Event;
-	type Call = Call;
-	type Currency = Balances;
-	type ConfigDepositBase = ConfigDepositBase;
-	type FriendDepositFactor = FriendDepositFactor;
-	type MaxFriends = MaxFriends;
-	type RecoveryDeposit = RecoveryDeposit;
-}
-
 // parameter_types! {
 // 	pub const TicketPrice: Balance = 10 * UART;
 // 	pub const LuckyPeriod: BlockNumber = 1200;

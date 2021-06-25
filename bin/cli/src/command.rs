@@ -284,7 +284,7 @@ pub fn run() -> sc_cli::Result<()> {
 			info!("  \\____/|_| |_|_|    /_/    \\_\\_|   \\__|___/  \\_____|_| |_|\\__,_|_|_| |_|");
 			info!("                                                                         ");
 			info!("                                                                         ");
-			info!("  by UniArts Network, 2018-2020");
+			info!("  by UniArts Network, 2018-2021");
 
 			if chain_spec.is_pangu_network() {
 				runner.run_node_until_exit(|config| match config.role {

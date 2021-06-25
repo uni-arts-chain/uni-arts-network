@@ -156,6 +156,13 @@ pub fn new_partial<RuntimeApi, Executor>(config: &mut Configuration) -> Result<s
     })
 }
 
+fn remote_keystore(_url: &String) -> Result<Arc<LocalKeystore>, &'static str> {
+    // FIXME: here would the concrete keystore be built,
+    //        must return a concrete type (NOT `LocalKeystore`) that
+    //        implements `CryptoStore` and `SyncCryptoStore`
+    Err("Remote Keystore not supported.")
+}
+
 /// Builds a new service for a full client.
 pub fn new_full<RuntimeApi, Executor>(mut config: Configuration) -> Result<(TaskManager, Arc<FullClient<RuntimeApi, Executor>>), ServiceError>
     where
@@ -243,6 +250,7 @@ pub fn new_full<RuntimeApi, Executor>(mut config: Configuration) -> Result<(Task
 
     if role.is_authority() {
         let proposer = sc_basic_authorship::ProposerFactory::new(
+            task_manager.spawn_handle(),
             client.clone(),
             transaction_pool,
             prometheus_registry.as_ref(),
@@ -338,6 +346,8 @@ pub fn new_light<RuntimeApi, Executor>(mut config: Configuration) -> Result<Task
         sc_service::new_light_parts::<Block, RuntimeApi, Executor>(&config)?;
 
     config.network.extra_sets.push(sc_finality_grandpa::grandpa_peers_set_config());
+
+    let select_chain = sc_consensus::LongestChain::new(backend.clone());
 
     let transaction_pool = Arc::new(sc_transaction_pool::BasicPool::new_light(
         config.transaction_pool.clone(),

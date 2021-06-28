@@ -11,7 +11,7 @@ pub trait UniartsClient<Block, Backend, Runtime>: Sized
     + Send
     + Sync
     + sc_client_api::BlockchainEvents<Block>
-    + sp_api::CallApiAt<Block, Error = sp_blockchain::Error, StateBackend = Backend::State>
+    + sp_api::CallApiAt<Block>
     + sp_api::ProvideRuntimeApi<Block, Api = Runtime::RuntimeApi>
     + sp_blockchain::HeaderBackend<Block>
     where
@@ -28,7 +28,7 @@ impl<Block, Backend, Runtime, Client> UniartsClient<Block, Backend, Runtime> for
         Client: Sized
         + Send
         + Sync
-        + sp_api::CallApiAt<Block, Error = sp_blockchain::Error, StateBackend = Backend::State>
+        + sp_api::CallApiAt<Block>
         + sp_api::ProvideRuntimeApi<Block, Api = Runtime::RuntimeApi>
         + sp_blockchain::HeaderBackend<Block>
         + sc_client_api::BlockchainEvents<Block>,

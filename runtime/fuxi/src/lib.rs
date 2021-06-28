@@ -82,8 +82,6 @@ pub use uniarts_primitives::{
 
 /// Import configs.
 // pub use pallet_certificate;
-pub use pallet_nft_multi;
-pub use pallet_nicks;
 pub use pallet_staking;
 pub use pallet_validator_set;
 pub use uniarts_common::*;

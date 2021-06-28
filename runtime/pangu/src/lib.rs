@@ -81,9 +81,6 @@ pub use uniarts_primitives::{
 
 /// Import configs.
 // pub use pallet_certificate;
-pub use pallet_assets;
-pub use pallet_nft;
-pub use pallet_nicks;
 pub use pallet_staking;
 pub use pallet_validator_set;
 pub use uniarts_common::*;
@@ -180,51 +177,51 @@ construct_runtime!(
 		NodeBlock = opaque::Block,
 		UncheckedExtrinsic = UncheckedExtrinsic
 	{
-		System: frame_system::{Module, Call, Config, Storage, Event<T>},
-		RandomnessCollectiveFlip: pallet_randomness_collective_flip::{Module, Call, Storage},
-		Timestamp: pallet_timestamp::{Module, Call, Storage, Inherent},
-		Indices: pallet_indices::{Module, Call, Storage, Config<T>, Event<T>},
+		System: frame_system::{Module, Call, Config, Storage, Event<T>} = 0,
+		Timestamp: pallet_timestamp::{Module, Call, Storage, Inherent} = 1,
+		// System scheduler.
+		Scheduler: pallet_scheduler::{Module, Call, Storage, Event<T>} = 2,
+		Utility: pallet_utility::{Module, Call, Event} = 3,
+		Multisig: pallet_multisig::{Module, Call, Storage, Event<T>} =4,
+		Proxy: pallet_proxy::{Module, Call, Storage, Event<T>} = 5,
+		RandomnessCollectiveFlip: pallet_randomness_collective_flip::{Module, Call, Storage} = 6,
 
-		Authorship: pallet_authorship::{Module, Call, Storage},
-		Session: pallet_session::{Module, Call, Storage, Event, Config<T>},
-		ValidatorSet: pallet_validator_set::{Module, Call, Storage, Event<T>, Config<T>},
-		Aura: pallet_aura::{Module, Config<T>},
-		Grandpa: pallet_grandpa::{Module, Call, Storage, Config, Event},
-		Rewards: pallet_rewards::{Module, Call, Storage, Event<T>},
-		Staking: pallet_staking::{Module, Call, Storage, Event<T>},
-		Vesting: pallet_vesting::{Module, Call, Storage, Event<T>, Config<T>},
+		Indices: pallet_indices::{Module, Call, Storage, Config<T>, Event<T>} = 10,
+		Authorship: pallet_authorship::{Module, Call, Storage} = 11,
+		Session: pallet_session::{Module, Call, Storage, Event, Config<T>} = 12,
+		ValidatorSet: pallet_validator_set::{Module, Call, Storage, Event<T>, Config<T>} = 13,
+		Aura: pallet_aura::{Module, Config<T>} = 14,
+		Grandpa: pallet_grandpa::{Module, Call, Storage, Config, Event} = 15,
+		Rewards: pallet_rewards::{Module, Call, Storage, Event<T>} = 16,
+		Staking: pallet_staking::{Module, Call, Storage, Event<T>} = 17,
+		Vesting: pallet_vesting::{Module, Call, Storage, Event<T>, Config<T>} = 18,
 
 		// Nicks: pallet_nicks::{Module, Call, Storage, Event<T>},
-		Balances: pallet_balances::{Module, Call, Storage, Config<T>, Event<T>},
-		Contracts: pallet_contracts::{Module, Call, Storage, Event<T>, Config},
+		Balances: pallet_balances::{Module, Call, Storage, Config<T>, Event<T>} = 21,
+		Contracts: pallet_contracts::{Module, Call, Storage, Event<T>, Config} = 22,
 		// Lotteries: pallet_lotteries::{Module, Call, Storage, Event<T>},
 		// Uart: pallet_balances::<Instance0>::{Module, Call, Storage, Config<T>, Event<T>},
-		Uink: pallet_balances::<Instance1>::{Module, Call, Storage, Config<T>, Event<T>},
+		Uink: pallet_balances::<Instance1>::{Module, Call, Storage, Config<T>, Event<T>} = 23,
 
 		// Governance
-		Council: pallet_collective::<Instance0>::{Module, Call, Storage, Origin<T>, Event<T>, Config<T>},
-		CouncilMembership: pallet_membership::<Instance0>::{Module, Call, Storage, Event<T>, Config<T>},
-		Treasury: pallet_treasury::{Module, Call, Storage, Config, Event<T>},
-		Bounties: pallet_bounties::{Module, Call, Storage, Event<T>},
-		TechnicalCommittee: pallet_collective::<Instance1>::{Module, Call, Storage, Origin<T>, Config<T>, Event<T>},
-		TechnicalMembership: pallet_membership::<Instance1>::{Module, Call, Storage, Config<T>, Event<T>},
-		Identity: pallet_identity::{Module, Call, Storage, Event<T>},
-		ElectionsPhragmen: pallet_elections_phragmen::{Module, Call, Storage, Event<T>},
+		Council: pallet_collective::<Instance0>::{Module, Call, Storage, Origin<T>, Event<T>, Config<T>} = 31,
+		CouncilMembership: pallet_membership::<Instance0>::{Module, Call, Storage, Event<T>, Config<T>} = 32,
+		Treasury: pallet_treasury::{Module, Call, Storage, Config, Event<T>} = 33,
+		Bounties: pallet_bounties::{Module, Call, Storage, Event<T>} = 34,
+		TechnicalCommittee: pallet_collective::<Instance1>::{Module, Call, Storage, Origin<T>, Config<T>, Event<T>} = 35,
+		TechnicalMembership: pallet_membership::<Instance1>::{Module, Call, Storage, Config<T>, Event<T>} = 36,
+		Identity: pallet_identity::{Module, Call, Storage, Event<T>} = 37,
+		ElectionsPhragmen: pallet_elections_phragmen::{Module, Call, Storage, Event<T>} = 38,
+
 		// Society module.
-		Society: pallet_society::{Module, Call, Storage, Event<T>},
+		Society: pallet_society::{Module, Call, Storage, Event<T>} = 41,
+		TransactionPayment: pallet_transaction_payment::{Module, Storage} = 42,
+		Sudo: pallet_sudo::{Module, Call, Config<T>, Storage, Event<T>} = 43,
+		Recovery: pallet_recovery::{Module, Call, Storage, Event<T>} = 44,
 
-		// System scheduler.
-		Scheduler: pallet_scheduler::{Module, Call, Storage, Event<T>},
-		TransactionPayment: pallet_transaction_payment::{Module, Storage},
-		Sudo: pallet_sudo::{Module, Call, Config<T>, Storage, Event<T>},
-
-		Names: pallet_names::{Module, Call, Storage, Event<T>},
-		Assets: pallet_assets::{Module, Call, Storage, Event<T>},
-		Nft: pallet_nft::{Module, Call, Storage, Event<T>},
-		Utility: pallet_utility::{Module, Call, Event},
-		Proxy: pallet_proxy::{Module, Call, Storage, Event<T>},
-		Multisig: pallet_multisig::{Module, Call, Storage, Event<T>},
-		Recovery: pallet_recovery::{Module, Call, Storage, Event<T>},
+		Names: pallet_names::{Module, Call, Storage, Event<T>} = 51,
+		Assets: pallet_assets::{Module, Call, Storage, Event<T>} = 52,
+		Nft: pallet_nft::{Module, Call, Storage, Event<T>} = 53,
 	}
 );
 

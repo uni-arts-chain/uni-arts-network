@@ -47,6 +47,7 @@ sp-blockchain = { version = "3.0.0" }
 sp-block-builder = { version = "3.0.0" }
 sp-offchain = { version = "3.0.0" }
 sp-session = { version = "3.0.0" }
+sp-storage = { version = "3.0.0" }
 sp-trie = { version = "3.0.0" }
 
 frame-benchmarking = { version = "3.0.0" }

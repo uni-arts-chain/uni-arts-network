@@ -422,7 +422,7 @@ pub fn new_chain_ops<Runtime, Dispatch>(
     config: &mut Configuration,
 ) -> Result<
     (
-        Arc<FullClient<Runtime, Dispatch>>,
+        Arc<Client>,
         Arc<FullBackend>,
         BasicQueue<Block, PrefixedMemoryDB<BlakeTwo256>>,
         TaskManager,
@@ -436,15 +436,25 @@ pub fn new_chain_ops<Runtime, Dispatch>(
 {
     config.keystore = KeystoreConfig::InMemory;
 
-    let PartialComponents {
-        client,
-        backend,
-        import_queue,
-        task_manager,
-        ..
-    } = new_partial::<Runtime, Dispatch>(config)?;
-
-    Ok((client, backend, import_queue, task_manager))
+    if config.chain_spec.is_fuxi_network() {
+        let PartialComponents {
+            client,
+            backend,
+            import_queue,
+            task_manager,
+            ..
+        } = new_partial::<fuxi_runtime::RuntimeApi, FuxiExecutor>(config)?;
+        Ok((Arc::new(Client::Fuxi(client)), backend, import_queue, task_manager))
+    } else {
+        let PartialComponents {
+            client,
+            backend,
+            import_queue,
+            task_manager,
+            ..
+        } = new_partial::<pangu_runtime::RuntimeApi, PanguExecutor>(config)?;
+        Ok((Arc::new(Client::Pangu(client)), backend, import_queue, task_manager))
+    }
 }
 
 /// Create a new Uniarts service for a full node.
@@ -454,13 +464,13 @@ pub fn pangu_new_full(
 ) -> Result<
     (
         TaskManager,
-        Arc<impl UniartsClient<Block, FullBackend, pangu_runtime::RuntimeApi>>,
+        Arc<Client>,
     ),
     ServiceError,
 > {
     let (components, client) = new_full::<pangu_runtime::RuntimeApi, PanguExecutor>(config)?;
 
-    Ok((components, client))
+    Ok((components, Arc::new(Client::Pangu(client))))
 }
 
 /// Create a new Uniarts service for a light client.
@@ -475,13 +485,13 @@ pub fn fuxi_new_full(
 ) -> Result<
     (
         TaskManager,
-        Arc<impl UniartsClient<Block, FullBackend, fuxi_runtime::RuntimeApi>>,
+        Arc<Client>,
     ),
     ServiceError,
 > {
     let (components, client) = new_full::<fuxi_runtime::RuntimeApi, FuxiExecutor>(config)?;
 
-    Ok((components, client))
+    Ok((components, Arc::new(Client::Fuxi(client))))
 }
 
 /// Create a new Uniarts service for a light client.

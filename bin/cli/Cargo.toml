@@ -12,7 +12,7 @@ structopt = "0.3.8"
 log = { version = "0.4.11" }
 
 # uniarts
-uniarts-service = { path = "../service", default-features = false, optional = true }
+uniarts-service = { path = "../service", default-features = false }
 uniarts-primitives = { git = "https://github.com/uni-arts-chain/uni-arts-common.git", tag = "v3.0.0" }
 
 # substratem
@@ -36,7 +36,7 @@ wasmtime = [
 ]
 
 cli = [
-    "uniarts-service",
+    "uniarts-service/full-node",
     "sp-core",
     "sc-cli",
     "sc-service",

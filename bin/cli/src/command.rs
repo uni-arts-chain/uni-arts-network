@@ -290,7 +290,7 @@ pub fn run() -> sc_cli::Result<()> {
 				runner.run_node_until_exit(|config| async move {
 					match config.role {
 						Role::Light => {
-							uniarts_service::pangu_new_light(config).map(|(task_manager, _)| task_manager)
+							uniarts_service::pangu_new_light(config)
 						},
 						_ => uniarts_service::pangu_new_full(config).map(|(task_manager, _)| task_manager),
 					}.map_err(sc_cli::Error::Service)
@@ -299,7 +299,7 @@ pub fn run() -> sc_cli::Result<()> {
 				runner.run_node_until_exit(|config| async move {
 					match config.role {
 						Role::Light => {
-							uniarts_service::fuxi_new_light(config).map(|(task_manager, _)| task_manager)
+							uniarts_service::fuxi_new_light(config)
 						},
 						_ => uniarts_service::fuxi_new_full(config).map(|(task_manager, _)| task_manager),
 					}.map_err(sc_cli::Error::Service)

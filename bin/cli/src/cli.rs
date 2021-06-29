@@ -15,10 +15,6 @@ pub enum Subcommand {
 	/// Key management cli utilities
 	Key(KeySubcommand),
 
-	/// The custom benchmark subcommmand benchmarking runtime pallets.
-	#[structopt(name = "benchmark", about = "Benchmark runtime pallets.")]
-	Benchmark(frame_benchmarking_cli::BenchmarkCmd),
-
 	/// Verify a signature for a message, provided on STDIN, with a given (public or secret) key.
 	Verify(VerifyCmd),
 

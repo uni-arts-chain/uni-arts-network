@@ -18,17 +18,16 @@ use uniarts_rpc::{FullDeps};
 use std::sync::Arc;
 use std::time::Duration;
 use sc_client_api::{ExecutorProvider, RemoteBackend, StateBackendFor};
-use sc_service::{error::Error as ServiceError, TaskManager, PartialComponents, config::{KeystoreConfig, PrometheusConfig}};
+use sc_service::{error::Error as ServiceError, TaskManager, config::PrometheusConfig};
 use sp_inherents::InherentDataProviders;
 use sc_executor::native_executor_instance;
 pub use sc_executor::{NativeExecutor, NativeExecutionDispatch};
-use sp_consensus::{import_queue::BasicQueue};
 use sp_consensus_aura::sr25519::{AuthorityPair as AuraPair};
-use sc_finality_grandpa::{FinalityProofProvider as GrandpaFinalityProofProvider, SharedVoterState};
+use sc_finality_grandpa::SharedVoterState;
 use sp_api::ConstructRuntimeApi;
 use sp_runtime::traits::BlakeTwo256;
-use sp_trie::PrefixedMemoryDB;
 use substrate_prometheus_endpoint::Registry;
+use sc_keystore::LocalKeystore;
 
 type FullClient<RuntimeApi, Executor> = sc_service::TFullClient<Block, RuntimeApi, Executor>;
 type FullBackend = sc_service::TFullBackend<Block>;
@@ -99,7 +98,7 @@ pub fn new_partial<RuntimeApi, Executor>(config: &mut Configuration) -> Result<s
             sc_finality_grandpa::GrandpaBlockImport<FullBackend, Block, FullClient<RuntimeApi, Executor>, FullSelectChain>,
             AuraPair
         >,
-        sc_finality_grandpa::LinkHalf<Block, FullClient<RuntimeApi, Executor>, FullSelectChain>
+        sc_finality_grandpa::LinkHalf<Block, FullClient<RuntimeApi, Executor>, FullSelectChain>,
     )
 >, ServiceError>
     where
@@ -116,7 +115,7 @@ pub fn new_partial<RuntimeApi, Executor>(config: &mut Configuration) -> Result<s
 
     let inherent_data_providers = sp_inherents::InherentDataProviders::new();
 
-    let (client, backend, keystore, task_manager) =
+    let (client, backend, keystore_container, task_manager) =
         sc_service::new_full_parts::<Block, RuntimeApi, Executor>(&config)?;
     let client = Arc::new(client);
 
@@ -216,10 +215,10 @@ pub fn new_full<RuntimeApi, Executor>(mut config: Configuration) -> Result<(Task
 
     let role = config.role.clone();
     let force_authoring = config.force_authoring;
+    let backoff_authoring_blocks: Option<()> = None;
     let name = config.network.node_name.clone();
     let enable_grandpa = !config.disable_grandpa;
     let prometheus_registry = config.prometheus_registry().cloned();
-    let telemetry_connection_sinks = sc_service::TelemetryConnectionSinks::default();
 
     let rpc_extensions_builder = {
         let client = client.clone();
@@ -236,17 +235,22 @@ pub fn new_full<RuntimeApi, Executor>(mut config: Configuration) -> Result<(Task
         })
     };
 
-    sc_service::spawn_tasks(sc_service::SpawnTasksParams {
-        network: network.clone(),
-        client: client.clone(),
-        keystore: keystore_container.sync_keystore(),
-        task_manager: &mut task_manager,
-        transaction_pool: transaction_pool.clone(),
-        rpc_extensions_builder: rpc_extensions_builder,
-        on_demand: None,
-        remote_blockchain: None,
-        backend, network_status_sinks, system_rpc_tx, config,
-    })?;
+    let (_rpc_handlers, telemetry_connection_notifier) = sc_service::spawn_tasks(
+        sc_service::SpawnTasksParams {
+            network: network.clone(),
+            client: client.clone(),
+            keystore: keystore_container.sync_keystore(),
+            task_manager: &mut task_manager,
+            transaction_pool: transaction_pool.clone(),
+            rpc_extensions_builder,
+            on_demand: None,
+            remote_blockchain: None,
+            backend,
+            network_status_sinks,
+            system_rpc_tx,
+            config,
+        },
+    )?;
 
     if role.is_authority() {
         let proposer = sc_basic_authorship::ProposerFactory::new(
@@ -319,12 +323,6 @@ pub fn new_full<RuntimeApi, Executor>(mut config: Configuration) -> Result<(Task
             "grandpa-voter",
             sc_finality_grandpa::run_grandpa_voter(grandpa_config)?
         );
-    } else {
-        sc_finality_grandpa::setup_disabled_grandpa(
-            client.clone(),
-            &inherent_data_providers,
-            network,
-        )?;
     }
 
     network_starter.start_network();

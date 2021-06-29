@@ -59,7 +59,6 @@ pub use pallet_balances::Call as BalancesCall;
 #[cfg(any(feature = "std", test))]
 pub use frame_system::Call as SystemCall;
 #[cfg(any(feature = "std", test))]
-pub use pallet_staking::StakerStatus;
 pub use pallet_timestamp::Call as TimestampCall;
 pub use sp_runtime::{Permill, Perbill, Percent, ModuleId};
 
@@ -198,7 +197,7 @@ construct_runtime!(
 
 		// Nicks: pallet_nicks::{Module, Call, Storage, Event<T>},
 		Balances: pallet_balances::{Module, Call, Storage, Config<T>, Event<T>} = 21,
-		Contracts: pallet_contracts::{Module, Call, Storage, Event<T>, Config} = 22,
+		Contracts: pallet_contracts::{Module, Call, Storage, Config<T>, Event<T>} = 22,
 		// Lotteries: pallet_lotteries::{Module, Call, Storage, Event<T>},
 		// Uart: pallet_balances::<Instance0>::{Module, Call, Storage, Config<T>, Event<T>},
 		Uink: pallet_balances::<Instance1>::{Module, Call, Storage, Config<T>, Event<T>} = 23,
@@ -226,7 +225,7 @@ construct_runtime!(
 );
 
 /// The address format for describing accounts.
-pub type Address = AccountId;
+pub type Address = sp_runtime::MultiAddress<AccountId, ()>;
 /// Block type as expected by this runtime.
 pub type Block = generic::Block<Header, UncheckedExtrinsic>;
 /// A Block signed with a Justification

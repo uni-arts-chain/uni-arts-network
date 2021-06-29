@@ -148,6 +148,20 @@ dependencies = [
 ]
 
 [[package]]
+name = "arithmetic"
+version = "2.1.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "130851fd264cdff74e909f1bd537f2fde38d055b4166218dd02f7ced78d63e36"
+dependencies = [
+ "debug-derive",
+ "integer-sqrt",
+ "num-traits",
+ "serde",
+ "tetcore-std",
+ "tetsy-scale-codec",
+]
+
+[[package]]
 name = "arrayref"
 version = "0.3.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1181,6 +1195,17 @@ dependencies = [
 ]
 
 [[package]]
+name = "debug-derive"
+version = "2.1.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "b1963233e84849a8eac13a504073545c8a73b0413be5d256aa3ea3ddae84853c"
+dependencies = [
+ "proc-macro2",
+ "quote",
+ "syn",
+]
+
+[[package]]
 name = "derive_more"
 version = "0.99.14"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1260,6 +1285,12 @@ dependencies = [
  "byteorder",
  "quick-error 1.2.3",
 ]
+
+[[package]]
+name = "downcast-rs"
+version = "1.2.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "9ea835d29036a4087793836fa931b08837ad5e957da9e23886b29586fb9b6650"
 
 [[package]]
 name = "dyn-clonable"
@@ -1371,6 +1402,12 @@ dependencies = [
 ]
 
 [[package]]
+name = "environ"
+version = "1.1.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "d186e270c5dc21285d22ce76b9f20217f068c65c569c5dc1404c38253eb1968a"
+
+[[package]]
 name = "environmental"
 version = "1.1.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1419,6 +1456,30 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "e43f2f1833d64e33f15592464d6fdd70f349dda7b1a53088eb83cd94014008c5"
 dependencies = [
  "futures 0.3.15",
+]
+
+[[package]]
+name = "externalities"
+version = "0.8.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "a812d6a985f2d90f9f3eda2f4c1cbd7250e010cfd2b282f740b398c71b9678f7"
+dependencies = [
+ "environ",
+ "tetcore-std",
+ "tetcore-storage",
+ "tetsy-scale-codec",
+]
+
+[[package]]
+name = "externalities"
+version = "2.1.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "987ec99b0bc89b49a726d5c5a45e9386fc497f51aff711180461b841b48d1cb7"
+dependencies = [
+ "environ",
+ "tetcore-std",
+ "tetcore-storage",
+ "tetsy-scale-codec",
 ]
 
 [[package]]
@@ -1545,6 +1606,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "forktree"
+version = "2.1.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "f46c45588c285f9c9166af7d1faef32ec82c3e692e2b37d7b4c10ac2dbcdc499"
+dependencies = [
+ "tetsy-scale-codec",
+]
+
+[[package]]
 name = "form_urlencoded"
 version = "1.0.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1564,7 +1634,7 @@ dependencies = [
  "frame-system",
  "linregress",
  "parity-scale-codec",
- "paste",
+ "paste 1.0.5",
  "sp-api",
  "sp-io",
  "sp-runtime",
@@ -1639,7 +1709,7 @@ dependencies = [
  "log",
  "once_cell",
  "parity-scale-codec",
- "paste",
+ "paste 1.0.5",
  "serde",
  "smallvec 1.6.1",
  "sp-arithmetic",
@@ -2469,6 +2539,22 @@ dependencies = [
 ]
 
 [[package]]
+name = "if-watch"
+version = "0.2.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "ae8ab7f67bad3240049cb24fb9cb0b4c2c6af4c245840917fbbdededeee91179"
+dependencies = [
+ "async-io",
+ "futures 0.3.15",
+ "futures-lite",
+ "if-addrs",
+ "ipnet",
+ "libc",
+ "log",
+ "winapi 0.3.9",
+]
+
+[[package]]
 name = "impl-codec"
 version = "0.5.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -3058,7 +3144,7 @@ dependencies = [
  "data-encoding",
  "dns-parser",
  "futures 0.3.15",
- "if-watch",
+ "if-watch 0.1.8",
  "lazy_static",
  "libp2p-core",
  "libp2p-swarm",
@@ -3200,7 +3286,7 @@ dependencies = [
  "async-io",
  "futures 0.3.15",
  "futures-timer 3.0.2",
- "if-watch",
+ "if-watch 0.1.8",
  "ipnet",
  "libc",
  "libp2p-core",
@@ -3725,10 +3811,34 @@ dependencies = [
 ]
 
 [[package]]
+name = "node-inspect"
+version = "0.8.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "11561d78bed53ef3640e1a49f4f7f3e17e4aa3ed1d01dded4e52aadafeddc9d1"
+dependencies = [
+ "derive_more",
+ "log",
+ "structopt",
+ "tc-cli",
+ "tc-client-api",
+ "tc-service",
+ "tet-core",
+ "tetsy-scale-codec",
+ "tp-blockchain",
+ "tp-runtime",
+]
+
+[[package]]
 name = "nodrop"
 version = "0.1.14"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "72ef4a56884ca558e5ddb05a1d1e7e1bfd9a68d9ed024c21704cc98872dae1bb"
+
+[[package]]
+name = "nohash"
+version = "0.2.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "a0f889fb66f7acdf83442c35775764b51fed3c606ab9cee51500dbde2cf528ca"
 
 [[package]]
 name = "nohash-hasher"
@@ -4721,6 +4831,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "panic-handler"
+version = "2.1.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "6c8721f24112c95f5f31ca61b0d2f0fa2b6d8acb9f37051e9b2b0365de57111f"
+dependencies = [
+ "backtrace",
+]
+
+[[package]]
 name = "parity-db"
 version = "0.2.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -4949,9 +5068,28 @@ dependencies = [
 
 [[package]]
 name = "paste"
+version = "0.1.18"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "45ca20c77d80be666aef2b45486da86238fabe33e38306bd3118fe4af33fa880"
+dependencies = [
+ "paste-impl",
+ "proc-macro-hack",
+]
+
+[[package]]
+name = "paste"
 version = "1.0.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "acbf547ad0c65e31259204bd90935776d1c693cec2f4ff7abb7a1bbbd40dfe58"
+
+[[package]]
+name = "paste-impl"
+version = "0.1.18"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "d95a7db200b97ef370c8e6de0088252f7e0dfff7d047a28528e47456c0fc98b6"
+dependencies = [
+ "proc-macro-hack",
+]
 
 [[package]]
 name = "pbkdf2"
@@ -5237,6 +5375,20 @@ dependencies = [
 
 [[package]]
 name = "prometheus"
+version = "0.10.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "30d70cf4412832bcac9cffe27906f4a66e450d323525e977168c70d1b36120ae"
+dependencies = [
+ "cfg-if 0.1.10",
+ "fnv",
+ "lazy_static",
+ "parking_lot 0.11.1",
+ "regex",
+ "thiserror",
+]
+
+[[package]]
+name = "prometheus"
 version = "0.11.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "c8425533e7122f0c3cc7a37e6244b16ad3a2cc32ae7ac6276e2a75da0d9c200d"
@@ -5247,6 +5399,21 @@ dependencies = [
  "parking_lot 0.11.1",
  "regex",
  "thiserror",
+]
+
+[[package]]
+name = "prometheus-endpoint"
+version = "0.8.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "541f166e5722c39ec2cf2ce5db99e76503e7c2311d01979d1cad70644eff7e4a"
+dependencies = [
+ "async-std",
+ "derive_more",
+ "futures-util",
+ "hyper 0.13.10",
+ "log",
+ "prometheus 0.10.0",
+ "tokio 0.2.25",
 ]
 
 [[package]]
@@ -5660,6 +5827,20 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "3acd125665422973a33ac9d3dd2df85edad0f4ae9b00dafb1a05e43a9f5ef8e7"
 dependencies = [
  "winapi 0.3.9",
+]
+
+[[package]]
+name = "remux"
+version = "0.8.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "abae755a6563579ea3f3c4ec2036fcf82d5611ab4dc3e187f4941b1bf67da1c4"
+dependencies = [
+ "futures 0.3.15",
+ "log",
+ "nohash",
+ "parking_lot 0.11.1",
+ "rand 0.7.3",
+ "static_assertions",
 ]
 
 [[package]]
@@ -6896,6 +7077,16 @@ dependencies = [
 ]
 
 [[package]]
+name = "serializer"
+version = "2.1.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "a1bdbd7427e1618ac1e1c45312ae5a968d7ec9241bf0e78a121b00cfebbc8376"
+dependencies = [
+ "serde",
+ "serde_json",
+]
+
+[[package]]
 name = "sha-1"
 version = "0.8.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -7006,7 +7197,7 @@ dependencies = [
  "approx 0.4.0",
  "num-complex 0.3.1",
  "num-traits",
- "paste",
+ "paste 1.0.5",
 ]
 
 [[package]]
@@ -7018,7 +7209,7 @@ dependencies = [
  "approx 0.5.0",
  "num-complex 0.4.0",
  "num-traits",
- "paste",
+ "paste 1.0.5",
 ]
 
 [[package]]
@@ -7452,7 +7643,7 @@ dependencies = [
  "lazy_static",
  "sp-core",
  "sp-runtime",
- "strum",
+ "strum 0.20.0",
 ]
 
 [[package]]
@@ -7541,7 +7732,7 @@ dependencies = [
  "log",
  "parity-scale-codec",
  "parity-util-mem",
- "paste",
+ "paste 1.0.5",
  "rand 0.7.3",
  "serde",
  "sp-application-crypto",
@@ -7759,7 +7950,7 @@ dependencies = [
  "futures-core",
  "futures-timer 3.0.2",
  "lazy_static",
- "prometheus",
+ "prometheus 0.11.0",
 ]
 
 [[package]]
@@ -7869,11 +8060,32 @@ dependencies = [
 
 [[package]]
 name = "strum"
+version = "0.16.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "6138f8f88a16d90134763314e3fc76fa3ed6a7db4725d6acf9a3ef95a3188d22"
+dependencies = [
+ "strum_macros 0.16.0",
+]
+
+[[package]]
+name = "strum"
 version = "0.20.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "7318c509b5ba57f18533982607f24070a55d353e90d4cae30c467cdb2ad5ac5c"
 dependencies = [
- "strum_macros",
+ "strum_macros 0.20.1",
+]
+
+[[package]]
+name = "strum_macros"
+version = "0.16.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "0054a7df764039a6cd8592b9de84be4bec368ff081d203a7d5371cbfa8e65c81"
+dependencies = [
+ "heck",
+ "proc-macro2",
+ "quote",
+ "syn",
 ]
 
 [[package]]
@@ -7945,7 +8157,7 @@ dependencies = [
  "futures-util",
  "hyper 0.13.10",
  "log",
- "prometheus",
+ "prometheus 0.11.0",
  "tokio 0.2.25",
 ]
 
@@ -8019,6 +8231,821 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "422045212ea98508ae3d28025bc5aaa2bd4a9cdaecd442a08da2ee620ee9ea95"
 
 [[package]]
+name = "tc-block-builder"
+version = "0.8.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "47a7da790d3b27bd9944fcfeed8d291a0064fc4f9bc6c8ee7273407825017810"
+dependencies = [
+ "tc-client-api",
+ "tet-core",
+ "tetsy-scale-codec",
+ "tp-api",
+ "tp-block-builder",
+ "tp-blockchain",
+ "tp-consensus",
+ "tp-inherents",
+ "tp-runtime",
+ "tp-state-machine 0.8.2",
+]
+
+[[package]]
+name = "tc-chain-spec"
+version = "2.0.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "ce3c0e34399f20fb259d186f9b32694be3cbf00174326cda56241bc0c99d62c0"
+dependencies = [
+ "impl-trait-for-tuples 0.2.1",
+ "serde",
+ "serde_json",
+ "tc-chain-spec-derive",
+ "tc-consensus-babe",
+ "tc-consensus-epochs",
+ "tc-finality-grandpa",
+ "tc-network",
+ "tc-telemetry",
+ "tet-core",
+ "tetsy-scale-codec",
+ "tp-chain-spec",
+ "tp-consensus-babe",
+ "tp-runtime",
+]
+
+[[package]]
+name = "tc-chain-spec-derive"
+version = "2.0.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "80a5c77e0e1f906866e9524917b9484811ff56159f4af93042136758bb557788"
+dependencies = [
+ "proc-macro-crate 0.1.5",
+ "proc-macro2",
+ "quote",
+ "syn",
+]
+
+[[package]]
+name = "tc-cli"
+version = "0.8.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "553f9b10ec2acd511625f1bd831184c55255ad34aaa5b635d8f7cac3aa273598"
+dependencies = [
+ "chrono",
+ "fdlimit",
+ "futures 0.3.15",
+ "hex",
+ "log",
+ "names",
+ "panic-handler",
+ "rand 0.7.3",
+ "regex",
+ "rpassword",
+ "serde",
+ "serde_json",
+ "structopt",
+ "tc-client-api",
+ "tc-keystore",
+ "tc-network",
+ "tc-service",
+ "tc-telemetry",
+ "tc-tracing",
+ "tet-core",
+ "tetcore-utils",
+ "tetsy-libp2p",
+ "tetsy-scale-codec",
+ "thiserror",
+ "tiny-bip39",
+ "tokio 0.2.25",
+ "tp-blockchain",
+ "tp-keyring",
+ "tp-keystore 0.8.1",
+ "tp-runtime",
+ "tp-version",
+]
+
+[[package]]
+name = "tc-client-api"
+version = "2.0.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "9f1a1a42e0c68188f4c3e2304ff4a3435ab265dd272d92ae261ce3742afc31f6"
+dependencies = [
+ "derive_more",
+ "externalities 0.8.2",
+ "fnv",
+ "futures 0.3.15",
+ "lazy_static",
+ "log",
+ "parking_lot 0.11.1",
+ "prometheus-endpoint",
+ "tc-executor",
+ "tet-core",
+ "tetcore-database",
+ "tetcore-std",
+ "tetcore-storage",
+ "tetcore-utils",
+ "tetsy-hash-db",
+ "tetsy-kvdb",
+ "tetsy-scale-codec",
+ "tp-api",
+ "tp-blockchain",
+ "tp-consensus",
+ "tp-inherents",
+ "tp-keystore 0.8.1",
+ "tp-runtime",
+ "tp-state-machine 0.8.2",
+ "tp-transaction-pool",
+ "tp-trie",
+ "tp-version",
+]
+
+[[package]]
+name = "tc-client-db"
+version = "0.8.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "efd11b56015382e78574c7140c9eafdb63192cc1cdccf4bdbe18e5bc209709c1"
+dependencies = [
+ "arithmetic",
+ "blake2-rfc",
+ "linked-hash-map",
+ "log",
+ "parking_lot 0.11.1",
+ "prometheus-endpoint",
+ "tc-client-api",
+ "tc-executor",
+ "tc-state-db",
+ "tet-core",
+ "tetcore-database",
+ "tetsy-hash-db",
+ "tetsy-kvdb",
+ "tetsy-kvdb-memorydb",
+ "tetsy-scale-codec",
+ "tetsy-util-mem",
+ "tp-blockchain",
+ "tp-consensus",
+ "tp-runtime",
+ "tp-state-machine 0.8.2",
+ "tp-trie",
+]
+
+[[package]]
+name = "tc-consensus"
+version = "0.8.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "0473d4ff2b742b4853d1eec0a82232fbb528a492fcab134edd93fd66d3077e75"
+dependencies = [
+ "tc-client-api",
+ "tp-blockchain",
+ "tp-consensus",
+ "tp-runtime",
+]
+
+[[package]]
+name = "tc-consensus-babe"
+version = "0.8.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "b235eb8b45b0d3c0e1831f1cf5e8c1f46c60222440938682fd1680eea3dca4ec"
+dependencies = [
+ "derive_more",
+ "forktree",
+ "futures 0.3.15",
+ "futures-timer 3.0.2",
+ "log",
+ "merlin",
+ "num-bigint",
+ "num-rational 0.2.4",
+ "num-traits",
+ "parking_lot 0.11.1",
+ "pdqselect",
+ "prometheus-endpoint",
+ "rand 0.7.3",
+ "retain_mut",
+ "schnorrkel",
+ "serde",
+ "tc-client-api",
+ "tc-consensus-epochs",
+ "tc-consensus-slots",
+ "tc-consensus-uncles",
+ "tc-keystore",
+ "tc-telemetry",
+ "tet-application-crypto",
+ "tet-core",
+ "tet-io",
+ "tetcore-utils",
+ "tetsy-scale-codec",
+ "tp-api",
+ "tp-block-builder",
+ "tp-blockchain",
+ "tp-consensus",
+ "tp-consensus-babe",
+ "tp-consensus-slots",
+ "tp-consensus-vrf",
+ "tp-inherents",
+ "tp-keystore 0.8.1",
+ "tp-runtime",
+ "tp-timestamp",
+ "tp-version",
+]
+
+[[package]]
+name = "tc-consensus-epochs"
+version = "0.8.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "b8e4a24a1216033d586715b9b5e83e78b5d9a86642f9123ce7e8dca154282349"
+dependencies = [
+ "forktree",
+ "parking_lot 0.11.1",
+ "tc-client-api",
+ "tetsy-scale-codec",
+ "tp-blockchain",
+ "tp-runtime",
+]
+
+[[package]]
+name = "tc-consensus-slots"
+version = "0.8.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "f06aaad523d90999d15d6b12c5e91e148bfcf7689f6f11f144fea37d2ba0a8fc"
+dependencies = [
+ "arithmetic",
+ "futures 0.3.15",
+ "futures-timer 3.0.2",
+ "log",
+ "parking_lot 0.11.1",
+ "tc-client-api",
+ "tc-telemetry",
+ "tet-application-crypto",
+ "tet-core",
+ "tetsy-scale-codec",
+ "thiserror",
+ "tp-api",
+ "tp-blockchain",
+ "tp-consensus",
+ "tp-consensus-slots",
+ "tp-inherents",
+ "tp-runtime",
+ "tp-state-machine 0.8.2",
+ "tp-trie",
+]
+
+[[package]]
+name = "tc-consensus-uncles"
+version = "0.8.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "7ec370f6a58a08b6211cd9fda63083a0bd8e83957187d568565400fdcdb7976f"
+dependencies = [
+ "log",
+ "tc-client-api",
+ "tet-core",
+ "tp-authorship",
+ "tp-consensus",
+ "tp-inherents",
+ "tp-runtime",
+]
+
+[[package]]
+name = "tc-executor"
+version = "0.8.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "ae0fa7f7c0db338ca57f62066209ce31ec4cab58309bd6c26fbd888313e00533"
+dependencies = [
+ "derive_more",
+ "externalities 0.8.2",
+ "lazy_static",
+ "libsecp256k1",
+ "log",
+ "panic-handler",
+ "parking_lot 0.11.1",
+ "serializer",
+ "tc-executor-common",
+ "tc-executor-twasmi",
+ "tet-core",
+ "tet-io",
+ "tetcore-wasm-interface",
+ "tetsy-scale-codec",
+ "tetsy-wasm",
+ "tp-api",
+ "tp-runtime-interface",
+ "tp-tasks",
+ "tp-trie",
+ "tp-version",
+ "twasmi",
+]
+
+[[package]]
+name = "tc-executor-common"
+version = "0.8.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "69cbe95b97a376ce80a2e423138f4cc79cf7d1002e43bbae3cb0627eef522455"
+dependencies = [
+ "derive_more",
+ "serializer",
+ "tet-core",
+ "tetcore-wasm-interface",
+ "tetsy-scale-codec",
+ "tetsy-wasm",
+ "thiserror",
+ "tp-allocator",
+ "twasmi",
+]
+
+[[package]]
+name = "tc-executor-twasmi"
+version = "0.8.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "f383b8ae141c7e5647288fe824cf9574c480835b0495062be2243ef59bbf4f97"
+dependencies = [
+ "log",
+ "tc-executor-common",
+ "tet-core",
+ "tetcore-wasm-interface",
+ "tetsy-scale-codec",
+ "tp-allocator",
+ "tp-runtime-interface",
+ "twasmi",
+]
+
+[[package]]
+name = "tc-finality-grandpa"
+version = "0.8.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "1dd5d3fe9f2f4263804f5b5999ea3b4a8325cf0b51ce7dc9827ec8a9d7caaf0c"
+dependencies = [
+ "arithmetic",
+ "derive_more",
+ "forktree",
+ "futures 0.3.15",
+ "futures-timer 3.0.2",
+ "linked-hash-map",
+ "log",
+ "parking_lot 0.11.1",
+ "pin-project 0.4.28",
+ "prometheus-endpoint",
+ "rand 0.7.3",
+ "serde_json",
+ "tc-block-builder",
+ "tc-client-api",
+ "tc-consensus",
+ "tc-keystore",
+ "tc-network",
+ "tc-network-gossip",
+ "tc-telemetry",
+ "tet-application-crypto",
+ "tet-core",
+ "tetcore-utils",
+ "tetsy-finality-grandpa",
+ "tetsy-scale-codec",
+ "tp-api",
+ "tp-blockchain",
+ "tp-consensus",
+ "tp-finality-grandpa",
+ "tp-inherents",
+ "tp-keystore 0.8.1",
+ "tp-runtime",
+]
+
+[[package]]
+name = "tc-informant"
+version = "0.8.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "051ad2d2369a7a8ae9f73ffaa2018b8d048c7aa995375a710dc8edf3d3c210ef"
+dependencies = [
+ "ansi_term 0.12.1",
+ "futures 0.3.15",
+ "log",
+ "tc-client-api",
+ "tc-network",
+ "tetcore-utils",
+ "tetsy-util-mem",
+ "tp-blockchain",
+ "tp-runtime",
+ "tp-transaction-pool",
+ "wasm-timer",
+]
+
+[[package]]
+name = "tc-keystore"
+version = "2.0.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "b62cc433b234da44b0d7f9afb83aca7fe19d69ec3d86a7bf622dc4f2f5c7b008"
+dependencies = [
+ "async-trait",
+ "derive_more",
+ "futures 0.3.15",
+ "futures-util",
+ "hex",
+ "merlin",
+ "parking_lot 0.11.1",
+ "rand 0.7.3",
+ "serde_json",
+ "subtle 2.4.0",
+ "tet-application-crypto",
+ "tet-core",
+ "tp-keystore 0.8.1",
+]
+
+[[package]]
+name = "tc-light"
+version = "2.0.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "d8c9708c3b513738cee08fbcafaa8578c4895dba282d179d48f6f941375c29b9"
+dependencies = [
+ "externalities 0.8.2",
+ "lazy_static",
+ "parking_lot 0.11.1",
+ "tc-client-api",
+ "tc-executor",
+ "tet-core",
+ "tetsy-hash-db",
+ "tetsy-scale-codec",
+ "tp-api",
+ "tp-blockchain",
+ "tp-runtime",
+ "tp-state-machine 0.8.2",
+]
+
+[[package]]
+name = "tc-network"
+version = "0.8.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "065d65224bf03134caeac53f618791e083b32a94609b5fb5235116ffd6e6bac9"
+dependencies = [
+ "arithmetic",
+ "async-std",
+ "async-trait",
+ "asynchronous-codec 0.5.0",
+ "bitflags",
+ "bs58",
+ "bytes 1.0.1",
+ "derive_more",
+ "either",
+ "erased-serde",
+ "fnv",
+ "forktree",
+ "futures 0.3.15",
+ "futures-timer 3.0.2",
+ "hex",
+ "ip_network",
+ "linked-hash-map",
+ "linked_hash_set",
+ "log",
+ "lru",
+ "nohash-hasher",
+ "parking_lot 0.11.1",
+ "pin-project 0.4.28",
+ "prometheus-endpoint",
+ "prost",
+ "prost-build",
+ "rand 0.7.3",
+ "serde",
+ "serde_json",
+ "smallvec 1.6.1",
+ "tc-block-builder",
+ "tc-client-api",
+ "tc-peerset",
+ "tet-core",
+ "tetcore-utils",
+ "tetsy-libp2p",
+ "tetsy-scale-codec",
+ "thiserror",
+ "tp-blockchain",
+ "tp-consensus",
+ "tp-runtime",
+ "unsigned-varint 0.6.0",
+ "void",
+ "wasm-timer",
+ "zeroize",
+]
+
+[[package]]
+name = "tc-network-gossip"
+version = "0.8.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "e5c56757dd8b8fde9ed76bb8e98ba181112267159d5bb4407deba46fe27f886d"
+dependencies = [
+ "futures 0.3.15",
+ "futures-timer 3.0.2",
+ "log",
+ "lru",
+ "prometheus-endpoint",
+ "tc-network",
+ "tetsy-libp2p",
+ "tp-runtime",
+ "wasm-timer",
+]
+
+[[package]]
+name = "tc-offchain"
+version = "2.0.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "9567050d2f23d7a1793b7df705f8d4df54f5cd3c42f3fd2016e6ce8465fb7037"
+dependencies = [
+ "bytes 0.5.6",
+ "fnv",
+ "futures 0.3.15",
+ "futures-timer 3.0.2",
+ "hyper 0.13.10",
+ "hyper-rustls",
+ "log",
+ "num_cpus",
+ "parking_lot 0.11.1",
+ "rand 0.7.3",
+ "tc-client-api",
+ "tc-keystore",
+ "tc-network",
+ "tet-core",
+ "tetcore-utils",
+ "tetsy-scale-codec",
+ "threadpool",
+ "tp-api",
+ "tp-offchain",
+ "tp-runtime",
+]
+
+[[package]]
+name = "tc-peerset"
+version = "2.0.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "98cf9b58d579caec583fad9a44d3debeb6f041ae6600ee25947333a24bceb932"
+dependencies = [
+ "futures 0.3.15",
+ "log",
+ "serde_json",
+ "tetcore-utils",
+ "tetsy-libp2p",
+ "wasm-timer",
+]
+
+[[package]]
+name = "tc-rpc"
+version = "2.0.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "0ff992e69d8768c0a21642b386c2428f526e3804b18e14d4c7539d549f6a7d24"
+dependencies = [
+ "futures 0.3.15",
+ "log",
+ "parking_lot 0.11.1",
+ "serde_json",
+ "tc-block-builder",
+ "tc-client-api",
+ "tc-executor",
+ "tc-keystore",
+ "tc-rpc-api",
+ "tc-tracing",
+ "tet-core",
+ "tetcore-utils",
+ "tetsy-hash-db",
+ "tetsy-jsonrpc-core",
+ "tetsy-jsonrpc-pubsub",
+ "tetsy-scale-codec",
+ "tp-api",
+ "tp-blockchain",
+ "tp-chain-spec",
+ "tp-keystore 0.8.1",
+ "tp-offchain",
+ "tp-rpc",
+ "tp-runtime",
+ "tp-session",
+ "tp-transaction-pool",
+ "tp-version",
+]
+
+[[package]]
+name = "tc-rpc-api"
+version = "0.8.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "ab5f41ec54d04f93e6c21f6ab1799ad1d2934c7c72b70fa1cc2f67fceb9b179b"
+dependencies = [
+ "derive_more",
+ "futures 0.3.15",
+ "log",
+ "parking_lot 0.11.1",
+ "serde",
+ "serde_json",
+ "tet-core",
+ "tetsy-jsonrpc-core",
+ "tetsy-jsonrpc-core-client",
+ "tetsy-jsonrpc-derive",
+ "tetsy-jsonrpc-pubsub",
+ "tetsy-scale-codec",
+ "tp-chain-spec",
+ "tp-rpc",
+ "tp-runtime",
+ "tp-transaction-pool",
+ "tp-version",
+]
+
+[[package]]
+name = "tc-rpc-server"
+version = "2.0.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "c55a41a85e803f40101c8affc04305117656ac73b9b998d8fed85064d3cefcf6"
+dependencies = [
+ "futures 0.1.31",
+ "log",
+ "prometheus-endpoint",
+ "serde",
+ "serde_json",
+ "tetsy-jsonrpc-core",
+ "tetsy-jsonrpc-http-server",
+ "tetsy-jsonrpc-ipc-server",
+ "tetsy-jsonrpc-pubsub",
+ "tetsy-jsonrpc-ws-server",
+ "tp-runtime",
+]
+
+[[package]]
+name = "tc-service"
+version = "0.8.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "c31291dddfcb793117f8835d56350b3c3ec1143333f259e003ca6fdaed96c91d"
+dependencies = [
+ "directories",
+ "externalities 0.8.2",
+ "futures 0.1.31",
+ "futures 0.3.15",
+ "futures-timer 3.0.2",
+ "lazy_static",
+ "log",
+ "parking_lot 0.11.1",
+ "pin-project 0.4.28",
+ "prometheus-endpoint",
+ "rand 0.7.3",
+ "serde",
+ "serde_json",
+ "tc-block-builder",
+ "tc-chain-spec",
+ "tc-client-api",
+ "tc-client-db",
+ "tc-executor",
+ "tc-informant",
+ "tc-keystore",
+ "tc-light",
+ "tc-network",
+ "tc-offchain",
+ "tc-rpc",
+ "tc-rpc-server",
+ "tc-telemetry",
+ "tc-tracing",
+ "tc-transaction-pool",
+ "tempfile",
+ "tet-application-crypto",
+ "tet-core",
+ "tet-io",
+ "tetcore-tracing",
+ "tetcore-utils",
+ "tetsy-exit-future",
+ "tetsy-hash-db",
+ "tetsy-jsonrpc-core",
+ "tetsy-jsonrpc-pubsub",
+ "tetsy-scale-codec",
+ "tetsy-util-mem",
+ "thiserror",
+ "tp-api",
+ "tp-block-builder",
+ "tp-blockchain",
+ "tp-consensus",
+ "tp-inherents",
+ "tp-keystore 0.8.1",
+ "tp-runtime",
+ "tp-session",
+ "tp-state-machine 0.8.2",
+ "tp-transaction-pool",
+ "tp-trie",
+ "tp-version",
+ "tracing",
+ "tracing-futures",
+ "wasm-timer",
+]
+
+[[package]]
+name = "tc-state-db"
+version = "0.8.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "00381bceddf958880c032a27ae947a43b9eb777d5627276f9a3a3ac206284d28"
+dependencies = [
+ "log",
+ "parking_lot 0.11.1",
+ "tc-client-api",
+ "tet-core",
+ "tetsy-scale-codec",
+ "tetsy-util-mem",
+ "tetsy-util-mem-derive",
+ "thiserror",
+]
+
+[[package]]
+name = "tc-telemetry"
+version = "2.0.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "d05315dbe02d00556117dc3bdbb597b3d0a1872b4811deb79251a1a62c718596"
+dependencies = [
+ "chrono",
+ "futures 0.3.15",
+ "log",
+ "parking_lot 0.11.1",
+ "pin-project 0.4.28",
+ "rand 0.7.3",
+ "serde",
+ "serde_json",
+ "take_mut",
+ "tetcore-utils",
+ "tetsy-libp2p",
+ "tracing",
+ "tracing-subscriber",
+ "void",
+ "wasm-timer",
+]
+
+[[package]]
+name = "tc-tracing"
+version = "2.0.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "f95dc3ac86883c799570862ee288514e4156323dbbdbf691e245a2cdc5b3d4aa"
+dependencies = [
+ "ansi_term 0.12.1",
+ "atty",
+ "erased-serde",
+ "lazy_static",
+ "log",
+ "once_cell",
+ "parking_lot 0.11.1",
+ "regex",
+ "rustc-hash",
+ "serde",
+ "serde_json",
+ "tc-telemetry",
+ "tc-tracing-proc-macro",
+ "tetcore-tracing",
+ "thiserror",
+ "tracing",
+ "tracing-core",
+ "tracing-log",
+ "tracing-subscriber",
+ "wasm-bindgen",
+ "web-sys",
+]
+
+[[package]]
+name = "tc-tracing-proc-macro"
+version = "2.0.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "5746bb8f6a37297cf24506e40e458d9e42e8d3f0bdb2a853cff3736ad777d960"
+dependencies = [
+ "proc-macro-crate 0.1.5",
+ "proc-macro2",
+ "quote",
+ "syn",
+]
+
+[[package]]
+name = "tc-transaction-graph"
+version = "2.0.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "ee53909ffbf54edf09b5e7875e7c4e9594ea8cef8505bf655cf5139476830299"
+dependencies = [
+ "derive_more",
+ "futures 0.3.15",
+ "linked-hash-map",
+ "log",
+ "parking_lot 0.11.1",
+ "retain_mut",
+ "serde",
+ "tet-core",
+ "tetcore-utils",
+ "tetsy-util-mem",
+ "thiserror",
+ "tp-blockchain",
+ "tp-runtime",
+ "tp-transaction-pool",
+ "wasm-timer",
+]
+
+[[package]]
+name = "tc-transaction-pool"
+version = "2.0.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "c48b1482824a8bfb0e18857ec228683ed46918427e06e0824070c9f5cee3b495"
+dependencies = [
+ "futures 0.3.15",
+ "futures-diagnose",
+ "intervalier",
+ "log",
+ "parking_lot 0.11.1",
+ "prometheus-endpoint",
+ "tc-client-api",
+ "tc-transaction-graph",
+ "tet-core",
+ "tetcore-tracing",
+ "tetcore-utils",
+ "tetsy-scale-codec",
+ "tetsy-util-mem",
+ "thiserror",
+ "tp-api",
+ "tp-blockchain",
+ "tp-runtime",
+ "tp-transaction-pool",
+ "wasm-timer",
+]
+
+[[package]]
 name = "tempfile"
 version = "3.2.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -8039,6 +9066,968 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "2dfed899f0eb03f32ee8c6a0aabdb8a7949659e3466561fc0adf54e26d88c5f4"
 dependencies = [
  "winapi-util",
+]
+
+[[package]]
+name = "tet-application-crypto"
+version = "2.1.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "739b1079a947b3f8a2f4d66ff9bca55c3a59adc4dcb8a9e2c0b05d256e24e2a5"
+dependencies = [
+ "serde",
+ "tet-core",
+ "tet-io",
+ "tetcore-std",
+ "tetsy-scale-codec",
+]
+
+[[package]]
+name = "tet-core"
+version = "2.1.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "dcfb28b2e9554032bea441e7ebd5cf313b42a21672905aa0994c14e882fb48d6"
+dependencies = [
+ "base58",
+ "blake2-rfc",
+ "byteorder",
+ "debug-derive",
+ "dyn-clonable",
+ "ed25519-dalek",
+ "externalities 2.1.2",
+ "futures 0.3.15",
+ "hex",
+ "impl-serde",
+ "lazy_static",
+ "libsecp256k1",
+ "log",
+ "merlin",
+ "num-traits",
+ "parking_lot 0.11.1",
+ "rand 0.7.3",
+ "regex",
+ "schnorrkel",
+ "secrecy",
+ "serde",
+ "sha2 0.9.5",
+ "tetcore-bip39",
+ "tetcore-std",
+ "tetcore-storage",
+ "tetsy-hash-db",
+ "tetsy-hash256-std-hasher",
+ "tetsy-primitive-types",
+ "tetsy-scale-codec",
+ "tetsy-util-mem",
+ "thiserror",
+ "tiny-bip39",
+ "tiny-keccak",
+ "tp-runtime-interface",
+ "twasmi",
+ "twox-hash",
+ "zeroize",
+]
+
+[[package]]
+name = "tet-io"
+version = "2.1.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "05376e6908c37fe019f64f94b81538928bd688522cf8fb8e44195699be6c70b8"
+dependencies = [
+ "externalities 2.1.2",
+ "futures 0.3.15",
+ "libsecp256k1",
+ "log",
+ "parking_lot 0.11.1",
+ "tet-core",
+ "tetcore-std",
+ "tetcore-tracing",
+ "tetcore-wasm-interface",
+ "tetsy-hash-db",
+ "tetsy-scale-codec",
+ "tp-keystore 2.1.2",
+ "tp-runtime-interface",
+ "tp-state-machine 2.1.2",
+ "tp-trie",
+ "tracing",
+ "tracing-core",
+]
+
+[[package]]
+name = "tetcore-bip39"
+version = "0.4.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "2912f605b40243d147ebf359eb641a6d06fea23cffc838ccc1f1b628fc57eda2"
+dependencies = [
+ "hmac 0.7.1",
+ "pbkdf2 0.3.0",
+ "schnorrkel",
+ "sha2 0.8.2",
+ "zeroize",
+]
+
+[[package]]
+name = "tetcore-database"
+version = "2.1.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "2b27f75cb6ddd84245da3a532d8bd96ebae27386002530627a5f1a2b38b24375"
+dependencies = [
+ "parking_lot 0.11.1",
+ "tetsy-kvdb",
+]
+
+[[package]]
+name = "tetcore-std"
+version = "2.1.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "60d73ec9a6aa8f7eb55a5a264f41b6522bd6347582c64a4ef576ab46af232a07"
+
+[[package]]
+name = "tetcore-storage"
+version = "2.1.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "f0c851c377ff5045c4dc2a15737d3700591f2695a1e6969ba8ca7991685f7ceb"
+dependencies = [
+ "debug-derive",
+ "impl-serde",
+ "ref-cast",
+ "serde",
+ "tetcore-std",
+ "tetsy-scale-codec",
+]
+
+[[package]]
+name = "tetcore-tracing"
+version = "2.1.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "dfacba4ecdc0ccd37d4c5c28bf8b123fc03f7683147cde1a169a8a2bd503aa22"
+dependencies = [
+ "log",
+ "tetcore-std",
+ "tetsy-scale-codec",
+ "tracing",
+ "tracing-core",
+ "tracing-subscriber",
+]
+
+[[package]]
+name = "tetcore-utils"
+version = "2.1.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "785bd0638d40ef550b2e3a3fb0ebdcf98eda54dd28cab485edc564af5bb34f35"
+dependencies = [
+ "futures 0.3.15",
+ "futures-core",
+ "futures-timer 3.0.2",
+ "lazy_static",
+ "prometheus 0.10.0",
+]
+
+[[package]]
+name = "tetcore-wasm-interface"
+version = "2.1.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "ffd1055223dcb23722736e3413e60353cb50bfbb175aba3fbdd8dd682c0b6ee9"
+dependencies = [
+ "impl-trait-for-tuples 0.2.1",
+ "tetcore-std",
+ "tetsy-scale-codec",
+ "twasmi",
+]
+
+[[package]]
+name = "tetsy-exit-future"
+version = "0.2.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "b53657ad20f4982cb60569c49072c28afb47d128d2bf26f578cc49a939dfc8b9"
+dependencies = [
+ "futures 0.3.15",
+]
+
+[[package]]
+name = "tetsy-finality-grandpa"
+version = "0.13.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "3ca94531400ef14326da17dfe6b5b4c1787d83ad2979956e20b42b3890f3bcae"
+dependencies = [
+ "either",
+ "futures 0.3.15",
+ "futures-timer 3.0.2",
+ "log",
+ "num-traits",
+ "parking_lot 0.11.1",
+ "tetsy-scale-codec",
+]
+
+[[package]]
+name = "tetsy-fixed-hash"
+version = "0.7.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "a186364c5e2bd1c4caef6a590afd358caafd90441e5200c2df0423ac2d4446a2"
+dependencies = [
+ "byteorder",
+ "rand 0.8.4",
+ "rustc-hex",
+ "static_assertions",
+]
+
+[[package]]
+name = "tetsy-hash-db"
+version = "0.15.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "63bdafe780365bec794d716a51eb589d84c360514a125e9508c973f14991f4f5"
+
+[[package]]
+name = "tetsy-hash256-std-hasher"
+version = "0.15.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "57992449ce703e125e8950dca30b4ec0ddc6405304e0eeb072b76389e0d0f4e7"
+dependencies = [
+ "crunchy",
+]
+
+[[package]]
+name = "tetsy-impl-codec"
+version = "0.5.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "1ddf100e73b2d5dbb9856cd88856c395bf5df7a92376f942a2a4bd3641af75ba"
+dependencies = [
+ "tetsy-scale-codec",
+]
+
+[[package]]
+name = "tetsy-impl-serde"
+version = "0.3.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "9d656fba2fea71759e9a04c08aece8188a3b4e449074e1300ae02c2adef162f1"
+dependencies = [
+ "serde",
+]
+
+[[package]]
+name = "tetsy-jsonrpc-client-transports"
+version = "15.1.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "19d3fcc561b7f1b0f48c851cafc260d6986ea2424688e8c3814ac9c184a5a94f"
+dependencies = [
+ "failure",
+ "futures 0.1.31",
+ "log",
+ "serde",
+ "serde_json",
+ "tetsy-jsonrpc-core",
+ "tetsy-jsonrpc-pubsub",
+ "url 1.7.2",
+]
+
+[[package]]
+name = "tetsy-jsonrpc-core"
+version = "15.1.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "7eae34210d01bad4ec66f54cf9c72464b01356be52cf8a1a4cae86938de9e459"
+dependencies = [
+ "futures 0.1.31",
+ "log",
+ "serde",
+ "serde_derive",
+ "serde_json",
+]
+
+[[package]]
+name = "tetsy-jsonrpc-core-client"
+version = "15.1.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "27faad68b844421e0bb1526a323b8e3992730f11da029927e85dfb630ed09a56"
+dependencies = [
+ "tetsy-jsonrpc-client-transports",
+]
+
+[[package]]
+name = "tetsy-jsonrpc-derive"
+version = "15.1.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "ba20a1faec527b7fe516ac90ed3356921919dbb5b3b0d18f49fa923ff1cdfed7"
+dependencies = [
+ "proc-macro-crate 0.1.5",
+ "proc-macro2",
+ "quote",
+ "syn",
+]
+
+[[package]]
+name = "tetsy-jsonrpc-http-server"
+version = "15.1.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "5e7deeab376ce94ef093d947b7d23714ec861b91f6568eebfdc398c4e808ef5d"
+dependencies = [
+ "hyper 0.12.36",
+ "log",
+ "net2",
+ "parking_lot 0.10.2",
+ "tetsy-jsonrpc-core",
+ "tetsy-jsonrpc-server-utils",
+ "unicase",
+]
+
+[[package]]
+name = "tetsy-jsonrpc-ipc-server"
+version = "15.1.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "a9d12c47e8ee791e4ed048d74471617f38e5a2578df707d662013e72afc08b74"
+dependencies = [
+ "log",
+ "parking_lot 0.10.2",
+ "tetsy-jsonrpc-core",
+ "tetsy-jsonrpc-server-utils",
+ "tetsy-tokio-ipc",
+ "tokio-service",
+]
+
+[[package]]
+name = "tetsy-jsonrpc-pubsub"
+version = "15.1.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "69d120aa2ba604c80dd22b26d8dce87c5fbbd1a525402d54e991cbd5988ea0f2"
+dependencies = [
+ "log",
+ "parking_lot 0.10.2",
+ "rand 0.7.3",
+ "serde",
+ "tetsy-jsonrpc-core",
+]
+
+[[package]]
+name = "tetsy-jsonrpc-server-utils"
+version = "15.1.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "47e2f8d8933a1ddded1a2078f2c1e3489c890bb475749fd42180340f15f7a8f2"
+dependencies = [
+ "bytes 0.4.12",
+ "globset",
+ "lazy_static",
+ "log",
+ "tetsy-jsonrpc-core",
+ "tokio 0.1.22",
+ "tokio-codec",
+ "unicase",
+]
+
+[[package]]
+name = "tetsy-jsonrpc-ws-server"
+version = "15.1.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "b62b4050adf8dd84b9017e658240b7610b3bca6c28562eb542ba2022eb0f26a6"
+dependencies = [
+ "log",
+ "parking_lot 0.10.2",
+ "slab",
+ "tetsy-jsonrpc-core",
+ "tetsy-jsonrpc-server-utils",
+ "tetsy-ws",
+]
+
+[[package]]
+name = "tetsy-kvdb"
+version = "0.9.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "4770464538b8bcdb455cdcbf61ee1fa88842dadbeabada95725bedf2d0468294"
+dependencies = [
+ "smallvec 1.6.1",
+ "tetsy-util-mem",
+]
+
+[[package]]
+name = "tetsy-kvdb-memorydb"
+version = "0.9.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "7e9b17f098d4ac4f3e451d2c613d125caeb38e9ccbc5717dbdf215523fecdfaa"
+dependencies = [
+ "parking_lot 0.11.1",
+ "tetsy-kvdb",
+ "tetsy-util-mem",
+]
+
+[[package]]
+name = "tetsy-libp2p"
+version = "0.34.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "3bc0b83e2f2a5e6efb37abdaffbd56612c91d69cc8ea19bda89e62c8091ca392"
+dependencies = [
+ "atomic",
+ "bytes 1.0.1",
+ "futures 0.3.15",
+ "lazy_static",
+ "parking_lot 0.11.1",
+ "pin-project 1.0.7",
+ "smallvec 1.6.1",
+ "tetsy-libp2p-core",
+ "tetsy-libp2p-core-derive",
+ "tetsy-libp2p-deflate",
+ "tetsy-libp2p-dns",
+ "tetsy-libp2p-floodsub",
+ "tetsy-libp2p-gossipsub",
+ "tetsy-libp2p-identify",
+ "tetsy-libp2p-kad",
+ "tetsy-libp2p-mdns",
+ "tetsy-libp2p-mplex",
+ "tetsy-libp2p-noise",
+ "tetsy-libp2p-ping",
+ "tetsy-libp2p-plaintext",
+ "tetsy-libp2p-pnet",
+ "tetsy-libp2p-remux",
+ "tetsy-libp2p-request-response",
+ "tetsy-libp2p-swarm",
+ "tetsy-libp2p-tcp",
+ "tetsy-libp2p-uds",
+ "tetsy-libp2p-wasm-ext",
+ "tetsy-libp2p-websocket",
+ "tetsy-multiaddr",
+ "wasm-timer",
+]
+
+[[package]]
+name = "tetsy-libp2p-core"
+version = "0.27.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "aed06acad38242fe34a3e330bfa6d102a512b7904c507e0b8feaee47984184db"
+dependencies = [
+ "asn1_der",
+ "bs58",
+ "ed25519-dalek",
+ "either",
+ "fnv",
+ "futures 0.3.15",
+ "futures-timer 3.0.2",
+ "lazy_static",
+ "libsecp256k1",
+ "log",
+ "multihash",
+ "parking_lot 0.11.1",
+ "pin-project 1.0.7",
+ "prost",
+ "prost-build",
+ "rand 0.7.3",
+ "ring",
+ "rw-stream-sink",
+ "sha2 0.9.5",
+ "smallvec 1.6.1",
+ "tetsy-multiaddr",
+ "tetsy-multistream-select",
+ "thiserror",
+ "unsigned-varint 0.7.0",
+ "void",
+ "zeroize",
+]
+
+[[package]]
+name = "tetsy-libp2p-core-derive"
+version = "0.21.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "73f1e7933b09879fa32030cbdc0a3c0db1237c5402a130b16b05b2c5e92a3fdb"
+dependencies = [
+ "quote",
+ "syn",
+]
+
+[[package]]
+name = "tetsy-libp2p-deflate"
+version = "0.27.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "d5f49e29ba14bc331cfee21d85ac87ff8477b0b1625049a0ca535e0c338d2ccd"
+dependencies = [
+ "flate2",
+ "futures 0.3.15",
+ "tetsy-libp2p-core",
+]
+
+[[package]]
+name = "tetsy-libp2p-dns"
+version = "0.27.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "a0b76c088b11829d007a9475e0698b6452bd5fd9fc21cb02b434a06146a8a699"
+dependencies = [
+ "futures 0.3.15",
+ "log",
+ "tetsy-libp2p-core",
+]
+
+[[package]]
+name = "tetsy-libp2p-floodsub"
+version = "0.27.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "921b24cb1c9ea5bfefb6176fd83ca7f71768cfed1d886a0bc633fd3c5cd2f3d1"
+dependencies = [
+ "cuckoofilter",
+ "fnv",
+ "futures 0.3.15",
+ "log",
+ "prost",
+ "prost-build",
+ "rand 0.7.3",
+ "smallvec 1.6.1",
+ "tetsy-libp2p-core",
+ "tetsy-libp2p-swarm",
+]
+
+[[package]]
+name = "tetsy-libp2p-gossipsub"
+version = "0.27.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "42173a34584d7da7769cc8c72d4c3f018bbf6068d2383deb1849b3d259cb14db"
+dependencies = [
+ "asynchronous-codec 0.5.0",
+ "base64 0.13.0",
+ "byteorder",
+ "bytes 1.0.1",
+ "fnv",
+ "futures 0.3.15",
+ "hex_fmt",
+ "log",
+ "prost",
+ "prost-build",
+ "rand 0.7.3",
+ "regex",
+ "sha2 0.9.5",
+ "smallvec 1.6.1",
+ "tetsy-libp2p-core",
+ "tetsy-libp2p-swarm",
+ "unsigned-varint 0.6.0",
+ "wasm-timer",
+]
+
+[[package]]
+name = "tetsy-libp2p-identify"
+version = "0.27.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "c06a5651cf0c33983e9d5ad923602f72a075d68c651f7cdae7bf2177ef08e20b"
+dependencies = [
+ "futures 0.3.15",
+ "log",
+ "prost",
+ "prost-build",
+ "smallvec 1.6.1",
+ "tetsy-libp2p-core",
+ "tetsy-libp2p-swarm",
+ "wasm-timer",
+]
+
+[[package]]
+name = "tetsy-libp2p-kad"
+version = "0.28.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "ca8b5336fb033c7bf8162bb255379329cfbd3a28976cd782480dfe5dbe2267a5"
+dependencies = [
+ "arrayvec 0.5.2",
+ "asynchronous-codec 0.5.0",
+ "bytes 1.0.1",
+ "either",
+ "fnv",
+ "futures 0.3.15",
+ "log",
+ "prost",
+ "prost-build",
+ "rand 0.7.3",
+ "sha2 0.9.5",
+ "smallvec 1.6.1",
+ "tetsy-libp2p-core",
+ "tetsy-libp2p-swarm",
+ "uint-crate",
+ "unsigned-varint 0.6.0",
+ "void",
+ "wasm-timer",
+]
+
+[[package]]
+name = "tetsy-libp2p-mdns"
+version = "0.28.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "2c1395b2aa257cc5f8519af0e8338a67d0f72e5df249a1405fdc3c273eb9d001"
+dependencies = [
+ "async-io",
+ "data-encoding",
+ "dns-parser",
+ "futures 0.3.15",
+ "if-watch 0.1.8",
+ "lazy_static",
+ "log",
+ "rand 0.7.3",
+ "smallvec 1.6.1",
+ "socket2 0.3.19",
+ "tetsy-libp2p-core",
+ "tetsy-libp2p-swarm",
+ "void",
+]
+
+[[package]]
+name = "tetsy-libp2p-mplex"
+version = "0.27.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "2ae1b59104a2bc8b3a583c12dfae4812b48a33d83421a01550d3893d14985f33"
+dependencies = [
+ "asynchronous-codec 0.5.0",
+ "bytes 1.0.1",
+ "futures 0.3.15",
+ "log",
+ "nohash-hasher",
+ "parking_lot 0.11.1",
+ "rand 0.7.3",
+ "smallvec 1.6.1",
+ "tetsy-libp2p-core",
+ "unsigned-varint 0.6.0",
+]
+
+[[package]]
+name = "tetsy-libp2p-noise"
+version = "0.29.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "0e3a5708f2231b828ca67d17748084d4a61bbb93f42f811c8ecc1589989b4122"
+dependencies = [
+ "bytes 1.0.1",
+ "curve25519-dalek 3.1.0",
+ "futures 0.3.15",
+ "lazy_static",
+ "log",
+ "prost",
+ "prost-build",
+ "rand 0.7.3",
+ "sha2 0.9.5",
+ "snow",
+ "static_assertions",
+ "tetsy-libp2p-core",
+ "x25519-dalek",
+ "zeroize",
+]
+
+[[package]]
+name = "tetsy-libp2p-ping"
+version = "0.27.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "e5fd52cd7170e070eaf25dff7b9a6aaac54303f71c2355a988abc7734c3987f9"
+dependencies = [
+ "futures 0.3.15",
+ "log",
+ "rand 0.7.3",
+ "tetsy-libp2p-core",
+ "tetsy-libp2p-swarm",
+ "void",
+ "wasm-timer",
+]
+
+[[package]]
+name = "tetsy-libp2p-plaintext"
+version = "0.27.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "093280ee4beee1b5ee240c9de651f02c678c1dfc9c5eea14177069ff2d109b70"
+dependencies = [
+ "asynchronous-codec 0.5.0",
+ "bytes 1.0.1",
+ "futures 0.3.15",
+ "log",
+ "prost",
+ "prost-build",
+ "tetsy-libp2p-core",
+ "unsigned-varint 0.6.0",
+ "void",
+]
+
+[[package]]
+name = "tetsy-libp2p-pnet"
+version = "0.20.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "335ce6acb5b3e1f3f288d9559dad9fcbb72f1e40997eb0a63fa285821e937d0d"
+dependencies = [
+ "futures 0.3.15",
+ "log",
+ "pin-project 1.0.7",
+ "rand 0.7.3",
+ "salsa20",
+ "sha3",
+]
+
+[[package]]
+name = "tetsy-libp2p-remux"
+version = "0.30.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "748cd9ac8454e5af9aad13377d607ed84bd7c9a4169c9d15a4670ae61650fb89"
+dependencies = [
+ "futures 0.3.15",
+ "parking_lot 0.11.1",
+ "remux",
+ "tetsy-libp2p-core",
+ "thiserror",
+]
+
+[[package]]
+name = "tetsy-libp2p-request-response"
+version = "0.9.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "b13cb40f79778ad9622b37a597c8e31bc147a0215baf614f485a9d01e5dcee73"
+dependencies = [
+ "async-trait",
+ "bytes 1.0.1",
+ "futures 0.3.15",
+ "log",
+ "lru",
+ "minicbor",
+ "rand 0.7.3",
+ "smallvec 1.6.1",
+ "tetsy-libp2p-core",
+ "tetsy-libp2p-swarm",
+ "unsigned-varint 0.6.0",
+ "wasm-timer",
+]
+
+[[package]]
+name = "tetsy-libp2p-swarm"
+version = "0.27.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "5f9c96e4cf06359d813594f3c6cc3491d00bb25737558773efe7e2002b8d65d8"
+dependencies = [
+ "either",
+ "futures 0.3.15",
+ "log",
+ "rand 0.7.3",
+ "smallvec 1.6.1",
+ "tetsy-libp2p-core",
+ "void",
+ "wasm-timer",
+]
+
+[[package]]
+name = "tetsy-libp2p-tcp"
+version = "0.27.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "485628481b4f107b5d22e96fda44ce861e519f8d289801ef1fc971baf8e76ca9"
+dependencies = [
+ "async-io",
+ "futures 0.3.15",
+ "futures-timer 3.0.2",
+ "if-watch 0.2.2",
+ "ipnet",
+ "libc",
+ "log",
+ "socket2 0.3.19",
+ "tetsy-libp2p-core",
+]
+
+[[package]]
+name = "tetsy-libp2p-uds"
+version = "0.27.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "5c0a0e28f7c256081bba075772ade17ea8f954b0b6f0464ef8149d7383908bf6"
+dependencies = [
+ "async-std",
+ "futures 0.3.15",
+ "log",
+ "tetsy-libp2p-core",
+]
+
+[[package]]
+name = "tetsy-libp2p-wasm-ext"
+version = "0.27.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "5a942d8a70d14471370fe95f5fad008a78481e7d2a69f486fef976b57bbffb68"
+dependencies = [
+ "futures 0.3.15",
+ "js-sys",
+ "tetsy-libp2p-core",
+ "tetsy-send-wrapper",
+ "wasm-bindgen",
+ "wasm-bindgen-futures",
+]
+
+[[package]]
+name = "tetsy-libp2p-websocket"
+version = "0.28.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "392e4a3773758b9bb0e5c117dc655ccbf245e0dd2b6d69c762218d6543d25ce7"
+dependencies = [
+ "either",
+ "futures 0.3.15",
+ "futures-rustls",
+ "log",
+ "quicksink",
+ "rw-stream-sink",
+ "soketto",
+ "tetsy-libp2p-core",
+ "url 2.2.2",
+ "webpki-roots",
+]
+
+[[package]]
+name = "tetsy-memory-db"
+version = "0.26.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "b1c4acfc5692152beabe0a232e5104c5219a5b1653981bb5c2744580d38ea923"
+dependencies = [
+ "hashbrown",
+ "tetsy-hash-db",
+ "tetsy-util-mem",
+]
+
+[[package]]
+name = "tetsy-multiaddr"
+version = "0.11.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "a5c98078350780bd0532d90836974875eb7c5fca2909d72128516c859cec76f6"
+dependencies = [
+ "arrayref",
+ "bs58",
+ "byteorder",
+ "data-encoding",
+ "multihash",
+ "percent-encoding 2.1.0",
+ "serde",
+ "static_assertions",
+ "unsigned-varint 0.6.0",
+ "url 2.2.2",
+]
+
+[[package]]
+name = "tetsy-multistream-select"
+version = "0.10.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "95c47c86ee285a2839d764a0a3df0223893e3eacb7beacb49704eaa828ae583d"
+dependencies = [
+ "bytes 1.0.1",
+ "futures 0.3.15",
+ "log",
+ "pin-project 1.0.7",
+ "smallvec 1.6.1",
+ "unsigned-varint 0.7.0",
+]
+
+[[package]]
+name = "tetsy-primitive-types"
+version = "0.9.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "689a4f85c95122372d0e0b2aacc1257337291fb440676be4a707af4d77c2826f"
+dependencies = [
+ "tetsy-fixed-hash",
+ "tetsy-impl-codec",
+ "tetsy-impl-serde",
+ "uint-crate",
+]
+
+[[package]]
+name = "tetsy-scale-codec"
+version = "2.0.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "63db9abc85c3447fdb7bebb6575534bbaf0f6467355149a6c062a7c6ce15a202"
+dependencies = [
+ "arrayvec 0.5.2",
+ "bitvec",
+ "byte-slice-cast",
+ "funty",
+ "serde",
+ "tetsy-scale-codec-derive",
+]
+
+[[package]]
+name = "tetsy-scale-codec-derive"
+version = "2.0.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "93c7f15807c77445f27fa073406f3c69ff6cc43e83e2f0e314452740a6f1178e"
+dependencies = [
+ "proc-macro-crate 0.1.5",
+ "proc-macro2",
+ "quote",
+ "syn",
+]
+
+[[package]]
+name = "tetsy-send-wrapper"
+version = "0.1.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "6d53afb010343a1741c720c001ca1811645f6bad94b2ac4e1da4bbaff748c62f"
+
+[[package]]
+name = "tetsy-tokio-ipc"
+version = "0.4.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "f8b53bf751af90efd656ac42bc64a8fe95227304a0aa6f06b5ccb6739e1665cb"
+dependencies = [
+ "bytes 0.4.12",
+ "futures 0.1.31",
+ "libc",
+ "log",
+ "mio-named-pipes",
+ "miow 0.3.7",
+ "rand 0.7.3",
+ "tokio 0.1.22",
+ "tokio-named-pipes",
+ "tokio-uds",
+ "winapi 0.3.9",
+]
+
+[[package]]
+name = "tetsy-trie-db"
+version = "0.22.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "5713b8a5fca8cae7adff65e8b602ebdb1e5ef8f54fe9df9d3deea265df19ae0a"
+dependencies = [
+ "hashbrown",
+ "log",
+ "rustc-hex",
+ "smallvec 1.6.1",
+ "tetsy-hash-db",
+]
+
+[[package]]
+name = "tetsy-trie-root"
+version = "0.16.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "23050df67dd960aa64bf5046d917126316e848c3fc9ae8faac59fc9c39714a7d"
+dependencies = [
+ "tetsy-hash-db",
+]
+
+[[package]]
+name = "tetsy-util-mem"
+version = "0.9.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "7709d73aa408b8b7a3c8f096a5ff9ccdf7bc51871c5a813cd7127b55a56ef095"
+dependencies = [
+ "cfg-if 1.0.0",
+ "hashbrown",
+ "impl-trait-for-tuples 0.2.1",
+ "parking_lot 0.11.1",
+ "tetsy-primitive-types",
+ "tetsy-util-mem-derive",
+ "winapi 0.3.9",
+]
+
+[[package]]
+name = "tetsy-util-mem-derive"
+version = "0.1.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "6a5ba230d73eac389b2a43327e90e857ccee06c2c734726067555708164cbd19"
+dependencies = [
+ "proc-macro2",
+ "syn",
+ "synstructure",
+]
+
+[[package]]
+name = "tetsy-wasm"
+version = "0.41.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "da1d4de235b111a45b9d29aa15e26ba33e1a714480646d8d36acb62da9f74641"
+
+[[package]]
+name = "tetsy-ws"
+version = "0.10.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "8ad80c40175a7ee871902b11301f7512899053909bd1875e99aab45e70fc8985"
+dependencies = [
+ "byteorder",
+ "bytes 0.4.12",
+ "httparse",
+ "log",
+ "mio",
+ "mio-extras",
+ "rand 0.7.3",
+ "sha-1 0.8.2",
+ "slab",
+ "url 2.2.2",
 ]
 
 [[package]]
@@ -8420,6 +10409,472 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "360dfd1d6d30e05fda32ace2c8c70e9c0a9da713275777f5a4dbb8a1893930c6"
 
 [[package]]
+name = "tp-allocator"
+version = "2.1.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "6209676aa99ca56aca0cef8eed43e452e7a192eaeac72eefc9467f8e68292751"
+dependencies = [
+ "log",
+ "tet-core",
+ "tetcore-std",
+ "tetcore-wasm-interface",
+ "thiserror",
+]
+
+[[package]]
+name = "tp-api"
+version = "2.1.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "8d8271e7f92e49db3c922b059f59fcb7b372aabe2c6c2a9b66da543a87a68a7a"
+dependencies = [
+ "tet-core",
+ "tetcore-std",
+ "tetsy-hash-db",
+ "tetsy-scale-codec",
+ "thiserror",
+ "tp-api-proc-macro",
+ "tp-runtime",
+ "tp-state-machine 2.1.2",
+ "tp-version",
+]
+
+[[package]]
+name = "tp-api-proc-macro"
+version = "2.1.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "cebcac41e4a7946830346555ac87baade9387cb4eda788df1bbc559bdc213e30"
+dependencies = [
+ "blake2-rfc",
+ "proc-macro-crate 0.1.5",
+ "proc-macro2",
+ "quote",
+ "syn",
+]
+
+[[package]]
+name = "tp-authorship"
+version = "2.1.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "91433550779c025990828e6cf7af95dc6fd40aaf3ffd4fb38ef5aad8a37b3756"
+dependencies = [
+ "tetcore-std",
+ "tetsy-scale-codec",
+ "tp-inherents",
+ "tp-runtime",
+]
+
+[[package]]
+name = "tp-block-builder"
+version = "2.1.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "c6713669b05a9adfe964056d8559dff26d11c4c30628882e13f1cd23bd5ea64d"
+dependencies = [
+ "tetcore-std",
+ "tetsy-scale-codec",
+ "tp-api",
+ "tp-inherents",
+ "tp-runtime",
+]
+
+[[package]]
+name = "tp-blockchain"
+version = "2.0.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "a2e303c7803872d258fbe1de9f90a109154b40ff6853e316488f9896e51e9274"
+dependencies = [
+ "futures 0.3.15",
+ "log",
+ "lru",
+ "parking_lot 0.11.1",
+ "tetcore-database",
+ "tetsy-scale-codec",
+ "thiserror",
+ "tp-api",
+ "tp-consensus",
+ "tp-runtime",
+ "tp-state-machine 0.8.2",
+]
+
+[[package]]
+name = "tp-chain-spec"
+version = "2.1.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "885d5b6c6393b042ef5ae2d3963e0b8742e6f1bcf75a29da8e3c0d1e552297c7"
+dependencies = [
+ "serde",
+ "serde_json",
+]
+
+[[package]]
+name = "tp-consensus"
+version = "0.8.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "81e4e55d6581602886652ae47bf395bb7d7be12c8952fd6acd4a0f7b24cbca77"
+dependencies = [
+ "futures 0.3.15",
+ "futures-timer 3.0.2",
+ "log",
+ "parking_lot 0.11.1",
+ "prometheus-endpoint",
+ "serde",
+ "tet-core",
+ "tetcore-std",
+ "tetcore-utils",
+ "tetsy-libp2p",
+ "tetsy-scale-codec",
+ "thiserror",
+ "tp-api",
+ "tp-inherents",
+ "tp-runtime",
+ "tp-state-machine 0.8.2",
+ "tp-trie",
+ "tp-version",
+ "wasm-timer",
+]
+
+[[package]]
+name = "tp-consensus-babe"
+version = "0.8.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "3bdac7ec79ab78335a95168f4176e2d997ec7db6fb3e3e12e123295512db0698"
+dependencies = [
+ "merlin",
+ "tet-application-crypto",
+ "tet-core",
+ "tetcore-std",
+ "tetsy-scale-codec",
+ "tp-api",
+ "tp-consensus",
+ "tp-consensus-slots",
+ "tp-consensus-vrf",
+ "tp-inherents",
+ "tp-keystore 0.8.1",
+ "tp-runtime",
+ "tp-timestamp",
+]
+
+[[package]]
+name = "tp-consensus-slots"
+version = "0.8.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "881446f30aec9a67a796fb12097c7c8ca3131fdc9fa27a132e20d62665c0d7fa"
+dependencies = [
+ "arithmetic",
+ "tetsy-scale-codec",
+ "tp-runtime",
+]
+
+[[package]]
+name = "tp-consensus-vrf"
+version = "0.8.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "479912d625638b68b4a4ff77a31448eabae9570f9e28911297e97f9161194b1f"
+dependencies = [
+ "schnorrkel",
+ "tet-core",
+ "tetcore-std",
+ "tetsy-scale-codec",
+ "tp-runtime",
+]
+
+[[package]]
+name = "tp-finality-grandpa"
+version = "2.0.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "49daaddfe8f267aad838fba5126d9969bfd5319e168d027281227a7d0820b34a"
+dependencies = [
+ "log",
+ "serde",
+ "tet-application-crypto",
+ "tet-core",
+ "tetcore-std",
+ "tetsy-finality-grandpa",
+ "tetsy-scale-codec",
+ "tp-api",
+ "tp-keystore 0.8.1",
+ "tp-runtime",
+]
+
+[[package]]
+name = "tp-inherents"
+version = "2.1.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "0b61c16e6f8332da80935011f39af51e5173d9272896e478dbc111216bec53d0"
+dependencies = [
+ "parking_lot 0.11.1",
+ "tet-core",
+ "tetcore-std",
+ "tetsy-scale-codec",
+ "thiserror",
+]
+
+[[package]]
+name = "tp-keyring"
+version = "2.0.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "ae9e7a8438bc03dfc8d79bbb63ecfae82fb5fdaec03714ae81cd1c2ac2f5a2d6"
+dependencies = [
+ "lazy_static",
+ "strum 0.16.0",
+ "tet-core",
+ "tp-runtime",
+]
+
+[[package]]
+name = "tp-keystore"
+version = "0.8.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "8d04f57b5944eff4f9a35513a8559b881bf21583a9430b1900de7ffa2ee7f558"
+dependencies = [
+ "async-trait",
+ "derive_more",
+ "externalities 0.8.2",
+ "futures 0.3.15",
+ "merlin",
+ "parking_lot 0.11.1",
+ "schnorrkel",
+ "serde",
+ "tet-core",
+ "tetsy-scale-codec",
+]
+
+[[package]]
+name = "tp-keystore"
+version = "2.1.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "9c823144ce624fe7b1e58eb46552bd0c4837c06adf677054b4d356dbab86ed73"
+dependencies = [
+ "async-trait",
+ "derive_more",
+ "externalities 2.1.2",
+ "futures 0.3.15",
+ "merlin",
+ "parking_lot 0.11.1",
+ "schnorrkel",
+ "tet-core",
+ "tetsy-scale-codec",
+]
+
+[[package]]
+name = "tp-offchain"
+version = "2.0.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "88246d3110d31a287c109e14d26552ba46097d86db39a80ce70e17beb5aaaf72"
+dependencies = [
+ "tet-core",
+ "tp-api",
+ "tp-runtime",
+]
+
+[[package]]
+name = "tp-rpc"
+version = "2.0.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "518677c1f656a7b09586ae8143afc6fdf4a7d8bf134ad5e41293ffb7d6ab8d74"
+dependencies = [
+ "serde",
+ "tet-core",
+]
+
+[[package]]
+name = "tp-runtime"
+version = "2.1.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "2d38dc3b34bff5989ca0d297d141600a293bcb859587c84613f4f3e68733fab0"
+dependencies = [
+ "arithmetic",
+ "either",
+ "impl-trait-for-tuples 0.2.1",
+ "log",
+ "paste 0.1.18",
+ "rand 0.7.3",
+ "serde",
+ "tet-application-crypto",
+ "tet-core",
+ "tet-io",
+ "tetcore-std",
+ "tetsy-hash256-std-hasher",
+ "tetsy-scale-codec",
+ "tetsy-util-mem",
+]
+
+[[package]]
+name = "tp-runtime-interface"
+version = "2.1.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "de85d1f4d9dcb7354bdd26eee36fde5e52a360e7d8373aceb1b708b20fa694ea"
+dependencies = [
+ "externalities 2.1.2",
+ "impl-trait-for-tuples 0.2.1",
+ "static_assertions",
+ "tetcore-std",
+ "tetcore-storage",
+ "tetcore-tracing",
+ "tetcore-wasm-interface",
+ "tetsy-primitive-types",
+ "tetsy-scale-codec",
+ "tp-runtime-interface-proc-macro",
+]
+
+[[package]]
+name = "tp-runtime-interface-proc-macro"
+version = "2.1.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "39e107e2545fe89a2095f48f03170c5b3a28caed6defd10d7dc0d57fc6e34de8"
+dependencies = [
+ "Inflector",
+ "proc-macro-crate 0.1.5",
+ "proc-macro2",
+ "quote",
+ "syn",
+]
+
+[[package]]
+name = "tp-session"
+version = "2.0.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "a3b02c4c68227f3c5e99fc4ed2d3114bbb159223124e3e117689b4516a2403f5"
+dependencies = [
+ "tet-core",
+ "tetcore-std",
+ "tetsy-scale-codec",
+ "tp-api",
+ "tp-runtime",
+ "tp-staking",
+]
+
+[[package]]
+name = "tp-staking"
+version = "2.0.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "a54d8367578b5004ef2215b6c388630c7d88365212bac9f2fddce528c08ff82f"
+dependencies = [
+ "tetcore-std",
+ "tetsy-scale-codec",
+ "tp-runtime",
+]
+
+[[package]]
+name = "tp-state-machine"
+version = "0.8.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "40ba46a6d4a5e4240aac8d24cb5442f8769f371c4b705463d11302667d0cd481"
+dependencies = [
+ "externalities 0.8.2",
+ "log",
+ "num-traits",
+ "panic-handler",
+ "parking_lot 0.11.1",
+ "rand 0.7.3",
+ "smallvec 1.6.1",
+ "tet-core",
+ "tetcore-std",
+ "tetsy-hash-db",
+ "tetsy-scale-codec",
+ "tetsy-trie-db",
+ "tetsy-trie-root",
+ "thiserror",
+ "tp-trie",
+]
+
+[[package]]
+name = "tp-state-machine"
+version = "2.1.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "0173f82b8c0e0fdf9f11867be67bd22f3a3ea1620c652d0ee5697f64e1810e60"
+dependencies = [
+ "externalities 2.1.2",
+ "log",
+ "num-traits",
+ "panic-handler",
+ "parking_lot 0.11.1",
+ "rand 0.7.3",
+ "smallvec 1.6.1",
+ "tet-core",
+ "tetcore-std",
+ "tetsy-hash-db",
+ "tetsy-scale-codec",
+ "tetsy-trie-db",
+ "tetsy-trie-root",
+ "thiserror",
+ "tp-trie",
+]
+
+[[package]]
+name = "tp-tasks"
+version = "2.0.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "b06224eb3ee7f2f9ad8a0a7e63f106d42e847e232e67b3372cd66c8213d68275"
+dependencies = [
+ "externalities 0.8.2",
+ "log",
+ "tet-core",
+ "tet-io",
+ "tetcore-std",
+ "tp-runtime-interface",
+]
+
+[[package]]
+name = "tp-timestamp"
+version = "2.1.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "8f6cab7d4b3ccda8be9c2a0eef8b71ceff05c22eba4a671705b1982ab3925618"
+dependencies = [
+ "impl-trait-for-tuples 0.2.1",
+ "tetcore-std",
+ "tetsy-scale-codec",
+ "tp-api",
+ "tp-inherents",
+ "tp-runtime",
+ "wasm-timer",
+]
+
+[[package]]
+name = "tp-transaction-pool"
+version = "2.0.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "8971bc76c8b2b11a25150753766a6e477a393aaa51e82ff44b383e332b2b07c5"
+dependencies = [
+ "derive_more",
+ "futures 0.3.15",
+ "log",
+ "serde",
+ "tetsy-scale-codec",
+ "thiserror",
+ "tp-api",
+ "tp-blockchain",
+ "tp-runtime",
+]
+
+[[package]]
+name = "tp-trie"
+version = "2.1.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "65c99265b995399e3644565396f6807c6ebd213f97748c856566d01f42844a80"
+dependencies = [
+ "tet-core",
+ "tetcore-std",
+ "tetsy-hash-db",
+ "tetsy-memory-db",
+ "tetsy-scale-codec",
+ "tetsy-trie-db",
+ "tetsy-trie-root",
+]
+
+[[package]]
+name = "tp-version"
+version = "2.1.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "4b9f769cca7447d2662cbb372f4681a0bac86e58edad56e826b0f60f4209707b"
+dependencies = [
+ "impl-serde",
+ "serde",
+ "tetcore-std",
+ "tetsy-scale-codec",
+ "tp-runtime",
+]
+
+[[package]]
 name = "tracing"
 version = "0.1.26"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -8534,6 +10989,30 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "59547bce71d9c38b83d9c0e92b6066c4253371f15005def0c30d9657f50c7642"
 
 [[package]]
+name = "twasmi"
+version = "0.6.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "cf4fb3677d11115fbaf6a9cf414b5642a3b0482d35a0d7d5eab823683e0ae462"
+dependencies = [
+ "downcast-rs",
+ "libc",
+ "memory_units",
+ "num-rational 0.2.4",
+ "num-traits",
+ "tetsy-wasm",
+ "twasmi-validation",
+]
+
+[[package]]
+name = "twasmi-validation"
+version = "0.3.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "6b87a0b67bbe15d6296f3a368ab983c73065a0a65ffe77e39cd45c6952dcf7ef"
+dependencies = [
+ "tetsy-wasm",
+]
+
+[[package]]
 name = "twox-hash"
 version = "1.6.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -8582,6 +11061,18 @@ dependencies = [
 ]
 
 [[package]]
+name = "uint-crate"
+version = "0.9.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "ffefa93aec81f9db0dc9508ca181b718ca93fef9da306d14f014855c15232413"
+dependencies = [
+ "byteorder",
+ "crunchy",
+ "hex",
+ "static_assertions",
+]
+
+[[package]]
 name = "uniarts-chain-primitives"
 version = "3.0.0"
 dependencies = [
@@ -8599,6 +11090,7 @@ version = "3.0.0"
 dependencies = [
  "frame-benchmarking-cli",
  "log",
+ "node-inspect",
  "sc-cli",
  "sc-executor",
  "sc-service",
@@ -8700,6 +11192,7 @@ dependencies = [
  "sc-consensus-aura",
  "sc-executor",
  "sc-finality-grandpa",
+ "sc-keystore",
  "sc-rpc",
  "sc-rpc-api",
  "sc-service",

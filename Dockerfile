@@ -15,7 +15,8 @@ RUN apt-get update && \
 RUN curl https://sh.rustup.rs -sSf | sh -s -- -y 
 # && \
 RUN	rustup uninstall stable && \
-    rustup install 1.54.0 && \
+    rustup install 1.53.0 && \
+    rustup default 1.53.0-x86_64-unknown-linux-gnu && \
 	rustup toolchain install $RUST_TOOLCHAIN && \
 	rustup target add wasm32-unknown-unknown --toolchain $RUST_TOOLCHAIN && \
 	rustup default $RUST_TOOLCHAIN

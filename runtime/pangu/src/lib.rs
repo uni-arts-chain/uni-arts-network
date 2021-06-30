@@ -184,6 +184,7 @@ construct_runtime!(
 		Multisig: pallet_multisig::{Module, Call, Storage, Event<T>} =4,
 		Proxy: pallet_proxy::{Module, Call, Storage, Event<T>} = 5,
 		RandomnessCollectiveFlip: pallet_randomness_collective_flip::{Module, Call, Storage} = 6,
+		Balances: pallet_balances::{Module, Call, Storage, Config<T>, Event<T>} = 7,
 
 		Indices: pallet_indices::{Module, Call, Storage, Config<T>, Event<T>} = 10,
 		Authorship: pallet_authorship::{Module, Call, Storage} = 11,
@@ -196,7 +197,6 @@ construct_runtime!(
 		Vesting: pallet_vesting::{Module, Call, Storage, Event<T>, Config<T>} = 18,
 
 		// Nicks: pallet_nicks::{Module, Call, Storage, Event<T>},
-		Balances: pallet_balances::{Module, Call, Storage, Config<T>, Event<T>} = 21,
 		Contracts: pallet_contracts::{Module, Call, Storage, Config<T>, Event<T>} = 22,
 		// Lotteries: pallet_lotteries::{Module, Call, Storage, Event<T>},
 		// Uart: pallet_balances::<Instance0>::{Module, Call, Storage, Config<T>, Event<T>},

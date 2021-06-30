@@ -3,7 +3,7 @@
 FROM phusion/baseimage:0.11 as builder
 
 ENV DEBIAN_FRONTEND=noninteractive
-ENV RUST_TOOLCHAIN=nightly-2020-10-06
+ENV RUST_TOOLCHAIN=nightly-2021-06-01
 ENV PATH="$PATH:/root/.cargo/bin"
 ARG PROFILE=release
 
@@ -15,8 +15,8 @@ RUN apt-get update && \
 RUN curl https://sh.rustup.rs -sSf | sh -s -- -y 
 # && \
 RUN	rustup uninstall stable && \
-    rustup install 1.46.0 && \
-    rustup default 1.46.0-x86_64-unknown-linux-gnu && \
+    rustup install 1.54.0 && \
+    rustup default 1.54.0-x86_64-unknown-linux-gnu && \
 	rustup toolchain install $RUST_TOOLCHAIN && \
 	rustup target add wasm32-unknown-unknown --toolchain $RUST_TOOLCHAIN && \
 	rustup default $RUST_TOOLCHAIN
@@ -34,7 +34,7 @@ COPY primitives ./primitives/
 COPY README.md README.md
 COPY Cargo* ./
 
-RUN	cargo +nightly-2020-10-06 build "--$PROFILE"
+RUN	cargo +nightly-2021-06-01 build "--$PROFILE"
 
 
 # ===== RUN ======

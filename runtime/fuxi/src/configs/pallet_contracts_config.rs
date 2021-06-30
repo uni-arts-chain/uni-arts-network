@@ -5,16 +5,16 @@ use frame_support::weights::Weight;
 use uniarts_primitives::*;
 pub use crate::constants::currency::*;
 pub use crate::constants::time::*;
-use core::convert::TryInto;
+// use core::convert::TryInto;
 
 use crate::*;
 use crate::frame_system_config::RuntimeBlockWeights;
 
 
 frame_support::parameter_types! {
-	pub TombstoneDeposit: Balance = deposit(
-        (1 * UART).try_into().unwrap(),
-		sp_std::mem::size_of::<pallet_contracts::ContractInfo<Runtime>>() as u32,
+	pub const TombstoneDeposit: Balance = deposit(
+		1,
+		sp_std::mem::size_of::<pallet_contracts::ContractInfo<Runtime>>() as u32
 	);
 	pub DepositPerContract: Balance = TombstoneDeposit::get();
 	pub const DepositPerStorageByte: Balance = deposit(0, 1);

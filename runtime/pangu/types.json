@@ -2,6 +2,13 @@
   "Keys": "SessionKeys2",
   "Address": "MultiAddress",
   "LookupSource": "MultiAddress",
+  "AccountData": {
+    "free": "Balance",
+    "reserved": "Balance",
+    "misc_frozen": "Balance",
+    "fee_frozen": "Balance"
+  },
+  "AccountInfo": "AccountInfoWithDualRefCount",
   "WorkId": "u32",
   "Id": "u32",
   "Name": "Vec<u8>",

@@ -1,5 +1,5 @@
 # Uni-arts Network (https://uniarts.network)
-![Image text](https://raw.githubusercontent.com/uni-arts-chain/uni-arts-network/master/docs/uniarts-network-new.png)
+![Image text](https://raw.githubusercontent.com/uni-arts-chain/uni-arts-network/master/docs/UA-logo.png)
 
 
 Unite of Uniqueness

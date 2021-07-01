@@ -198,7 +198,7 @@ construct_runtime!(
 		Staking: pallet_staking::{Module, Call, Storage, Event<T>} = 17,
 		Vesting: pallet_vesting::{Module, Call, Storage, Event<T>, Config<T>} = 18,
 
-		// Nicks: pallet_nicks::{Module, Call, Storage, Event<T>},
+		Nicks: pallet_nicks::{Module, Call, Storage, Event<T>} = 21,
 		Contracts: pallet_contracts::{Module, Call, Storage, Config<T>, Event<T>} = 22,
 		// Lotteries: pallet_lotteries::{Module, Call, Storage, Event<T>},
 		// Uart: pallet_balances::<Instance0>::{Module, Call, Storage, Config<T>, Event<T>},

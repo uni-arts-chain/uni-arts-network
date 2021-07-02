@@ -25,7 +25,7 @@ use sp_core::crypto::Ss58AddressFormat;
 use uniarts_service::{pangu_runtime, fuxi_runtime, IdentifyVariant};
 use log::info;
 
-const UNI_ARTS_ADDRESS_FORMAT_ID: u8 = 45;
+const UNI_ARTS_ADDRESS_FORMAT_ID: u16 = 45;
 
 impl SubstrateCli for Cli {
 	fn impl_name() -> String {
@@ -117,6 +117,10 @@ pub fn run() -> sc_cli::Result<()> {
 	let cli = Cli::from_args();
 
 	match &cli.subcommand {
+		Some(Subcommand::Key(cmd)) => cmd.run(&cli),
+		Some(Subcommand::Sign(cmd)) => cmd.run(),
+		Some(Subcommand::Verify(cmd)) => cmd.run(),
+		Some(Subcommand::Vanity(cmd)) => cmd.run(),
 		Some(Subcommand::BuildSpec(cmd)) => {
 			let runner = cli.create_runner(cmd)?;
 			runner.sync_run(|config| cmd.run(config.chain_spec, config.network))
@@ -280,17 +284,25 @@ pub fn run() -> sc_cli::Result<()> {
 			info!("  \\____/|_| |_|_|    /_/    \\_\\_|   \\__|___/  \\_____|_| |_|\\__,_|_|_| |_|");
 			info!("                                                                         ");
 			info!("                                                                         ");
-			info!("  by UniArts Network, 2018-2020");
+			info!("  by UniArts Network, 2018-2021");
 
 			if chain_spec.is_pangu_network() {
-				runner.run_node_until_exit(|config| match config.role {
-					Role::Light => uniarts_service::pangu_new_light(config),
-					_ => uniarts_service::pangu_new_full(config).map(|(components, _)| components),
+				runner.run_node_until_exit(|config| async move {
+					match config.role {
+						Role::Light => {
+							uniarts_service::pangu_new_light(config)
+						},
+						_ => uniarts_service::pangu_new_full(config).map(|(task_manager, _)| task_manager),
+					}.map_err(sc_cli::Error::Service)
 				})
 			} else if chain_spec.is_fuxi_network() {
-				runner.run_node_until_exit(|config| match config.role {
-					Role::Light => uniarts_service::fuxi_new_light(config),
-					_ => uniarts_service::fuxi_new_full(config).map(|(components, _)| components),
+				runner.run_node_until_exit(|config| async move {
+					match config.role {
+						Role::Light => {
+							uniarts_service::fuxi_new_light(config)
+						},
+						_ => uniarts_service::fuxi_new_full(config).map(|(task_manager, _)| task_manager),
+					}.map_err(sc_cli::Error::Service)
 				})
 			} else {
 				unreachable!()

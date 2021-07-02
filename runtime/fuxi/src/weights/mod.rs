@@ -1,3 +1,4 @@
+pub mod frame_system;
 pub mod pallet_scheduler;
 pub mod pallet_multisig;
 pub mod pallet_proxy;
@@ -11,3 +12,4 @@ pub mod pallet_elections_phragmen;
 pub mod pallet_treasury;
 pub mod pallet_identity;
 pub mod pallet_rewards;
+pub mod orml_tokens;

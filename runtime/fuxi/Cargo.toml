@@ -1,6 +1,6 @@
 [package]
 name = "fuxi-runtime"
-version = "2.0.1"
+version = "3.0.0"
 authors = ["terry.tu <tuminfei1981@gmail.com>"]
 edition = "2018"
 build   = "build.rs"
@@ -11,83 +11,83 @@ description = "Uniarts node runtime for fuxi network"
 targets = ["x86_64-unknown-linux-gnu"]
 
 [dependencies]
-codec = { package = "parity-scale-codec", version = "1.3.4", default-features = false, features = ["derive"] }
-serde = { version = "1.0.101", optional = true, features = ["derive"] }
+codec = { package = "parity-scale-codec", version = "2.0.0", default-features = false, features = ["derive"] }
+serde = { version = "1.0.102", optional = true, features = ["derive"] }
 hex-literal = { version = "0.3.1", optional = true }
 
-frame-system = { version = "2.0.1", default-features = false }
-frame-support = { version = "2.0.1", default-features = false }
-frame-executive = { version = "2.0.1", default-features = false }
-frame-system-rpc-runtime-api = { version = "2.0.1", default-features = false }
+frame-system = { version = "3.0.0", default-features = false }
+frame-support = { version = "3.0.0", default-features = false }
+frame-executive = { version = "3.0.0", default-features = false }
+frame-system-rpc-runtime-api = { version = "3.0.0", default-features = false }
 
-sp-api = { version = "2.0.1", default-features = false }
-sp-block-builder = { version = "2.0.1", default-features = false}
-sp-consensus-aura = { version = "0.8.0", default-features = false }
-sp-core = { version = "2.0.1", default-features = false }
-sp-inherents = { version = "2.0.1", default-features = false }
-sp-offchain = { version = "2.0.1", default-features = false }
-sp-runtime = { version = "2.0.1", default-features = false }
-sp-session = { version = "2.0.1", default-features = false }
-sp-std = { version = "2.0.1", default-features = false }
-sp-transaction-pool = { version = "2.0.1", default-features = false  }
-sp-version = { version = "2.0.1", default-features = false }
+sp-api = { version = "3.0.0", default-features = false }
+sp-block-builder = { version = "3.0.0", default-features = false}
+sp-consensus-aura = { version = "0.9.0", default-features = false }
+sp-core = { version = "3.0.0", default-features = false }
+sp-inherents = { version = "3.0.0", default-features = false }
+sp-offchain = { version = "3.0.0", default-features = false }
+sp-runtime = { version = "3.0.0", default-features = false }
+sp-session = { version = "3.0.0", default-features = false }
+sp-std = { version = "3.0.0", default-features = false }
+sp-transaction-pool = { version = "3.0.0", default-features = false  }
+sp-version = { version = "3.0.0", default-features = false }
 
-pallet-aura = { version = "2.0.1", default-features = false }
-pallet-balances = { version = "2.0.1", default-features = false }
-pallet-grandpa = { version = "2.0.1", default-features = false }
-pallet-authorship = { version = "2.0.1", default-features = false }
-pallet-randomness-collective-flip = { version = "2.0.1", default-features = false }
-pallet-sudo = { version = "2.0.1", default-features = false }
-pallet-timestamp = { version = "2.0.1", default-features = false }
-pallet-transaction-payment = { version = "2.0.1", default-features = false }
-pallet-session = { version = "2.0.1", default-features = false, features = ["historical"] }
-pallet-nicks = { version = "2.0.1", default-features = false }
-pallet-vesting = { version = "2.0.1", default-features = false }
-pallet-collective = { version = "2.0.1", default-features = false }
-pallet-membership = { version = "2.0.1", default-features = false }
-pallet-treasury = { version = "2.0.1", default-features = false }
-pallet-identity = { version = "2.0.1", default-features = false }
-pallet-scheduler = { version = "2.0.1", default-features = false }
-pallet-multisig = { version = "2.0.1", default-features = false }
-pallet-proxy = { version = "2.0.1", default-features = false }
-pallet-utility = { version = "2.0.1", default-features = false }
-pallet-indices = { version = "2.0.1", default-features = false }
-pallet-recovery = { version = "2.0.1", default-features = false }
-pallet-society = { version = "2.0.1", default-features = false }
-pallet-elections-phragmen = { version = "2.0.1", default-features = false }
-pallet-contracts = { version = "2.0.1", default-features = false }
-pallet-contracts-primitives = { version = "2.0.1", default-features = false }
-pallet-contracts-rpc-runtime-api = { version = "0.8.0", default-features = false }
+pallet-aura = { version = "3.0.0", default-features = false }
+pallet-balances = { version = "3.0.0", default-features = false }
+pallet-grandpa = { version = "3.0.0", default-features = false }
+pallet-authorship = { version = "3.0.0", default-features = false }
+pallet-randomness-collective-flip = { version = "3.0.0", default-features = false }
+pallet-sudo = { version = "3.0.0", default-features = false }
+pallet-timestamp = { version = "3.0.0", default-features = false }
+pallet-transaction-payment = { version = "3.0.0", default-features = false }
+pallet-session = { version = "3.0.0", default-features = false, features = ["historical"] }
+pallet-nicks = { version = "3.0.0", default-features = false }
+pallet-vesting = { version = "3.0.0", default-features = false }
+pallet-collective = { version = "3.0.0", default-features = false }
+pallet-membership = { version = "3.0.0", default-features = false }
+pallet-treasury = { version = "3.0.0", default-features = false }
+pallet-bounties = { version = "3.0.0", default-features = false }
+pallet-identity = { version = "3.0.0", default-features = false }
+pallet-scheduler = { version = "3.0.0", default-features = false }
+pallet-multisig = { version = "3.0.0", default-features = false }
+pallet-proxy = { version = "3.0.0", default-features = false }
+pallet-utility = { version = "3.0.0", default-features = false }
+pallet-indices = { version = "3.0.0", default-features = false }
+pallet-recovery = { version = "3.0.0", default-features = false }
+pallet-society = { version = "3.0.0", default-features = false }
+pallet-elections-phragmen = { version = "3.0.0", default-features = false }
+pallet-contracts = { version = "3.0.0", default-features = false }
+pallet-contracts-primitives = { version = "3.0.0", default-features = false }
+pallet-contracts-rpc-runtime-api = { version = "3.0.0", default-features = false }
 
 # orml
-orml-currencies = { default-features = false, version = '0.3.0' }
-orml-tokens = { default-features = false, version = '0.3.0' }
+orml-currencies = { default-features = false, version = '0.4.0' }
+orml-tokens = { default-features = false, version = '0.4.0' }
+orml-traits = { default-features = false, version = '0.4.0' }
 
 # Used for RPCs
-pallet-transaction-payment-rpc-runtime-api = { version = "2.0.1", default-features = false }
-pallet-staking-rpc-runtime-api = { version = "0.1.0", default-features = false, git = "https://github.com/uni-arts-chain/uni-arts-common.git", tag = "v2.0.1" }
+pallet-transaction-payment-rpc-runtime-api = { version = "3.0.0", default-features = false }
+pallet-staking-rpc-runtime-api = { version = "3.0.0", default-features = false, git = "https://github.com/uni-arts-chain/uni-arts-common.git", tag = "v3.0.0" }
 
-# Uni-Arts pallets
-uniarts-common = { git = "https://github.com/uni-arts-chain/uni-arts-common.git", tag = "v2.0.1", default-features = false }
-pallet-certificate = { git = "https://github.com/uni-arts-chain/uni-arts-common.git", tag = "v2.0.1", default-features = false }
-pallet-names = { git = "https://github.com/uni-arts-chain/uni-arts-common.git", tag = "v2.0.1", default-features = false }
-pallet-nft-multi = { git = "https://github.com/uni-arts-chain/uni-arts-common.git", tag = "v2.0.1", default-features = false }
-pallet-nft-blindbox = { git = "https://github.com/uni-arts-chain/uni-arts-common.git", tag = "v2.0.1", default-features = false }
-pallet-rewards = { git = "https://github.com/uni-arts-chain/uni-arts-common.git", tag = "v2.0.1", default-features = false }
-pallet-staking = { git = "https://github.com/uni-arts-chain/uni-arts-common.git", tag = "v2.0.1", default-features = false }
-pallet-validator-set = { git = "https://github.com/uni-arts-chain/uni-arts-common.git", tag = "v2.0.1", default-features = false }
-pallet-token = { git = "https://github.com/uni-arts-chain/uni-arts-common.git", tag = "v2.0.1", default-features = false }
-pallet-trade = { git = "https://github.com/uni-arts-chain/uni-arts-common.git", tag = "v2.0.1", default-features = false }
-pallet-bridge = { git = "https://github.com/uni-arts-chain/uni-arts-common.git", tag = "v2.0.1", default-features = false }
-# pallet-lotteries = { path = "../../pallets/lotteries", default-features = false }
-primitives = { package = "uniarts-primitives", git = "https://github.com/uni-arts-chain/uni-arts-common.git", tag = "v2.0.1", default-features = false }
+# Uni-Arts configs
+uniarts-common = { git = "https://github.com/uni-arts-chain/uni-arts-common.git", tag = "v3.0.0", default-features = false }
+pallet-names = { git = "https://github.com/uni-arts-chain/uni-arts-common.git", tag = "v3.0.0", default-features = false }
+pallet-nft-multi = { git = "https://github.com/uni-arts-chain/uni-arts-common.git", tag = "v3.0.0", default-features = false }
+pallet-nft-blindbox = { git = "https://github.com/uni-arts-chain/uni-arts-common.git", tag = "v3.0.0", default-features = false }
+pallet-rewards = { git = "https://github.com/uni-arts-chain/uni-arts-common.git", tag = "v3.0.0", default-features = false }
+pallet-staking = { git = "https://github.com/uni-arts-chain/uni-arts-common.git", tag = "v3.0.0", default-features = false }
+pallet-validator-set = { git = "https://github.com/uni-arts-chain/uni-arts-common.git", tag = "v3.0.0", default-features = false }
+pallet-bridge = { git = "https://github.com/uni-arts-chain/uni-arts-common.git", tag = "v3.0.0", default-features = false }
+pallet-assets = { git = "https://github.com/uni-arts-chain/uni-arts-common.git", tag = "v3.0.0" , default-features = false }
+# pallet-lotteries = { path = "../../configs/lotteries", default-features = false }
+uniarts-primitives = { package = "uniarts-primitives", git = "https://github.com/uni-arts-chain/uni-arts-common.git", tag = "v3.0.0", default-features = false }
 
 # Used for runtime benchmarking
-frame-benchmarking = { version = "2.0.1", default-features = false, optional = true }
-frame-system-benchmarking = { version = "2.0.1", default-features = false, optional = true }
+frame-benchmarking = { version = "3.0.0", default-features = false, optional = true }
+frame-system-benchmarking = { version = "3.0.0", default-features = false, optional = true }
 
 [build-dependencies]
-wasm-builder-runner = { version = "1.0.5", package = "substrate-wasm-builder-runner" }
+substrate-wasm-builder = '4.0.0'
 
 [features]
 default = ["std"]
@@ -108,12 +108,14 @@ std = [
     "pallet-collective/std",
     "pallet-membership/std",
     "pallet-treasury/std",
+    "pallet-bounties/std",
     "pallet-elections-phragmen/std",
     "pallet-identity/std",
     "pallet-randomness-collective-flip/std",
     "pallet-session/std",
     "pallet-society/std",
     "pallet-sudo/std",
+    "pallet-assets/std",
     "pallet-timestamp/std",
     "pallet-transaction-payment/std",
     "pallet-transaction-payment-rpc-runtime-api/std",
@@ -125,8 +127,6 @@ std = [
     "pallet-nft-multi/std",
     "pallet-nft-blindbox/std",
     "pallet-validator-set/std",
-    "pallet-token/std",
-    "pallet-trade/std",
     "pallet-staking/std",
     "pallet-rewards/std",
     "pallet-staking-rpc-runtime-api/std",
@@ -150,7 +150,7 @@ std = [
     "sp-std/std",
     "sp-transaction-pool/std",
     "sp-version/std",
-    "primitives/std",
+    "uniarts-primitives/std",
 ]
 
 runtime-benchmarks = [

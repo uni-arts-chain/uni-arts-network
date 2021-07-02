@@ -7,7 +7,7 @@ use frame_support::weights::{Weight, constants::RocksDbWeight as DbWeight};
 use sp_std::marker::PhantomData;
 
 pub struct WeightInfo<T>(PhantomData<T>);
-impl<T: frame_system::Trait> pallet_rewards::WeightInfo for WeightInfo<T> {
+impl<T: frame_system::Config> pallet_rewards::WeightInfo for WeightInfo<T> {
 	fn claim() -> Weight {
 		(50_000_000 as Weight)
 			.saturating_add(DbWeight::get().reads(3 as Weight))

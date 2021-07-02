@@ -7,12 +7,24 @@ use super::frame_system_config::BlocksPerDay;
 pub use crate::constants::currency::*;
 pub use crate::constants::time::*;
 
+/*
+    150_000_000 UARTs will be minted during 6 years. 
+    8 UARTs/block. Total supply is 250_000_000. 
+    75 days of mining in the sixth year.
+
+    1: 42048000 -> 16.8% 
+    2: 33638400 -> 13.4%
+    3: 26910720 -> 10.8%
+    4: 21528576 -> 8.6%
+    5: 17222860 -> 6.9%
+    6: 8651443  -> 3.5% 
+*/
 frame_support::parameter_types! {
 	pub const MiningRewardPerBlock: Balance = 8 * UART;
 	pub const RewardThreshold: Balance = 30 * (BlocksPerDay::get() as Balance) * MiningRewardPerBlock::get();
 	pub const StakingRewardPerBlock: Balance = 1 * UART;
 	pub const AmpFactor: Balance = 1e12 as Balance;
-	pub const BlocksPerYear: u32 = 10; //365 * BlocksPerDay::get();
+	pub const BlocksPerYear: u32 = 365 * BlocksPerDay::get();
 	pub const MiningCap: Balance = 150_000_000 * UART;
 }
 

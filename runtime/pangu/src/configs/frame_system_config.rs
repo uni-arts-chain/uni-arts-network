@@ -14,7 +14,7 @@ use crate::{weights::frame_system::WeightInfo, *};
 // }
 
 frame_support::parameter_types! {
-    pub const BlocksPerDay: u32 = 6 * 60 * 24;
+    pub const BlocksPerDay: u32 = 10 * 60 * 24;
 	pub const Version: RuntimeVersion = VERSION;
 	pub const SS58Prefix: u8 = 45;
     pub RuntimeBlockLength: BlockLength =

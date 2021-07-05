@@ -1,9 +1,11 @@
-use sp_core::{Pair, Public, crypto::UncheckedInto, sr25519};
+use std::{str::FromStr, collections::BTreeMap};
+use sp_core::{Pair, Public, crypto::UncheckedInto, sr25519, H160, U256,};
 
 use super::testnet_accounts;
 use fuxi_runtime::{
 	get_all_module_accounts,
 	BalancesConfig, ContractsConfig, GenesisConfig, SessionConfig, ValidatorSetConfig, VestingConfig, BridgeConfig,
+	EVMConfig, EthereumConfig,
 	SudoConfig, SystemConfig, CouncilMembershipConfig, TechnicalMembershipConfig, UniTokensConfig, CurrencyId,
 	WASM_BINARY, Signature, opaque::SessionKeys
 };
@@ -122,7 +124,7 @@ pub fn fuxi_staging_config() -> Result<FuxiChainSpec, String> {
 
 	Ok(FuxiChainSpec::from_genesis(
 		// Name
-		"UniArts Staging network",
+		"UniArts Staging chain",
 		// ID
 		"fuxi_staging",
 		ChainType::Live,
@@ -287,7 +289,7 @@ fn testnet_genesis(
 		pallet_aura: None,
 		pallet_grandpa: None,
 		pallet_sudo: Some(SudoConfig {
-			// Assign network admin rights.
+			// Assign chain admin rights.
 			key: root_key.clone(),
 		}),
 		pallet_contracts: Some(ContractsConfig {
@@ -328,6 +330,25 @@ fn testnet_genesis(
 				400*10u128.pow(18),
 				1*10u128.pow(6),
 			]
-		})
+		}),
+		pallet_evm: Some(EVMConfig {
+			accounts: {
+				let mut map = BTreeMap::new();
+				map.insert(
+					H160::from_str("6be02d1d3665660d22ff9624b7be0551ee1ac91b")
+						.expect("internal H160 is valid; qed"),
+					pallet_evm::GenesisAccount {
+						balance: U256::from_str("0xffffffffffffffffffffffffffffffff")
+							.expect("internal U256 is valid; qed"),
+						code: Default::default(),
+						nonce: Default::default(),
+						storage: Default::default(),
+					}
+				);
+				map
+			},
+		}),
+		pallet_ethereum: Some(EthereumConfig {}),
+		pallet_dynamic_fee: Some(Default::default()),
 	}
 }

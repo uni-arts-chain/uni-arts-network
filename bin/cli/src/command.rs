@@ -47,7 +47,7 @@ impl SubstrateCli for Cli {
 	}
 
 	fn support_url() -> String {
-		"https://github.com/uni-arts-chain/uni-arts-network/issues".into()
+		"https://github.com/uni-arts-chain/uni-arts-chain/issues".into()
 	}
 
 	fn copyright_start_year() -> i32 {

@@ -118,7 +118,7 @@ pub fn staging_config() -> Result<PanguChainSpec, String> {
 
 	Ok(PanguChainSpec::from_genesis(
 		// Name
-		"Uni-Arts Staging network",
+		"Uni-Arts Staging chain",
 		// ID
 		"pangu_staging",
 		ChainType::Live,
@@ -275,7 +275,7 @@ fn testnet_genesis(
 		pallet_aura: None,
 		pallet_grandpa: None,
 		pallet_sudo: Some(SudoConfig {
-			// Assign network admin rights.
+			// Assign chain admin rights.
 			key: root_key.clone(),
 		}),
 		pallet_contracts: Some(ContractsConfig {

@@ -32,3 +32,6 @@ pub mod pallet_indices_config;
 pub mod pallet_recovery_config;
 pub mod pallet_bridge_config;
 pub mod pallet_proxy_config;
+pub mod pallet_evm_config;
+pub mod pallet_ethereum_config;
+pub mod pallet_dynamic_fee_config;

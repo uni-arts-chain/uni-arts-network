@@ -158,7 +158,7 @@ curl --location --request POST 'http://localhost:9935' \
 ## How to join our Uni-Arts test network ? (docker)
 ### docker run
 ```bash
-docker run --rm uniart/uni-arts-network uart --chain pangu --base-path chain-data --rpc-cors=all \
+docker run --rm uniart/uni-arts-chain uart --chain pangu --base-path chain-data --rpc-cors=all \
  --ws-external --rpc-external --rpc-methods=Unsafe --telemetry-url "wss://telemetry.polkadot.io/submit/ 0" \
   --bootnodes /dns/testnet.uniarts.me/tcp/30333/p2p/12D3KooWKw1pAvrKcFTt5Tj3vY33Dw9Vg2sa2DWsXQAoWJsTGhYX
 ```

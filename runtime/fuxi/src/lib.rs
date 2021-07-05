@@ -96,7 +96,7 @@ const MAXIMUM_BLOCK_WEIGHT: Weight = 2 * WEIGHT_PER_SECOND;
 
 /// Opaque types. These are used by the CLI to instantiate machinery that don't need to know
 /// the specifics of the runtime. They can then be made to be agnostic over specific formats
-/// of data like extrinsics, allowing for them to continue syncing the network through upgrades
+/// of data like extrinsics, allowing for them to continue syncing the chain through upgrades
 /// to even the core data structures.
 pub mod opaque {
 	use super::*;
@@ -228,6 +228,11 @@ construct_runtime!(
 		Nft: pallet_nft_multi::{Module, Call, Storage, Event<T>} = 63,
 		BlindBox: pallet_nft_blindbox::{Module, Call, Storage, Event<T>} = 64,
 		Bridge: pallet_bridge::{Module, Call, Storage, Event<T>, Config<T>} = 65,
+
+		// EVM
+		Ethereum: pallet_ethereum::{Module, Call, Storage, Event, Config, ValidateUnsigned} = 71,
+		EVM: pallet_evm::{Module, Config, Call, Storage, Event<T>} = 72,
+		DynamicFee: pallet_dynamic_fee::{Module, Call, Storage, Config, Inherent} = 73,
 	}
 );
 

@@ -60,12 +60,12 @@ native_executor_instance!(
 	frame_benchmarking::benchmarking::HostFunctions,
 );
 
-/// Can be called for a `Configuration` to check if it is a configuration for the `pangu` network.
+/// Can be called for a `Configuration` to check if it is a configuration for the `pangu` chain.
 pub trait IdentifyVariant {
-    /// Returns if this is a configuration for the `Pangu` network.
+    /// Returns if this is a configuration for the `Pangu` chain.
     fn is_pangu_network(&self) -> bool;
 
-    /// Returns if this is a configuration for the `Fuxi` network.
+    /// Returns if this is a configuration for the `Fuxi` chain.
     fn is_fuxi_network(&self) -> bool;
 }
 impl IdentifyVariant for Box<dyn ChainSpec> {
@@ -307,7 +307,7 @@ pub fn new_full<RuntimeApi, Executor>(mut config: Configuration) -> Result<(Task
         // NOTE: non-authorities could run the GRANDPA observer protocol, but at
         // this point the full voter should provide better guarantees of block
         // and vote data availability than the observer. The observer has not
-        // been tested extensively yet and having most nodes in a network run it
+        // been tested extensively yet and having most nodes in a chain run it
         // could lead to finality stalls.
         let grandpa_config = sc_finality_grandpa::GrandpaParams {
             config: grandpa_config,

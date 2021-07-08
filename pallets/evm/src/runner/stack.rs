@@ -31,7 +31,7 @@ use evm::backend::Backend as BackendT;
 use evm::executor::{StackExecutor, StackSubstateMetadata, StackState as StackStateT};
 use crate::{
 	Config, AccountStorages, FeeCalculator, AccountCodes, Module, Event,
-	Error, AddressMapping, PrecompileSet, OnChargeEVMTransaction, BlockHashMapping,
+	Error, AddressMapping, PrecompileSet, OnChargeEVMTransaction
 };
 use crate::runner::Runner as RunnerT;
 
@@ -347,7 +347,8 @@ impl<'vicinity, 'config, T: Config> BackendT for SubstrateStackState<'vicinity, 
 		if number > U256::from(u32::max_value()) {
 			H256::default()
 		} else {
-			T::BlockHashMapping::block_hash(number.as_u32())
+			let number = T::BlockNumber::from(number.as_u32());
+			H256::from_slice(frame_system::Module::<T>::block_hash(number).as_ref())
 		}
 	}
 
@@ -357,7 +358,7 @@ impl<'vicinity, 'config, T: Config> BackendT for SubstrateStackState<'vicinity, 
 	}
 
 	fn block_coinbase(&self) -> H160 {
-		Module::<T>::find_author()
+		H160::default()
 	}
 
 	fn block_timestamp(&self) -> U256 {

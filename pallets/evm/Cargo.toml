@@ -1,6 +1,6 @@
 [package]
 name = "pallet-evm"
-version = "5.0.0-dev"
+version = "4.0.0"
 authors = ["Parity Technologies <admin@parity.io>"]
 edition = "2018"
 license = "Apache-2.0"
@@ -31,10 +31,6 @@ evm-runtime = { version = "0.27.0", default-features = false }
 evm-gasometer = { version = "0.27.0", default-features = false }
 sha3 = { version = "0.8", default-features = false }
 log = { version = "0.4", default-features = false }
-
-[dev-dependencies]
-sp-consensus-aura = { version = "0.9.0" }
-pallet-aura = { version = "3.0.0" }
 
 [features]
 default = ["std"]

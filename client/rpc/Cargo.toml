@@ -1,0 +1,46 @@
+[package]
+name = "fc-rpc"
+version = "2.0.0-dev"
+authors = ["Parity Technologies <admin@parity.io>"]
+edition = "2018"
+description = "Ethereum RPC (web3) compatibility layer for Substrate."
+license = "GPL-3.0-or-later WITH Classpath-exception-2.0"
+
+[dependencies]
+jsonrpc-core = "15.0.0"
+jsonrpc-derive = "14.0.3"
+jsonrpc-core-client = "14.0.3"
+jsonrpc-pubsub = "15.0.0"
+log = "0.4.8"
+ethereum-types = "0.11.0"
+evm = "0.27.0"
+fc-consensus = { version = "2.0.0-dev", path = "../consensus" }
+fc-db = { version = "1.0.0", path = "../db" }
+fc-rpc-core = { version = "1.1.0-dev", path = "../rpc-core" }
+fp-consensus = { version = "1.0.0", path = "../../primitives/consensus" }
+fp-rpc = { version = "2.0.0-dev", path = "../../primitives/rpc" }
+fp-storage = { version = "1.0.1-dev", path = "../../primitives/storage"}
+sp-io = { version = "3.0.0" }
+sp-runtime = { version = "3.0.0" }
+sp-api = { version = "3.0.0" }
+sp-transaction-pool = { version = "3.0.0" }
+sp-storage = { version = "3.0.0" }
+sp-blockchain = { version = "3.0.0" }
+sc-service = { version = "0.9.0" }
+sc-client-api = { version = "3.0.0" }
+sc-rpc = { version = "3.0.0" }
+sc-network = { version = "0.9.0" }
+pallet-evm = { version = "4.0.0-dev", path = "../../pallets/evm" }
+fp-evm = { version = "2.0.0-dev", path = "../../primitives/evm" }
+pallet-ethereum = { version = "2.0.0-dev", path = "../../pallets/ethereum" }
+ethereum = { version = "0.7.1", features = ["with-codec"] }
+codec = { package = "parity-scale-codec", version = "2.0.0" }
+rlp = "0.5"
+futures = { version = "0.3.1", features = ["compat"] }
+sha3 = "0.8"
+rustc-hex = { version = "2.1.0", default-features = false }
+libsecp256k1 = "0.3"
+rand = "0.7"
+
+[features]
+rpc_binary_search_estimate = []

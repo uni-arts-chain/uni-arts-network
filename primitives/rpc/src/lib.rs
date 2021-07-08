@@ -22,7 +22,6 @@ use ethereum::{Log, Block as EthereumBlock};
 use ethereum_types::Bloom;
 use codec::{Encode, Decode};
 use sp_std::vec::Vec;
-use sp_runtime::traits::Block as BlockT;
 
 #[derive(Eq, PartialEq, Clone, Encode, Decode, sp_runtime::RuntimeDebug)]
 pub struct TransactionStatus {
@@ -99,10 +98,6 @@ sp_api::decl_runtime_apis! {
 			Option<Vec<ethereum::Receipt>>,
 			Option<Vec<TransactionStatus>>
 		);
-		/// Receives a `Vec<OpaqueExtrinsic>` and filters all the ethereum transactions.
-		fn extrinsic_filter(
-			xts: Vec<<Block as BlockT>::Extrinsic>,
-		) -> Vec<ethereum::Transaction>;
 	}
 }
 

@@ -1,26 +1,10 @@
 use pallet_evm::Config;
 use crate::*;
 
-use sp_std::marker::PhantomData;
-use sp_core::{U256, H160};
-use sp_core::crypto::Public;
+use sp_core::U256;
 use pallet_evm::{
     HashedAddressMapping, EnsureAddressTruncated,
 };
-
-pub struct FindAuthorTruncated<F>(PhantomData<F>);
-impl<F: FindAuthor<u32>> FindAuthor<H160> for FindAuthorTruncated<F>
-{
-    fn find_author<'a, I>(digests: I) -> Option<H160> where
-        I: 'a + IntoIterator<Item=(ConsensusEngineId, &'a [u8])>
-    {
-        if let Some(author_index) = F::find_author(digests) {
-            let authority_id = Aura::authorities()[author_index as usize].clone();
-            return Some(H160::from_slice(&authority_id.to_raw_vec()[4..24]));
-        }
-        None
-    }
-}
 
 frame_support::parameter_types! {
 	pub const ChainId: u64 = 42;
@@ -30,7 +14,6 @@ frame_support::parameter_types! {
 impl Config for Runtime {
     type FeeCalculator = pallet_dynamic_fee::Module<Self>;
     type GasWeightMapping = ();
-    type BlockHashMapping = pallet_ethereum::EthereumBlockHashMapping;
     type CallOrigin = EnsureAddressTruncated;
     type WithdrawOrigin = EnsureAddressTruncated;
     type AddressMapping = HashedAddressMapping<BlakeTwo256>;
@@ -50,5 +33,4 @@ impl Config for Runtime {
     type ChainId = ChainId;
     type BlockGasLimit = BlockGasLimit;
     type OnChargeTransaction = ();
-    type FindAuthor = FindAuthorTruncated<Aura>;
 }

@@ -7,8 +7,10 @@ edition = "2018"
 
 [dependencies]
 # crates
+futures = "0.3.4"
 codec = { package = "parity-scale-codec", version = "2.0.0", default-features = false }
 jsonrpc-core = "15.1.0"
+jsonrpc-pubsub = "15.1.0"
 
 # uniarts
 uniarts-primitives = { git = "https://github.com/uni-arts-chain/uni-arts-common.git", tag = "v3.0.0" }
@@ -26,11 +28,13 @@ sc-executor = { version = "0.9.0", features = ["wasmtime"] }
 sc-service = { version = "0.9.0", features = ["wasmtime"] }
 sc-transaction-pool = { version = "3.0.0" }
 sc-consensus-aura = { version = "0.9.0" }
+sc-consensus-manual-seal = { version = "0.9.0" }
 sc-consensus = { version = "0.9.0" }
 sc-finality-grandpa = { version = "0.9.0" }
 sc-client-api = { version = "3.0.0" }
 sc-rpc = { version = "3.0.0" }
 sc-rpc-api = { version = "0.9.0" }
+sc-network = { version = "0.9.0" }
 sc-telemetry = { version = "3.0.0" }
 sc-basic-authorship = { version = "0.9.0" }
 
@@ -45,3 +49,16 @@ sp-runtime = { version = "3.0.0" }
 sp-api = { version = "3.0.0" }
 sp-blockchain = { version = "3.0.0" }
 sp-block-builder = { version = "3.0.0" }
+
+# EVM
+pallet-ethereum = { path = "../../pallets/ethereum" }
+fc-consensus = { path = "../../client/consensus" }
+fp-consensus = { path = "../../primitives/consensus" }
+fc-rpc = { path = "../../client/rpc" }
+fp-rpc = { path = "../../primitives/rpc" }
+fc-rpc-core = { path = "../../client/rpc-core" }
+fc-db = { path = "../../client/db" }
+fc-mapping-sync = { path = "../../client/mapping-sync" }
+
+# runtime
+fuxi-runtime = { path = "../../runtime/fuxi" }

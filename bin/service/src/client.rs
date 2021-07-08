@@ -131,8 +131,8 @@ pub trait ClientHandle {
 /// A client instance of Moonbeam.
 #[derive(Clone)]
 pub enum Client {
-    Fuxi(Arc<crate::FullClient<fuxi_runtime::RuntimeApi, crate::FuxiExecutor>>),
-    Pangu(Arc<crate::FullClient<pangu_runtime::RuntimeApi, crate::PanguExecutor>>),
+    Fuxi(Arc<crate::client::FullClient<fuxi_runtime::RuntimeApi, crate::FuxiExecutor>>),
+    Pangu(Arc<crate::client::FullClient<pangu_runtime::RuntimeApi, crate::PanguExecutor>>),
 }
 
 impl ClientHandle for Client {
@@ -250,7 +250,7 @@ impl sc_client_api::StorageProvider<Block, crate::FullBackend> for Client {
         id: &BlockId<Block>,
         prefix: Option<&'a StorageKey>,
         start_key: Option<&StorageKey>,
-    ) -> sp_blockchain::Result<KeyIterator<'a, <crate::FullBackend as sc_client_api::Backend<Block>>::State, Block>> {
+    ) -> sp_blockchain::Result<KeyIterator<'a, <crate::service::FullBackend as sc_client_api::Backend<Block>>::State, Block>> {
         match self {
             Self::Fuxi(client) => client.storage_keys_iter(id, prefix, start_key),
             Self::Pangu(client) => client.storage_keys_iter(id, prefix, start_key),

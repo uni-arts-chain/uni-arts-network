@@ -15,7 +15,7 @@ use uniarts_rpc::fuxi::FullDeps;
 use std::{sync::{Arc, Mutex}, time::Duration, collections::{HashMap, BTreeMap}};
 use fc_rpc::EthTask;
 use fc_rpc_core::types::{FilterPool, PendingTransactions};
-use sc_client_api::{ExecutorProvider, RemoteBackend, StateBackendFor};
+use sc_client_api::{ExecutorProvider, RemoteBackend, StateBackendFor, BlockchainEvents};
 use sc_service::{error::Error as ServiceError, TaskManager, BasePath, config::KeystoreConfig, PartialComponents};
 use fc_consensus::FrontierBlockImport;
 use fc_mapping_sync::MappingSyncWorker;
@@ -28,8 +28,7 @@ use sp_api::ConstructRuntimeApi;
 use sp_consensus::import_queue::BasicQueue;
 use sp_runtime::traits::BlakeTwo256;
 use sp_trie::PrefixedMemoryDB;
-use sc_telemetry::{Telemetry, TelemetryWorker};
-use sp_core::U256;
+use futures::StreamExt;
 
 // Our native executor instance.
 native_executor_instance!(
@@ -58,7 +57,7 @@ pub fn open_frontier_backend(config: &Configuration) -> Result<Arc<fc_db::Backen
     })?))
 }
 
-pub fn new_partial<RuntimeApi, Executor>(config: &mut Configuration, #[allow(unused_variables)] cli: &Cli) -> Result<sc_service::PartialComponents<
+pub fn new_partial<RuntimeApi, Executor>(config: &mut Configuration) -> Result<sc_service::PartialComponents<
     FullClient<RuntimeApi, Executor>,
     FullBackend,
     FullSelectChain,
@@ -68,11 +67,15 @@ pub fn new_partial<RuntimeApi, Executor>(config: &mut Configuration, #[allow(unu
         (sc_consensus_aura::AuraBlockImport<
             Block,
             FullClient<RuntimeApi, Executor>,
-            sc_finality_grandpa::GrandpaBlockImport<FullBackend, Block, FullClient<RuntimeApi, Executor>, FullSelectChain>,
+            FrontierBlockImport<
+                Block,
+                sc_finality_grandpa::GrandpaBlockImport<FullBackend, Block, FullClient<RuntimeApi, Executor>, FullSelectChain>,
+                FullClient<RuntimeApi, Executor>
+            >,
             AuraPair
         >,
          sc_finality_grandpa::LinkHalf<Block, FullClient<RuntimeApi, Executor>, FullSelectChain>),
-        PendingTransactions, Option<FilterPool>, Arc<fc_db::Backend<Block>>, Option<Telemetry>
+        PendingTransactions, Option<FilterPool>, Arc<fc_db::Backend<Block>>
     )
 >, ServiceError>
     where
@@ -88,15 +91,6 @@ pub fn new_partial<RuntimeApi, Executor>(config: &mut Configuration, #[allow(unu
     }
 
     let inherent_data_providers = sp_inherents::InherentDataProviders::new();
-
-    let telemetry = config.telemetry_endpoints.clone()
-        .filter(|x| !x.is_empty())
-        .map(|endpoints| -> Result<_, sc_telemetry::Error> {
-            let worker = TelemetryWorker::new(16)?;
-            let telemetry = worker.handle().new_telemetry(endpoints);
-            Ok((worker, telemetry))
-        })
-        .transpose()?;
 
     let (client, backend, keystore_container, task_manager) =
         sc_service::new_full_parts::<Block, RuntimeApi, Executor>(&config)?;
@@ -120,10 +114,10 @@ pub fn new_partial<RuntimeApi, Executor>(config: &mut Configuration, #[allow(unu
 
     let frontier_backend = open_frontier_backend(config)?;
 
-    inherent_data_providers
-        .register_provider(pallet_dynamic_fee::InherentDataProvider(U256::from(cli.run.target_gas_price)))
-        .map_err(Into::into)
-        .map_err(sp_consensus::Error::InherentData)?;
+    // inherent_data_providers
+    //     .register_provider(pallet_dynamic_fee::InherentDataProvider(U256::from(cli.run.target_gas_price)))
+    //     .map_err(Into::into)
+    //     .map_err(sp_consensus::Error::InherentData)?;
 
     let (grandpa_block_import, grandpa_link) = sc_finality_grandpa::block_import(
         client.clone(), &(client.clone() as Arc<_>), select_chain.clone(),
@@ -136,7 +130,7 @@ pub fn new_partial<RuntimeApi, Executor>(config: &mut Configuration, #[allow(unu
     );
 
     let aura_block_import = sc_consensus_aura::AuraBlockImport::<_, _, _, AuraPair>::new(
-        grandpa_block_import.clone(), client.clone(),
+        frontier_block_import.clone(), client.clone(),
     );
 
     let import_queue = sc_consensus_aura::import_queue::<_, _, _, AuraPair, _, _>(
@@ -158,19 +152,19 @@ pub fn new_partial<RuntimeApi, Executor>(config: &mut Configuration, #[allow(unu
             pending_transactions,
             filter_pool,
             frontier_backend,
-            telemetry,
         )
     })
 }
 
 /// Builds a new service for a full client.
-pub fn new_full<RuntimeApi, Executor>(mut config: Configuration, cli: &Cli,) -> Result<(TaskManager, Arc<FullClient<RuntimeApi, Executor>>), ServiceError>
+pub fn new_full<RuntimeApi, Executor>(mut config: Configuration) -> Result<(TaskManager, Arc<FullClient<RuntimeApi, Executor>>), ServiceError>
     where
         Executor: 'static + NativeExecutionDispatch,
         RuntimeApi: 'static + Send + Sync + ConstructRuntimeApi<Block, FullClient<RuntimeApi, Executor>>,
         RuntimeApi::RuntimeApi: RuntimeApiCollection<StateBackend = StateBackendFor<FullBackend, Block>>,
 {
-    let enable_dev_signer = cli.run.enable_dev_signer;
+    // let enable_dev_signer = cli.run.enable_dev_signer;
+    let enable_dev_signer = false;
 
     let sc_service::PartialComponents {
         client,
@@ -184,8 +178,7 @@ pub fn new_full<RuntimeApi, Executor>(mut config: Configuration, cli: &Cli,) -> 
         other: ((block_import, grandpa_link),
             pending_transactions,
             filter_pool,
-            frontier_backend,
-            mut telemetry),
+            frontier_backend),
     } = new_partial(&mut config)?;
 
     if let Some(url) = &config.keystore_remote {
@@ -214,6 +207,9 @@ pub fn new_full<RuntimeApi, Executor>(mut config: Configuration, cli: &Cli,) -> 
             block_announce_validator_builder: None,
         })?;
 
+    // Channel for the rpc handler to communicate with the authorship task.
+    let (command_sink, _commands_stream) = futures::channel::mpsc::channel(1000);
+
     if config.offchain_worker.enabled {
         sc_service::build_offchain_workers(
             &config, backend.clone(), task_manager.spawn_handle(), client.clone(), network.clone(),
@@ -227,6 +223,7 @@ pub fn new_full<RuntimeApi, Executor>(mut config: Configuration, cli: &Cli,) -> 
     let enable_grandpa = !config.disable_grandpa;
     let prometheus_registry = config.prometheus_registry().cloned();
     let is_authority = role.is_authority();
+    let subscription_task_executor = sc_rpc::SubscriptionTaskExecutor::new(task_manager.spawn_handle());
 
     let rpc_extensions_builder = {
         let client = client.clone();
@@ -235,7 +232,7 @@ pub fn new_full<RuntimeApi, Executor>(mut config: Configuration, cli: &Cli,) -> 
         let pending = pending_transactions.clone();
         let filter_pool = filter_pool.clone();
         let frontier_backend = frontier_backend.clone();
-        let max_past_logs = cli.run.max_past_logs;
+        let max_past_logs = 10000u32;
 
         Box::new(move |deny_unsafe, _| {
             let deps = FullDeps {
@@ -252,7 +249,7 @@ pub fn new_full<RuntimeApi, Executor>(mut config: Configuration, cli: &Cli,) -> 
                 command_sink: Some(command_sink.clone()),
             };
 
-            uniarts_rpc::fuxi::create_full(deps)
+            uniarts_rpc::fuxi::create_full(deps, subscription_task_executor.clone())
         })
     };
 

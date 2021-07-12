@@ -112,7 +112,7 @@ pub trait ExecuteWithClient {
             <Api as sp_api::ApiExt<Block>>::StateBackend: sp_api::StateBackend<BlakeTwo256>,
             Backend: sc_client_api::Backend<Block>,
             Backend::State: sp_api::StateBackend<BlakeTwo256>,
-            Api: crate::RuntimeApiCollection<StateBackend = Backend::State>,
+            Api: crate::client::RuntimeApiCollection<StateBackend = Backend::State>,
             Client: AbstractClient<Block, Backend, Api = Api> + 'static;
 }
 
@@ -131,18 +131,18 @@ pub trait ClientHandle {
 /// A client instance of Moonbeam.
 #[derive(Clone)]
 pub enum Client {
-    Fuxi(Arc<crate::FullClient<fuxi_runtime::RuntimeApi, crate::FuxiExecutor>>),
-    Pangu(Arc<crate::FullClient<pangu_runtime::RuntimeApi, crate::PanguExecutor>>),
+    Fuxi(Arc<crate::service::FullClient<fuxi_runtime::RuntimeApi, crate::service::fuxi::FuxiExecutor>>),
+    Pangu(Arc<crate::service::FullClient<pangu_runtime::RuntimeApi, crate::service::pangu::PanguExecutor>>),
 }
 
 impl ClientHandle for Client {
     fn execute_with<T: ExecuteWithClient>(&self, t: T) -> T::Output {
         match self {
             Self::Fuxi(client) => {
-                T::execute_with_client::<_, _, crate::FullBackend>(t, client.clone())
+                T::execute_with_client::<_, _, crate::service::FullBackend>(t, client.clone())
             }
             Self::Pangu(client) => {
-                T::execute_with_client::<_, _, crate::FullBackend>(t, client.clone())
+                T::execute_with_client::<_, _, crate::service::FullBackend>(t, client.clone())
             }
         }
     }
@@ -208,7 +208,7 @@ impl sc_client_api::BlockBackend<Block> for Client {
     }
 }
 
-impl sc_client_api::StorageProvider<Block, crate::FullBackend> for Client {
+impl sc_client_api::StorageProvider<Block, crate::service::FullBackend> for Client {
     fn storage(&self, id: &BlockId<Block>, key: &StorageKey) -> sp_blockchain::Result<Option<StorageData>> {
         match self {
             Self::Fuxi(client) => client.storage(id, key),
@@ -250,7 +250,7 @@ impl sc_client_api::StorageProvider<Block, crate::FullBackend> for Client {
         id: &BlockId<Block>,
         prefix: Option<&'a StorageKey>,
         start_key: Option<&StorageKey>,
-    ) -> sp_blockchain::Result<KeyIterator<'a, <crate::FullBackend as sc_client_api::Backend<Block>>::State, Block>> {
+    ) -> sp_blockchain::Result<KeyIterator<'a, <crate::service::FullBackend as sc_client_api::Backend<Block>>::State, Block>> {
         match self {
             Self::Fuxi(client) => client.storage_keys_iter(id, prefix, start_key),
             Self::Pangu(client) => client.storage_keys_iter(id, prefix, start_key),

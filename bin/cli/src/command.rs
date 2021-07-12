@@ -22,7 +22,7 @@ use sc_cli::{SubstrateCli, RuntimeVersion, Role, ChainSpec};
 // use sc_service::PartialComponents;
 use sp_core::crypto::Ss58AddressFormat;
 // use uniarts_primitives::{OpaqueBlock as Block};
-use uniarts_service::{pangu_runtime, fuxi_runtime, IdentifyVariant};
+use uniarts_service::service::{pangu::{pangu_runtime, PanguExecutor}, fuxi::{fuxi_runtime, FuxiExecutor}, IdentifyVariant};
 use log::info;
 
 const UNI_ARTS_ADDRESS_FORMAT_ID: u16 = 45;
@@ -82,11 +82,11 @@ impl SubstrateCli for Cli {
 
 	fn native_runtime_version(spec: &Box<dyn ChainSpec>) -> &'static RuntimeVersion {
 		if spec.is_pangu_network() {
-			&uniarts_service::pangu_runtime::VERSION
+			&uniarts_service::service::pangu::pangu_runtime::VERSION
 		} else if spec.is_fuxi_network() {
-			&uniarts_service::fuxi_runtime::VERSION
+			&uniarts_service::service::fuxi::fuxi_runtime::VERSION
 		} else {
-			&uniarts_service::pangu_runtime::VERSION
+			&uniarts_service::service::pangu::pangu_runtime::VERSION
 		}
 	}
 }
@@ -98,7 +98,7 @@ fn get_exec_name() -> Option<String> {
 		.and_then(|s| s.into_string().ok())
 }
 
-fn set_default_ss58_version(spec: &Box<dyn uniarts_service::ChainSpec>) {
+fn set_default_ss58_version(spec: &Box<dyn uniarts_service::service::ChainSpec>) {
 	let ss58_version = if spec.is_pangu_network() {
 		Ss58AddressFormat::SubstrateAccount
 	} else if spec.is_fuxi_network() {
@@ -133,18 +133,18 @@ pub fn run() -> sc_cli::Result<()> {
 
 			if chain_spec.is_pangu_network() {
 				runner.async_run(|mut config| {
-					let (client, _, import_queue, task_manager) = uniarts_service::new_chain_ops::<
+					let (client, _, import_queue, task_manager) = uniarts_service::service::pangu::new_chain_ops::<
 						pangu_runtime::RuntimeApi,
-						uniarts_service::PanguExecutor,
+						PanguExecutor,
 					>(&mut config)?;
 
 					Ok((cmd.run(client, import_queue), task_manager))
 				})
 			} else if chain_spec.is_fuxi_network() {
 				runner.async_run(|mut config| {
-					let (client, _, import_queue, task_manager) = uniarts_service::new_chain_ops::<
+					let (client, _, import_queue, task_manager) = uniarts_service::service::fuxi::new_chain_ops::<
 						fuxi_runtime::RuntimeApi,
-						uniarts_service::FuxiExecutor,
+						FuxiExecutor,
 					>(&mut config)?;
 
 					Ok((cmd.run(client, import_queue), task_manager))
@@ -162,18 +162,18 @@ pub fn run() -> sc_cli::Result<()> {
 
 			if chain_spec.is_pangu_network() {
 				runner.async_run(|mut config| {
-					let (client, _, _, task_manager) = uniarts_service::new_chain_ops::<
+					let (client, _, _, task_manager) = uniarts_service::service::pangu::new_chain_ops::<
 						pangu_runtime::RuntimeApi,
-						uniarts_service::PanguExecutor,
+						PanguExecutor,
 					>(&mut config)?;
 
 					Ok((cmd.run(client, config.database), task_manager))
 				})
 			} else if chain_spec.is_fuxi_network() {
 				runner.async_run(|mut config| {
-					let (client, _, _, task_manager) = uniarts_service::new_chain_ops::<
+					let (client, _, _, task_manager) = uniarts_service::service::fuxi::new_chain_ops::<
 						fuxi_runtime::RuntimeApi,
-						uniarts_service::FuxiExecutor,
+						FuxiExecutor,
 					>(&mut config)?;
 
 					Ok((cmd.run(client, config.database), task_manager))
@@ -190,18 +190,18 @@ pub fn run() -> sc_cli::Result<()> {
 
 			if chain_spec.is_pangu_network() {
 				runner.async_run(|mut config| {
-					let (client, _, _, task_manager) = uniarts_service::new_chain_ops::<
+					let (client, _, _, task_manager) = uniarts_service::service::pangu::new_chain_ops::<
 						pangu_runtime::RuntimeApi,
-						uniarts_service::PanguExecutor,
+						PanguExecutor,
 					>(&mut config)?;
 
 					Ok((cmd.run(client, config.chain_spec), task_manager))
 				})
 			} else if chain_spec.is_fuxi_network() {
 				runner.async_run(|mut config| {
-					let (client, _, _, task_manager) = uniarts_service::new_chain_ops::<
+					let (client, _, _, task_manager) = uniarts_service::service::fuxi::new_chain_ops::<
 						fuxi_runtime::RuntimeApi,
-						uniarts_service::FuxiExecutor,
+						FuxiExecutor,
 					>(&mut config)?;
 
 					Ok((cmd.run(client, config.chain_spec), task_manager))
@@ -218,18 +218,18 @@ pub fn run() -> sc_cli::Result<()> {
 
 			if chain_spec.is_pangu_network() {
 				runner.async_run(|mut config| {
-					let (client, _, import_queue, task_manager) = uniarts_service::new_chain_ops::<
+					let (client, _, import_queue, task_manager) = uniarts_service::service::pangu::new_chain_ops::<
 						pangu_runtime::RuntimeApi,
-						uniarts_service::PanguExecutor,
+						PanguExecutor,
 					>(&mut config)?;
 
 					Ok((cmd.run(client, import_queue), task_manager))
 				})
 			} else if chain_spec.is_fuxi_network() {
 				runner.async_run(|mut config| {
-					let (client, _, import_queue, task_manager) = uniarts_service::new_chain_ops::<
+					let (client, _, import_queue, task_manager) = uniarts_service::service::fuxi::new_chain_ops::<
 						fuxi_runtime::RuntimeApi,
-						uniarts_service::FuxiExecutor,
+						FuxiExecutor,
 					>(&mut config)?;
 
 					Ok((cmd.run(client, import_queue), task_manager))
@@ -250,18 +250,18 @@ pub fn run() -> sc_cli::Result<()> {
 
 			if chain_spec.is_pangu_network() {
 				runner.async_run(|mut config| {
-					let (client, backend, _, task_manager) = uniarts_service::new_chain_ops::<
+					let (client, backend, _, task_manager) = uniarts_service::service::pangu::new_chain_ops::<
 						pangu_runtime::RuntimeApi,
-						uniarts_service::PanguExecutor,
+						PanguExecutor,
 					>(&mut config)?;
 
 					Ok((cmd.run(client, backend), task_manager))
 				})
 			} else if chain_spec.is_fuxi_network() {
 				runner.async_run(|mut config| {
-					let (client, backend, _, task_manager) = uniarts_service::new_chain_ops::<
+					let (client, backend, _, task_manager) = uniarts_service::service::fuxi::new_chain_ops::<
 						fuxi_runtime::RuntimeApi,
-						uniarts_service::FuxiExecutor,
+						FuxiExecutor,
 					>(&mut config)?;
 
 					Ok((cmd.run(client, backend), task_manager))
@@ -290,18 +290,18 @@ pub fn run() -> sc_cli::Result<()> {
 				runner.run_node_until_exit(|config| async move {
 					match config.role {
 						Role::Light => {
-							uniarts_service::pangu_new_light(config)
+							uniarts_service::service::pangu::pangu_new_light(config)
 						},
-						_ => uniarts_service::pangu_new_full(config).map(|(task_manager, _)| task_manager),
+						_ => uniarts_service::service::pangu::pangu_new_full(config).map(|(task_manager, _)| task_manager),
 					}.map_err(sc_cli::Error::Service)
 				})
 			} else if chain_spec.is_fuxi_network() {
 				runner.run_node_until_exit(|config| async move {
 					match config.role {
 						Role::Light => {
-							uniarts_service::fuxi_new_light(config)
+							uniarts_service::service::fuxi::fuxi_new_light(config)
 						},
-						_ => uniarts_service::fuxi_new_full(config).map(|(task_manager, _)| task_manager),
+						_ => uniarts_service::service::fuxi::fuxi_new_full(config).map(|(task_manager, _)| task_manager),
 					}.map_err(sc_cli::Error::Service)
 				})
 			} else {

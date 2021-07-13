@@ -5,7 +5,7 @@ panic = 'unwind'
 [workspace]
 members = [
     'bin',
-    'primitives',
+    'primitives/*',
     'runtime/pangu',
     'runtime/fuxi',
     'pallets/*',

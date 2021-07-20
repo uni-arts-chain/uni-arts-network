@@ -1,10 +1,11 @@
 use sp_core::{Pair, Public, crypto::UncheckedInto, sr25519};
+use std::collections::BTreeMap;
 
 use super::testnet_accounts;
 use fuxi_runtime::{
 	get_all_module_accounts,
-	BalancesConfig, ContractsConfig, GenesisConfig, SessionConfig, ValidatorSetConfig, VestingConfig, BridgeConfig,
-	SudoConfig, SystemConfig, CouncilMembershipConfig, TechnicalMembershipConfig, UniTokensConfig, CurrencyId,
+	BalancesConfig, ContractsConfig, GenesisConfig, SessionConfig, ValidatorSetConfig, VestingConfig, BridgeConfig, EVMConfig,
+	SudoConfig, SystemConfig, CouncilMembershipConfig, TechnicalMembershipConfig, UniTokensConfig, CurrencyId, EthereumConfig,
 	WASM_BINARY, Signature, opaque::SessionKeys
 };
 use fuxi_runtime::constants::currency::*;
@@ -328,6 +329,10 @@ fn testnet_genesis(
 				400*10u128.pow(18),
 				1*10u128.pow(6),
 			]
-		})
+		}),
+		pallet_evm: Some(EVMConfig {
+			accounts: BTreeMap::new(),
+		}),
+		pallet_ethereum: Some(EthereumConfig {}),
 	}
 }

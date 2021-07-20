@@ -9,4 +9,5 @@ members = [
     'runtime/pangu',
     'runtime/fuxi',
     'pallets/*',
+    'client/*',
 ]

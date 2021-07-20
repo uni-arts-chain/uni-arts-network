@@ -12,11 +12,10 @@ pub use fuxi_runtime;
 use uniarts_primitives::{OpaqueBlock as Block};
 use uniarts_rpc::fuxi::FullDeps;
 
-use std::sync::Arc;
-use std::time::Duration;
+use std::{sync::{Arc, Mutex}, cell::RefCell, time::Duration, collections::{HashMap, BTreeMap}};
 use sc_client_api::{ExecutorProvider, RemoteBackend, StateBackendFor};
 use sc_service::{error::Error as ServiceError, TaskManager, config::KeystoreConfig, PartialComponents};
-use sp_inherents::InherentDataProviders;
+use sp_inherents::{InherentDataProviders, ProvideInherentData, InherentIdentifier, InherentData};
 use sc_executor::native_executor_instance;
 pub use sc_executor::{NativeExecutor, NativeExecutionDispatch};
 use sp_consensus_aura::sr25519::{AuthorityPair as AuraPair};
@@ -26,6 +25,11 @@ use sp_consensus::import_queue::BasicQueue;
 use sp_runtime::traits::BlakeTwo256;
 use sp_trie::PrefixedMemoryDB;
 
+use fc_rpc_core::types::{FilterPool, PendingTransactions};
+use fc_consensus::FrontierBlockImport;
+use fuxi_runtime::{RuntimeApi, SLOT_DURATION};
+use sc_telemetry::TelemetrySpan;
+
 // Our native executor instance.
 native_executor_instance!(
 	pub FuxiExecutor,
@@ -34,6 +38,34 @@ native_executor_instance!(
 	frame_benchmarking::benchmarking::HostFunctions,
 );
 
+/// Provide a mock duration starting at 0 in millisecond for timestamp inherent.
+/// Each call will increment timestamp by slot_duration making Aura think time has passed.
+pub struct MockTimestampInherentDataProvider;
+
+pub const INHERENT_IDENTIFIER: InherentIdentifier = *b"timstap0";
+
+thread_local!(static TIMESTAMP: RefCell<u64> = RefCell::new(0));
+
+impl ProvideInherentData for MockTimestampInherentDataProvider {
+    fn inherent_identifier(&self) -> &'static InherentIdentifier {
+        &INHERENT_IDENTIFIER
+    }
+
+    fn provide_inherent_data(
+        &self,
+        inherent_data: &mut InherentData,
+    ) -> Result<(), sp_inherents::Error> {
+        TIMESTAMP.with(|x| {
+            *x.borrow_mut() += SLOT_DURATION;
+            inherent_data.put_data(INHERENT_IDENTIFIER, &*x.borrow())
+        })
+    }
+
+    fn error_to_string(&self, error: &[u8]) -> Option<String> {
+        InherentError::try_from(&INHERENT_IDENTIFIER, error).map(|e| format!("{:?}", e))
+    }
+}
+
 pub fn new_partial<RuntimeApi, Executor>(config: &mut Configuration) -> Result<sc_service::PartialComponents<
     FullClient<RuntimeApi, Executor>,
     FullBackend,
@@ -41,13 +73,19 @@ pub fn new_partial<RuntimeApi, Executor>(config: &mut Configuration) -> Result<s
     sp_consensus::DefaultImportQueue<Block, FullClient<RuntimeApi, Executor>>,
     sc_transaction_pool::FullPool<Block, FullClient<RuntimeApi, Executor>>,
     (
-        sc_consensus_aura::AuraBlockImport<
+        (
+            sc_consensus_aura::AuraBlockImport<
             Block,
             FullClient<RuntimeApi, Executor>,
-            sc_finality_grandpa::GrandpaBlockImport<FullBackend, Block, FullClient<RuntimeApi, Executor>, FullSelectChain>,
-            AuraPair
-        >,
-        sc_finality_grandpa::LinkHalf<Block, FullClient<RuntimeApi, Executor>, FullSelectChain>,
+            FrontierBlockImport<
+                Block,
+                sc_finality_grandpa::GrandpaBlockImport<FullBackend, Block, FullClient<RuntimeApi, Executor>, FullSelectChain>,
+                FullClient<RuntimeApi, Executor>
+            >,
+            AuraPair>,
+            sc_finality_grandpa::LinkHalf<Block, FullClient<RuntimeApi, Executor>, FullSelectChain>
+        ),
+        PendingTransactions, Option<FilterPool>
     )
 >, ServiceError>
     where
@@ -78,12 +116,22 @@ pub fn new_partial<RuntimeApi, Executor>(config: &mut Configuration) -> Result<s
         client.clone(),
     );
 
+    let pending_transactions: PendingTransactions = Some(Arc::new(Mutex::new(HashMap::new())));
+
+    let filter_pool: Option<FilterPool> = Some(Arc::new(Mutex::new(BTreeMap::new())));
+
     let (grandpa_block_import, grandpa_link) = sc_finality_grandpa::block_import(
         client.clone(), &(client.clone() as Arc<_>), select_chain.clone(),
     )?;
 
+    let frontier_block_import = FrontierBlockImport::new(
+        grandpa_block_import.clone(),
+        client.clone(),
+        true
+    );
+
     let aura_block_import = sc_consensus_aura::AuraBlockImport::<_, _, _, AuraPair>::new(
-        grandpa_block_import.clone(), client.clone(),
+        frontier_block_import, client.clone(),
     );
 
     let import_queue = sc_consensus_aura::import_queue::<_, _, _, AuraPair, _, _>(
@@ -100,7 +148,7 @@ pub fn new_partial<RuntimeApi, Executor>(config: &mut Configuration) -> Result<s
     Ok(sc_service::PartialComponents {
         client, backend, task_manager, import_queue, keystore_container, select_chain, transaction_pool,
         inherent_data_providers,
-        other: (aura_block_import, grandpa_link),
+        other: ((aura_block_import, grandpa_link), pending_transactions, filter_pool),
     })
 }
 
@@ -120,7 +168,7 @@ pub fn new_full<RuntimeApi, Executor>(mut config: Configuration) -> Result<(Task
         select_chain,
         transaction_pool,
         inherent_data_providers,
-        other: (block_import, grandpa_link),
+        other: ((block_import, grandpa_link), pending_transactions, filter_pool),
     } = new_partial(&mut config)?;
 
     if let Some(url) = &config.keystore_remote {
@@ -149,6 +197,9 @@ pub fn new_full<RuntimeApi, Executor>(mut config: Configuration) -> Result<(Task
             block_announce_validator_builder: None,
         })?;
 
+    // Channel for the rpc handler to communicate with the authorship task.
+    let (command_sink, commands_stream) = futures::channel::mpsc::channel(1000);
+
     if config.offchain_worker.enabled {
         sc_service::build_offchain_workers(
             &config, backend.clone(), task_manager.spawn_handle(), client.clone(), network.clone(),
@@ -161,21 +212,35 @@ pub fn new_full<RuntimeApi, Executor>(mut config: Configuration) -> Result<(Task
     let name = config.network.node_name.clone();
     let enable_grandpa = !config.disable_grandpa;
     let prometheus_registry = config.prometheus_registry().cloned();
+    let is_authority = role.is_authority();
+    let subscription_task_executor = sc_rpc::SubscriptionTaskExecutor::new(task_manager.spawn_handle());
 
     let rpc_extensions_builder = {
         let client = client.clone();
         let pool = transaction_pool.clone();
+        let network = network.clone();
+        let pending = pending_transactions.clone();
+        let filter_pool = filter_pool.clone();
 
         Box::new(move |deny_unsafe, _| {
             let deps = FullDeps {
                 client: client.clone(),
                 pool: pool.clone(),
                 deny_unsafe,
+                is_authority,
+                enable_dev_signer,
+                network: network.clone(),
+                pending_transactions: pending.clone(),
+                filter_pool: filter_pool.clone(),
+                command_sink: Some(command_sink.clone())
             };
 
-            uniarts_rpc::fuxi::create_full(deps)
+            uniarts_rpc::fuxi::create_full(deps, subscription_task_executor.clone())
         })
     };
+
+    let telemetry_span = TelemetrySpan::new();
+    let _telemetry_span_entered = telemetry_span.enter();
 
     let (_rpc_handlers, telemetry_connection_notifier) = sc_service::spawn_tasks(
         sc_service::SpawnTasksParams {
@@ -193,6 +258,70 @@ pub fn new_full<RuntimeApi, Executor>(mut config: Configuration) -> Result<(Task
             config,
         },
     )?;
+
+    // Spawn Frontier EthFilterApi maintenance task.
+    if filter_pool.is_some() {
+        use futures::StreamExt;
+        // Each filter is allowed to stay in the pool for 100 blocks.
+        const FILTER_RETAIN_THRESHOLD: u64 = 100;
+        task_manager.spawn_essential_handle().spawn(
+            "frontier-filter-pool",
+            client.import_notification_stream().for_each(move |notification| {
+                if let Ok(locked) = &mut filter_pool.clone().unwrap().lock() {
+                    let imported_number: u64 = notification.header.number as u64;
+                    for (k, v) in locked.clone().iter() {
+                        let lifespan_limit = v.at_block + FILTER_RETAIN_THRESHOLD;
+                        if lifespan_limit <= imported_number {
+                            locked.remove(&k);
+                        }
+                    }
+                }
+                futures::future::ready(())
+            })
+        );
+    }
+
+    // Spawn Frontier pending transactions maintenance task (as essential, otherwise we leak).
+    if pending_transactions.is_some() {
+        use futures::StreamExt;
+        use fp_consensus::{FRONTIER_ENGINE_ID, ConsensusLog};
+        use sp_runtime::generic::OpaqueDigestItemId;
+
+        const TRANSACTION_RETAIN_THRESHOLD: u64 = 5;
+        task_manager.spawn_essential_handle().spawn(
+            "frontier-pending-transactions",
+            client.import_notification_stream().for_each(move |notification| {
+
+                if let Ok(locked) = &mut pending_transactions.clone().unwrap().lock() {
+                    // As pending transactions have a finite lifespan anyway
+                    // we can ignore MultiplePostRuntimeLogs error checks.
+                    let mut frontier_log: Option<_> = None;
+                    for log in notification.header.digest.logs {
+                        let log = log.try_to::<ConsensusLog>(OpaqueDigestItemId::Consensus(&FRONTIER_ENGINE_ID));
+                        if let Some(log) = log {
+                            frontier_log = Some(log);
+                        }
+                    }
+
+                    let imported_number: u64 = notification.header.number as u64;
+
+                    if let Some(ConsensusLog::EndBlock {
+                                    block_hash: _, transaction_hashes,
+                                }) = frontier_log {
+                        // Retain all pending transactions that were not
+                        // processed in the current block.
+                        locked.retain(|&k, _| !transaction_hashes.contains(&k));
+                    }
+                    locked.retain(|_, v| {
+                        // Drop all the transactions that exceeded the given lifespan.
+                        let lifespan_limit = v.at_block + TRANSACTION_RETAIN_THRESHOLD;
+                        lifespan_limit > imported_number
+                    });
+                }
+                futures::future::ready(())
+            })
+        );
+    }
 
     if role.is_authority() {
         let proposer = sc_basic_authorship::ProposerFactory::new(
@@ -310,7 +439,7 @@ pub fn new_light<RuntimeApi, Executor>(mut config: Configuration) -> Result<Task
 
     let import_queue = sc_consensus_aura::import_queue::<_, _, _, AuraPair, _, _>(
         sc_consensus_aura::slot_duration(&*client)?,
-        aura_block_import,
+        grandpa_block_import.clone(),
         Some(Box::new(grandpa_block_import)),
         client.clone(),
         InherentDataProviders::new(),
@@ -318,6 +447,15 @@ pub fn new_light<RuntimeApi, Executor>(mut config: Configuration) -> Result<Task
         config.prometheus_registry(),
         sp_consensus::NeverCanAuthor,
     )?;
+
+    let light_deps = uniarts_rpc::fuxi::LightDeps {
+        remote_blockchain: backend.remote_blockchain(),
+        fetcher: on_demand.clone(),
+        client: client.clone(),
+        pool: transaction_pool.clone(),
+    };
+
+    let rpc_extensions = uniarts_rpc::fuxi::create_light(light_deps);
 
     let (network, network_status_sinks, system_rpc_tx, network_starter) =
         sc_service::build_network(sc_service::BuildNetworkParams {
@@ -336,12 +474,15 @@ pub fn new_light<RuntimeApi, Executor>(mut config: Configuration) -> Result<Task
         );
     }
 
+    let telemetry_span = TelemetrySpan::new();
+    let _telemetry_span_entered = telemetry_span.enter();
+
     sc_service::spawn_tasks(sc_service::SpawnTasksParams {
         remote_blockchain: Some(backend.remote_blockchain()),
         transaction_pool,
         task_manager: &mut task_manager,
         on_demand: Some(on_demand),
-        rpc_extensions_builder: Box::new(|_, _| ()),
+        rpc_extensions_builder: Box::new(sc_service::NoopRpcExtensionBuilder(rpc_extensions)),
         config,
         client,
         keystore: keystore_container.sync_keystore(),

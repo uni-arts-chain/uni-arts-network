@@ -34,7 +34,7 @@ use sp_runtime::{
 };
 use sp_runtime::traits::{
 	BlakeTwo256, Block as BlockT, NumberFor, Saturating, AccountIdConversion,
-	Convert, OpaqueKeys, SaturatedConversion, Bounded
+	Convert, OpaqueKeys, SaturatedConversion, Bounded,
 };
 use frame_system::{EnsureOneOf, EnsureRoot};
 use sp_api::impl_runtime_apis;

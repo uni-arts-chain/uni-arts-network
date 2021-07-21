@@ -29,6 +29,7 @@ sc-service = { version = "0.9.0", features = ["wasmtime"] }
 sc-transaction-pool = { version = "3.0.0" }
 sc-consensus-aura = { version = "0.9.0" }
 sc-consensus = { version = "0.9.0" }
+sc-consensus-manual-seal = { version = "0.9.0" }
 sc-finality-grandpa = { version = "0.9.0" }
 sc-client-api = { version = "3.0.0" }
 sc-rpc = { version = "3.0.0" }
@@ -54,3 +55,4 @@ sp-block-builder = { version = "3.0.0" }
 fuxi-runtime = { path = "../../runtime/fuxi" }
 fc-rpc = { path = "../../client/rpc" }
 fp-rpc = { path = "../../primitives/rpc" }
+fc-rpc-core = { path = "../../client/rpc-core" }

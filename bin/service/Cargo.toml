@@ -50,6 +50,7 @@ sp-offchain = { version = "3.0.0" }
 sp-session = { version = "3.0.0" }
 sp-storage = { version = "3.0.0" }
 sp-trie = { version = "3.0.0" }
+sp-timestamp = { version = "3.0.0" }
 
 frame-benchmarking = { version = "3.0.0" }
 frame-benchmarking-cli = { version = "3.0.0" }

@@ -9,7 +9,6 @@ pub use sc_service::{
 
 pub use crate::chain_spec::FuxiChainSpec;
 pub use fuxi_runtime;
-use uniarts_primitives::{OpaqueBlock as Block};
 use uniarts_rpc::fuxi::FullDeps;
 
 use std::{sync::{Arc, Mutex}, cell::RefCell, time::Duration, collections::{HashMap, BTreeMap}};
@@ -27,7 +26,8 @@ use sp_trie::PrefixedMemoryDB;
 
 use fc_rpc_core::types::{FilterPool, PendingTransactions};
 use fc_consensus::FrontierBlockImport;
-use fuxi_runtime::{RuntimeApi, SLOT_DURATION};
+use fuxi_runtime::{opaque::Block, SLOT_DURATION};
+use sp_timestamp::InherentError;
 use sc_telemetry::TelemetrySpan;
 
 // Our native executor instance.
@@ -153,7 +153,7 @@ pub fn new_partial<RuntimeApi, Executor>(config: &mut Configuration) -> Result<s
 }
 
 /// Builds a new service for a full client.
-pub fn new_full<RuntimeApi, Executor>(mut config: Configuration) -> Result<(TaskManager, Arc<FullClient<RuntimeApi, Executor>>), ServiceError>
+pub fn new_full<RuntimeApi, Executor>(mut config: Configuration, enable_dev_signer: bool,) -> Result<(TaskManager, Arc<FullClient<RuntimeApi, Executor>>), ServiceError>
     where
         Executor: 'static + NativeExecutionDispatch,
         RuntimeApi: 'static + Send + Sync + ConstructRuntimeApi<Block, FullClient<RuntimeApi, Executor>>,
@@ -226,6 +226,7 @@ pub fn new_full<RuntimeApi, Executor>(mut config: Configuration) -> Result<(Task
             let deps = FullDeps {
                 client: client.clone(),
                 pool: pool.clone(),
+                graph: pool.pool().clone(),
                 deny_unsafe,
                 is_authority,
                 enable_dev_signer,

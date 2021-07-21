@@ -21,9 +21,9 @@ use sc_client_api::{
 use sc_transaction_graph::{ChainApi, Pool};
 use sc_rpc::SubscriptionTaskExecutor;
 use sp_runtime::traits::BlakeTwo256;
-use sp_block_builder::BlockBuilder;
 use sc_network::NetworkService;
 use jsonrpc_pubsub::manager::SubscriptionManager;
+use fc_rpc_core::types::{PendingTransactions, FilterPool};
 
 /// A type representing all RPC extensions.
 pub type RpcExtension = jsonrpc_core::IoHandler<sc_rpc::Metadata>;
@@ -34,6 +34,8 @@ pub struct FullDeps<C, P, A: ChainApi> {
     pub client: Arc<C>,
     /// Transaction pool instance.
     pub pool: Arc<P>,
+    /// Graph pool instance.
+    pub graph: Arc<Pool<A>>,
     /// Whether to deny unsafe calls
     pub deny_unsafe: DenyUnsafe,
     /// The Node authority flag
@@ -96,6 +98,7 @@ pub fn create_full<C, P, BE, A>(
     let FullDeps {
         client,
         pool,
+        graph,
         deny_unsafe,
         is_authority,
         network,
@@ -106,7 +109,7 @@ pub fn create_full<C, P, BE, A>(
     } = deps;
 
     io.extend_with(
-        SystemApi::to_delegate(FullSystem::new(client.clone(), pool, deny_unsafe))
+        SystemApi::to_delegate(FullSystem::new(client.clone(), pool.clone(), deny_unsafe))
     );
 
     io.extend_with(

@@ -539,7 +539,7 @@ pub fn fuxi_new_full(
     ),
     ServiceError,
 > {
-    let (components, client) = new_full::<fuxi_runtime::RuntimeApi, FuxiExecutor>(config)?;
+    let (components, client) = new_full::<fuxi_runtime::RuntimeApi, FuxiExecutor>(config, false)?;
 
     Ok((components, Arc::new(Client::Fuxi(client))))
 }

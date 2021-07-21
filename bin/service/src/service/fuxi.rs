@@ -41,7 +41,7 @@ pub fn new_partial<RuntimeApi, Executor>(config: &mut Configuration) -> Result<s
     FullClient<RuntimeApi, Executor>,
     FullBackend,
     FullSelectChain,
-    sp_consensus::import_queue::BasicQueue<Block, sp_api::TransactionFor<FullClient<RuntimeApi, Executor>, Block>>,
+    BasicQueue<Block, sp_api::TransactionFor<FullClient<RuntimeApi, Executor>, Block>>,
     sc_transaction_pool::FullPool<Block, FullClient<RuntimeApi, Executor>>,
     (
         (

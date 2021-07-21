@@ -11,10 +11,10 @@ pub use crate::chain_spec::FuxiChainSpec;
 pub use fuxi_runtime;
 use uniarts_rpc::fuxi::FullDeps;
 
-use std::{sync::{Arc, Mutex}, cell::RefCell, time::Duration, collections::{HashMap, BTreeMap}};
+use std::{sync::{Arc, Mutex}, time::Duration, collections::{HashMap, BTreeMap}};
 use sc_client_api::{ExecutorProvider, RemoteBackend, StateBackendFor, BlockchainEvents};
 use sc_service::{error::Error as ServiceError, TaskManager, config::KeystoreConfig, PartialComponents};
-use sp_inherents::{InherentDataProviders, ProvideInherentData, InherentIdentifier, InherentData};
+use sp_inherents::InherentDataProviders;
 use sc_executor::native_executor_instance;
 pub use sc_executor::{NativeExecutor, NativeExecutionDispatch};
 use sp_consensus_aura::sr25519::{AuthorityPair as AuraPair};
@@ -26,8 +26,7 @@ use sp_trie::PrefixedMemoryDB;
 
 use fc_rpc_core::types::{FilterPool, PendingTransactions};
 use fc_consensus::FrontierBlockImport;
-use fuxi_runtime::{opaque::Block, SLOT_DURATION};
-use sp_timestamp::InherentError;
+use fuxi_runtime::opaque::Block;
 use sc_telemetry::TelemetrySpan;
 
 // Our native executor instance.

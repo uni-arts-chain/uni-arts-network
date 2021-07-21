@@ -12,7 +12,7 @@ pub use fuxi_runtime;
 use uniarts_rpc::fuxi::FullDeps;
 
 use std::{sync::{Arc, Mutex}, cell::RefCell, time::Duration, collections::{HashMap, BTreeMap}};
-use sc_client_api::{ExecutorProvider, RemoteBackend, StateBackendFor};
+use sc_client_api::{ExecutorProvider, RemoteBackend, StateBackendFor, BlockchainEvents};
 use sc_service::{error::Error as ServiceError, TaskManager, config::KeystoreConfig, PartialComponents};
 use sp_inherents::{InherentDataProviders, ProvideInherentData, InherentIdentifier, InherentData};
 use sc_executor::native_executor_instance;
@@ -38,39 +38,11 @@ native_executor_instance!(
 	frame_benchmarking::benchmarking::HostFunctions,
 );
 
-/// Provide a mock duration starting at 0 in millisecond for timestamp inherent.
-/// Each call will increment timestamp by slot_duration making Aura think time has passed.
-pub struct MockTimestampInherentDataProvider;
-
-pub const INHERENT_IDENTIFIER: InherentIdentifier = *b"timstap0";
-
-thread_local!(static TIMESTAMP: RefCell<u64> = RefCell::new(0));
-
-impl ProvideInherentData for MockTimestampInherentDataProvider {
-    fn inherent_identifier(&self) -> &'static InherentIdentifier {
-        &INHERENT_IDENTIFIER
-    }
-
-    fn provide_inherent_data(
-        &self,
-        inherent_data: &mut InherentData,
-    ) -> Result<(), sp_inherents::Error> {
-        TIMESTAMP.with(|x| {
-            *x.borrow_mut() += SLOT_DURATION;
-            inherent_data.put_data(INHERENT_IDENTIFIER, &*x.borrow())
-        })
-    }
-
-    fn error_to_string(&self, error: &[u8]) -> Option<String> {
-        InherentError::try_from(&INHERENT_IDENTIFIER, error).map(|e| format!("{:?}", e))
-    }
-}
-
 pub fn new_partial<RuntimeApi, Executor>(config: &mut Configuration) -> Result<sc_service::PartialComponents<
     FullClient<RuntimeApi, Executor>,
     FullBackend,
     FullSelectChain,
-    sp_consensus::DefaultImportQueue<Block, FullClient<RuntimeApi, Executor>>,
+    sp_consensus::import_queue::BasicQueue<Block, sp_api::TransactionFor<FullClient<RuntimeApi, Executor>, Block>>,
     sc_transaction_pool::FullPool<Block, FullClient<RuntimeApi, Executor>>,
     (
         (

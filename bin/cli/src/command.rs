@@ -100,8 +100,6 @@ fn set_default_ss58_version(spec: &Box<dyn uniarts_service::service::ChainSpec>)
 	let ss58_version = if spec.is_pangu_network() {
 		Ss58AddressFormat::SubstrateAccount
 	} else if spec.is_fuxi_network() {
-		// todo
-		// Waiting for release: uniart address id
 		Ss58AddressFormat::UniartsAccount
 	} else {
 		Ss58AddressFormat::SubstrateAccount

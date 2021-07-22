@@ -62,6 +62,12 @@ pallet-staking-rpc = { git = "https://github.com/uni-arts-chain/uni-arts-common.
 pallet-contracts-rpc = { version = "3.0.0" }
 pallet-contracts = { version = "3.0.0" }
 
+# EVM
+fc-consensus = { path = "../../client/consensus" }
+fp-consensus = { path = "../../primitives/consensus" }
+fc-rpc-core = { path = "../../client/rpc-core" }
+fp-rpc = { path = "../../primitives/rpc" }
+
 # API
 frame-system-rpc-runtime-api = { version = "3.0.0" }
 pallet-transaction-payment-rpc-runtime-api = { version = "3.0.0" }

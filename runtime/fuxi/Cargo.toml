@@ -82,6 +82,12 @@ pallet-assets = { git = "https://github.com/uni-arts-chain/uni-arts-common.git",
 # pallet-lotteries = { path = "../../configs/lotteries", default-features = false }
 uniarts-primitives = { package = "uniarts-primitives", git = "https://github.com/uni-arts-chain/uni-arts-common.git", tag = "v3.0.0", default-features = false }
 
+#EVM
+pallet-ethereum = { version = "0.1.0", default-features = false, path = "../../pallets/ethereum" }
+pallet-evm = { version = "3.0.0-dev", default-features = false, path = "../../pallets/evm" }
+pallet-evm-precompile-simple = { version = "3.0.0-dev", default-features = false, path = "../../pallets/evm/precompile/simple" }
+fp-rpc = { default-features = false, path = "../../primitives/rpc" }
+
 # Used for runtime benchmarking
 frame-benchmarking = { version = "3.0.0", default-features = false, optional = true }
 frame-system-benchmarking = { version = "3.0.0", default-features = false, optional = true }
@@ -151,6 +157,10 @@ std = [
     "sp-transaction-pool/std",
     "sp-version/std",
     "uniarts-primitives/std",
+    "pallet-ethereum/std",
+    "pallet-evm/std",
+    "pallet-evm-precompile-simple/std",
+    "fp-rpc/std",
 ]
 
 runtime-benchmarks = [

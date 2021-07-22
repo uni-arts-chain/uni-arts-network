@@ -25,8 +25,6 @@ use sp_core::crypto::Ss58AddressFormat;
 use uniarts_service::service::{pangu::{pangu_runtime, PanguExecutor}, fuxi::{fuxi_runtime, FuxiExecutor}, IdentifyVariant};
 use log::info;
 
-const UNI_ARTS_ADDRESS_FORMAT_ID: u16 = 45;
-
 impl SubstrateCli for Cli {
 	fn impl_name() -> String {
 		"UniArts Node".into()

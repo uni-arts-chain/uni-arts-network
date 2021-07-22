@@ -31,6 +31,7 @@ COPY pallets ./pallets/
 COPY runtime ./runtime/
 COPY scripts ./scripts/
 COPY primitives ./primitives/
+COPY client ./client/
 COPY README.md README.md
 COPY Cargo* ./
 

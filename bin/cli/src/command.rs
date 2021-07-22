@@ -104,7 +104,7 @@ fn set_default_ss58_version(spec: &Box<dyn uniarts_service::service::ChainSpec>)
 	} else if spec.is_fuxi_network() {
 		// todo
 		// Waiting for release: uniart address id
-		Ss58AddressFormat::Custom(UNI_ARTS_ADDRESS_FORMAT_ID)
+		Ss58AddressFormat::UniartsAccount
 	} else {
 		Ss58AddressFormat::SubstrateAccount
 	};

@@ -363,7 +363,7 @@ pub fn new_chain_ops<Runtime, Dispatch>(
     config: &mut Configuration,
 ) -> Result<
     (
-        Arc<Client>,
+        Arc<FullClient<Runtime, Dispatch>>,
         Arc<FullBackend>,
         BasicQueue<Block, PrefixedMemoryDB<BlakeTwo256>>,
         TaskManager,
@@ -383,9 +383,9 @@ pub fn new_chain_ops<Runtime, Dispatch>(
         import_queue,
         task_manager,
         ..
-    } = new_partial::<pangu_runtime::RuntimeApi, PanguExecutor>(config)?;
+    } = new_partial::<Runtime, Dispatch>(config)?;
 
-    Ok((Arc::new(Client::Pangu(client)), backend, import_queue, task_manager))
+    Ok((client, backend, import_queue, task_manager))
 }
 
 /// Create a new Uniarts service for a full node.
@@ -395,13 +395,13 @@ pub fn pangu_new_full(
 ) -> Result<
     (
         TaskManager,
-        Arc<Client>,
+        Arc<impl UniartsClient<Block, FullBackend, pangu_runtime::RuntimeApi>>,
     ),
     ServiceError,
 > {
     let (components, client) = new_full::<pangu_runtime::RuntimeApi, PanguExecutor>(config)?;
 
-    Ok((components, Arc::new(Client::Pangu(client))))
+    Ok((components, client))
 }
 
 /// Create a new Uniarts service for a light client.

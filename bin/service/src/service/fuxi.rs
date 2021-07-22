@@ -62,7 +62,7 @@ pub fn new_partial<RuntimeApi, Executor>(config: &mut Configuration) -> Result<s
     where
         Executor: 'static + NativeExecutionDispatch,
         RuntimeApi: 'static + Send + Sync + ConstructRuntimeApi<Block, FullClient<RuntimeApi, Executor>>,
-        RuntimeApi::RuntimeApi: RuntimeApiCollection<StateBackend = StateBackendFor<FullBackend, Block>>,
+        RuntimeApi::RuntimeApi: RuntimeEvmApiCollection<StateBackend = StateBackendFor<FullBackend, Block>>,
 {
     set_prometheus_registry(config)?;
 
@@ -128,7 +128,7 @@ pub fn new_full<RuntimeApi, Executor>(mut config: Configuration, enable_dev_sign
     where
         Executor: 'static + NativeExecutionDispatch,
         RuntimeApi: 'static + Send + Sync + ConstructRuntimeApi<Block, FullClient<RuntimeApi, Executor>>,
-        RuntimeApi::RuntimeApi: RuntimeApiCollection<StateBackend = StateBackendFor<FullBackend, Block>>,
+        RuntimeApi::RuntimeApi: RuntimeEvmApiCollection<StateBackend = StateBackendFor<FullBackend, Block>>,
 {
     let sc_service::PartialComponents {
         client,
@@ -169,7 +169,7 @@ pub fn new_full<RuntimeApi, Executor>(mut config: Configuration, enable_dev_sign
         })?;
 
     // Channel for the rpc handler to communicate with the authorship task.
-    let (command_sink, commands_stream) = futures::channel::mpsc::channel(1000);
+    let (command_sink, _commands_stream) = futures::channel::mpsc::channel(1000);
 
     if config.offchain_worker.enabled {
         sc_service::build_offchain_workers(
@@ -379,7 +379,7 @@ pub fn new_light<RuntimeApi, Executor>(mut config: Configuration) -> Result<Task
         RuntimeApi:
         'static + Send + Sync + ConstructRuntimeApi<Block, LightClient<RuntimeApi, Executor>>,
         <RuntimeApi as ConstructRuntimeApi<Block, LightClient<RuntimeApi, Executor>>>::RuntimeApi:
-        RuntimeApiCollection<StateBackend = StateBackendFor<LightBackend, Block>>,
+        RuntimeEvmApiCollection<StateBackend = StateBackendFor<LightBackend, Block>>,
 {
     set_prometheus_registry(&mut config)?;
 
@@ -404,10 +404,10 @@ pub fn new_light<RuntimeApi, Executor>(mut config: Configuration) -> Result<Task
         select_chain.clone(),
     )?;
 
-    let aura_block_import = sc_consensus_aura::AuraBlockImport::<_, _, _, AuraPair>::new(
-        grandpa_block_import.clone(),
-        client.clone(),
-    );
+    // let aura_block_import = sc_consensus_aura::AuraBlockImport::<_, _, _, AuraPair>::new(
+    //     grandpa_block_import.clone(),
+    //     client.clone(),
+    // );
 
     let import_queue = sc_consensus_aura::import_queue::<_, _, _, AuraPair, _, _>(
         sc_consensus_aura::slot_duration(&*client)?,
@@ -475,7 +475,7 @@ pub fn new_chain_ops<Runtime, Dispatch>(
     config: &mut Configuration,
 ) -> Result<
     (
-        Arc<Client>,
+        Arc<FullClient<Runtime, Dispatch>>,
         Arc<FullBackend>,
         BasicQueue<Block, PrefixedMemoryDB<BlakeTwo256>>,
         TaskManager,
@@ -485,7 +485,7 @@ pub fn new_chain_ops<Runtime, Dispatch>(
     where
         Dispatch: 'static + NativeExecutionDispatch,
         Runtime: 'static + Send + Sync + ConstructRuntimeApi<Block, FullClient<Runtime, Dispatch>>,
-        Runtime::RuntimeApi: RuntimeApiCollection<StateBackend = StateBackendFor<FullBackend, Block>>,
+        Runtime::RuntimeApi: RuntimeEvmApiCollection<StateBackend = StateBackendFor<FullBackend, Block>>,
 {
     config.keystore = KeystoreConfig::InMemory;
 
@@ -495,8 +495,8 @@ pub fn new_chain_ops<Runtime, Dispatch>(
         import_queue,
         task_manager,
         ..
-    } = new_partial::<fuxi_runtime::RuntimeApi, FuxiExecutor>(config)?;
-    Ok((Arc::new(Client::Fuxi(client)), backend, import_queue, task_manager))
+    } = new_partial::<Runtime, Dispatch>(config)?;
+    Ok((client, backend, import_queue, task_manager))
 }
 
 /// Create a new Uniarts service for a full node.
@@ -506,13 +506,13 @@ pub fn fuxi_new_full(
 ) -> Result<
     (
         TaskManager,
-        Arc<Client>,
+        Arc<impl UniartsClient<Block, FullBackend, fuxi_runtime::RuntimeApi>>,
     ),
     ServiceError,
 > {
     let (components, client) = new_full::<fuxi_runtime::RuntimeApi, FuxiExecutor>(config, false)?;
 
-    Ok((components, Arc::new(Client::Fuxi(client))))
+    Ok((components, client))
 }
 
 /// Create a new Uniarts service for a light client.

@@ -9119,6 +9119,7 @@ dependencies = [
  "fc-consensus",
  "fc-rpc-core",
  "fp-consensus",
+ "fp-rpc",
  "frame-benchmarking",
  "frame-benchmarking-cli",
  "frame-system-rpc-runtime-api",

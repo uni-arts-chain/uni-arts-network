@@ -182,13 +182,12 @@ pub fn create_full<C, P, BE, A>(
 }
 
 /// Instantiate all RPC extensions for light node.
-pub fn create_light<C, P, M, F>(deps: LightDeps<C, F, P>) -> jsonrpc_core::IoHandler<sc_rpc::Metadata>
+pub fn create_light<C, P, F>(deps: LightDeps<C, F, P>) -> jsonrpc_core::IoHandler<sc_rpc::Metadata>
     where
         C: Send + Sync + 'static,
         C: sp_blockchain::HeaderBackend<Block>,
         F: sc_client_api::light::Fetcher<Block> + 'static,
         P: sp_transaction_pool::TransactionPool + 'static,
-        M: jsonrpc_core::Metadata + Default,
 {
     // --- substrate ---
     use substrate_frame_rpc_system::{LightSystem, SystemApi};

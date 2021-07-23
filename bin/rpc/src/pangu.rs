@@ -14,9 +14,6 @@ use sp_block_builder::BlockBuilder;
 pub use sc_rpc_api::DenyUnsafe;
 use sp_transaction_pool::TransactionPool;
 
-/// A type representing all RPC extensions.
-pub type RpcExtension = jsonrpc_core::IoHandler<sc_rpc::Metadata>;
-
 /// Full client dependencies.
 pub struct FullDeps<C, P> {
     /// The client instance to use.

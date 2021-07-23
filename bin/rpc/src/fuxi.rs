@@ -25,9 +25,6 @@ use sc_network::NetworkService;
 use jsonrpc_pubsub::manager::SubscriptionManager;
 use fc_rpc_core::types::{PendingTransactions, FilterPool};
 
-/// A type representing all RPC extensions.
-pub type RpcExtension = jsonrpc_core::IoHandler<sc_rpc::Metadata>;
-
 /// Full client dependencies.
 pub struct FullDeps<C, P, A: ChainApi> {
     /// The client instance to use.

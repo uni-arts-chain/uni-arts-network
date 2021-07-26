@@ -9014,6 +9014,7 @@ dependencies = [
 name = "uniarts-chain-primitives"
 version = "3.0.0"
 dependencies = [
+ "pallet-evm",
  "parity-scale-codec",
  "serde",
  "sp-core",

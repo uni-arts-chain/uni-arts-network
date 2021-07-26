@@ -5,6 +5,7 @@ fn print_module_account() {
     // --- substrate ---
     use sp_core::crypto::{set_default_ss58_version, Ss58AddressFormat, Ss58AddressFormat::*};
     use sp_runtime::{traits::AccountIdConversion, ModuleId};
+    use uniarts_primitives::AccountId;
 
     fn account_of(alias: [u8; 8], ss58_version: Ss58AddressFormat) {
         set_default_ss58_version(ss58_version);
@@ -34,4 +35,30 @@ fn print_module_account() {
     // 5EYCAe5fj5zwikRqzNMCGpqMKcMNku4UHZTCpcGv2VmqWFAC
     // 6d6f646c6172742f706872650000000000000000000000000000000000000000 (5EYCAe5f...)
     account_of(*b"art/phre", SubstrateAccount);
+}
+
+#[ignore]
+#[test]
+fn print_evm_account() {
+    // --- substrate ---
+    use sp_core::H160;
+    use sp_runtime::AccountId32;
+    use std::str::FromStr;
+    pub use pallet_evm::AddressMapping;
+
+    pub struct HashedAddressMapping;
+
+    impl AddressMapping<AccountId32> for HashedAddressMapping {
+        fn into_account_id(address: H160) -> AccountId32 {
+            let mut data = [0u8; 32];
+            data[0..20].copy_from_slice(&address[..]);
+            let accountid = AccountId32::from(Into::<[u8; 32]>::into(data));
+            eprintln!("address: {:?}\naccountId: {}", address, accountid);
+            accountid
+        }
+    }
+
+    // address: 0x6c097fb92092793608fb3860509100be23c4f20f
+    // accountId: 5EWMrHFsEnSgHVRVD72uofG8E7bfnmE1hxyVpdyLM4qVLBcx
+    HashedAddressMapping::into_account_id(H160::from_str("6C097fB92092793608fB3860509100BE23c4f20F").unwrap());
 }

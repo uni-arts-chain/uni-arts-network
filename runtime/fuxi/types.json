@@ -1,7 +1,7 @@
 {
   "Keys": "SessionKeys2",
-  "Address#45-?": "MultiAddress",
-  "LookupSource#45-?": "MultiAddress",
+  "Address": "MultiAddress",
+  "LookupSource": "MultiAddress",
   "AccountData": {
     "free": "Balance",
     "reserved": "Balance",

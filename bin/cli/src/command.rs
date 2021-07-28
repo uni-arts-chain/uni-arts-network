@@ -72,6 +72,7 @@ impl SubstrateCli for Cli {
 			"pangu" => Box::new(uniarts_service::chain_spec::pangu_config()?),
 			"fuxi_staging" => Box::new(uniarts_service::chain_spec::fuxi_staging_config()?),
 			"fuxi" => Box::new(uniarts_service::chain_spec::fuxi_config()?),
+			"fuxi_test" => Box::new(uniarts_service::chain_spec::fuxi_testnet_config()?),
 			path => Box::new(uniarts_service::chain_spec::PanguChainSpec::from_json_file(
 				std::path::PathBuf::from(path),
 			)?),

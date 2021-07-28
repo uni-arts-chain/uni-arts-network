@@ -75,6 +75,10 @@ pub fn fuxi_config() -> Result<FuxiChainSpec, String> {
 	FuxiChainSpec::from_json_bytes(&include_bytes!("../../res/fuxi.json")[..])
 }
 
+pub fn fuxi_testnet_config() -> Result<FuxiChainSpec, String> {
+	FuxiChainSpec::from_json_bytes(&include_bytes!("../../res/fuxi_test.json")[..])
+}
+
 pub fn fuxi_staging_config() -> Result<FuxiChainSpec, String> {
 	let wasm_binary = WASM_BINARY.ok_or("Staging wasm binary not available".to_string())?;
 

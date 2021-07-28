@@ -7,7 +7,7 @@ pub use pangu::{
 
 pub mod fuxi;
 pub use fuxi::{
-    fuxi_config, fuxi_development_config, fuxi_staging_config, fuxi_local_testnet_config, FuxiChainSpec,
+    fuxi_config, fuxi_testnet_config, fuxi_development_config, fuxi_staging_config, fuxi_local_testnet_config, FuxiChainSpec,
 };
 
 // --- crates ---

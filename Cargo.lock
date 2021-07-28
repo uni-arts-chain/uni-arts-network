@@ -9130,6 +9130,7 @@ dependencies = [
  "log",
  "pallet-contracts",
  "pallet-contracts-rpc",
+ "pallet-evm",
  "pallet-staking-rpc",
  "pallet-transaction-payment-rpc",
  "pallet-transaction-payment-rpc-runtime-api",

@@ -1,4 +1,4 @@
-use sp_core::{Pair, Public, crypto::UncheckedInto, sr25519};
+use sp_core::{Pair, Public, crypto::UncheckedInto, sr25519, H160, U256};
 use std::collections::BTreeMap;
 
 use super::testnet_accounts;
@@ -17,6 +17,7 @@ use sp_runtime::traits::{Verify, IdentifyAccount};
 use sc_service::{ChainType, Properties};
 use hex_literal::hex;
 use sc_telemetry::TelemetryEndpoints;
+use std::str::FromStr;
 
 // The URL for the telemetry server.
 // const STAGING_TELEMETRY_URL: &str = "wss://telemetry.polkadot.io/submit/";
@@ -265,6 +266,19 @@ fn testnet_genesis(
 		// get_account_id_from_seed::<sr25519::Public>("Charlie"),
 	];
 
+	let gen_evm_account_id = H160::from_str("7184035beEAD581f3dcEDeCBa5dB6547A914fBB9").unwrap();
+	let mut evm_accounts = BTreeMap::new();
+	evm_accounts.insert(
+		gen_evm_account_id,
+		pallet_evm::GenesisAccount {
+			nonce: 0.into(),
+			balance: U256::from(1000000000_000_000_000_000_000_000u128),
+			storage: BTreeMap::new(),
+			code: vec![],
+		},
+	);
+	log::info!("Adding balance for {}", gen_evm_account_id);
+
 	GenesisConfig {
 		frame_system: Some(SystemConfig {
 			// Add Wasm runtime to storage.
@@ -331,7 +345,7 @@ fn testnet_genesis(
 			]
 		}),
 		pallet_evm: Some(EVMConfig {
-			accounts: BTreeMap::new(),
+			accounts: evm_accounts,
 		}),
 		pallet_ethereum: Some(EthereumConfig {}),
 	}

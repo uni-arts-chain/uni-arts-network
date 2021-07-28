@@ -63,6 +63,7 @@ pallet-contracts-rpc = { version = "3.0.0" }
 pallet-contracts = { version = "3.0.0" }
 
 # EVM
+pallet-evm = { version = "3.0.0-dev", default-features = false, path = "../../pallets/evm" }
 fc-consensus = { path = "../../client/consensus" }
 fp-consensus = { path = "../../primitives/consensus" }
 fc-rpc-core = { path = "../../client/rpc-core" }

@@ -61,4 +61,8 @@ fn print_evm_account() {
     // address: 0x6c097fb92092793608fb3860509100be23c4f20f
     // accountId: 5EWMrHFsEnSgHVRVD72uofG8E7bfnmE1hxyVpdyLM4qVLBcx
     HashedAddressMapping::into_account_id(H160::from_str("6C097fB92092793608fB3860509100BE23c4f20F").unwrap());
+
+    // address: 0x7184035beead581f3dcedecba5db6547a914fbb9
+    // accountId: 5EdYV3AszLFPYBQdGxWhJoawFfMBXGyCUgzPZznF5LZUFKS8
+    HashedAddressMapping::into_account_id(H160::from_str("7184035beEAD581f3dcEDeCBa5dB6547A914fBB9").unwrap());
 }

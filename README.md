@@ -35,6 +35,10 @@ To enable cross-chain functionality, the Uni-Arts Network will connect to the Po
 - as parachain - permanent connection for a given period
 - as an solo chain with a bridge back to Polkadot
 
+## Official Docker Containers
+
+The official docker containers can be found under https://hub.docker.com/r/uniart/uni-arts-network
+
 ## Run
 
 ### Single Node Development Chain

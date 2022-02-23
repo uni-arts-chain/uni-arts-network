@@ -13,13 +13,13 @@ jsonrpc-pubsub = "15.0.0"
 futures = "0.3.4"
 
 # uniarts
-uniarts-primitives = { git = "https://github.com/uni-arts-chain/uni-arts-common.git", tag = "v3.0.0" }
+uniarts-primitives = { git = "https://github.com/uni-arts-chain/uni-arts-common.git", tag = "v3.0.1" }
 
 # rpc
 substrate-frame-rpc-system = { version = "3.0.0" }
 pallet-transaction-payment-rpc = { version = "3.0.0" }
 
-pallet-staking-rpc = { git = "https://github.com/uni-arts-chain/uni-arts-common.git", tag = "v3.0.0" }
+pallet-staking-rpc = { git = "https://github.com/uni-arts-chain/uni-arts-common.git", tag = "v3.0.1" }
 pallet-contracts-rpc = { version = "3.0.0" }
 
 # substrate client

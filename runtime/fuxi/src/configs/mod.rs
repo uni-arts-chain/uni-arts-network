@@ -34,3 +34,4 @@ pub mod pallet_bridge_config;
 pub mod pallet_proxy_config;
 pub mod pallet_evm_config;
 pub mod pallet_ethereum_config;
+pub mod pallet_faucets_config;

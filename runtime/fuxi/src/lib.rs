@@ -129,7 +129,7 @@ pub const VERSION: RuntimeVersion = RuntimeVersion {
 	spec_name: create_runtime_str!("uart"),
 	impl_name: create_runtime_str!("uart"),
 	authoring_version: 1,
-	spec_version: 50,
+	spec_version: 51,
 	impl_version: 1,
 	apis: RUNTIME_API_VERSIONS,
 	transaction_version: 2,
@@ -237,6 +237,7 @@ construct_runtime!(
 		Bridge: pallet_bridge::{Module, Call, Storage, Event<T>, Config<T>} = 65,
 		Ethereum: pallet_ethereum::{Module, Call, Storage, Event, Config, ValidateUnsigned} = 66,
 		EVM: pallet_evm::{Module, Config, Call, Storage, Event<T>} = 67,
+		Faucets: pallet_faucets::{Module, Call, Storage, Event<T>} = 68,
 	}
 );
 

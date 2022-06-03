@@ -67,21 +67,21 @@ orml-traits = { default-features = false, version = '0.4.0' }
 
 # Used for RPCs
 pallet-transaction-payment-rpc-runtime-api = { version = "3.0.0", default-features = false }
-pallet-staking-rpc-runtime-api = { version = "3.0.0", default-features = false, git = "https://github.com/uni-arts-chain/uni-arts-common.git", tag = "v3.0.5" }
+pallet-staking-rpc-runtime-api = { version = "3.0.0", default-features = false, git = "https://github.com/uni-arts-chain/uni-arts-common.git", tag = "v3.0.6" }
 
 # Uni-Arts configs
-uniarts-common = { git = "https://github.com/uni-arts-chain/uni-arts-common.git", tag = "v3.0.5", default-features = false }
-pallet-names = { git = "https://github.com/uni-arts-chain/uni-arts-common.git", tag = "v3.0.5", default-features = false }
-pallet-nft-multi = { git = "https://github.com/uni-arts-chain/uni-arts-common.git", tag = "v3.0.5", default-features = false }
-pallet-nft-blindbox = { git = "https://github.com/uni-arts-chain/uni-arts-common.git", tag = "v3.0.5", default-features = false }
-pallet-rewards = { git = "https://github.com/uni-arts-chain/uni-arts-common.git", tag = "v3.0.5", default-features = false }
-pallet-staking = { git = "https://github.com/uni-arts-chain/uni-arts-common.git", tag = "v3.0.5", default-features = false }
-pallet-validator-set = { git = "https://github.com/uni-arts-chain/uni-arts-common.git", tag = "v3.0.5", default-features = false }
-pallet-bridge = { git = "https://github.com/uni-arts-chain/uni-arts-common.git", tag = "v3.0.5", default-features = false }
-pallet-assets = { git = "https://github.com/uni-arts-chain/uni-arts-common.git", tag = "v3.0.5" , default-features = false }
-pallet-faucets = { git = "https://github.com/uni-arts-chain/uni-arts-common.git", tag = "v3.0.5" , default-features = false }
+uniarts-common = { git = "https://github.com/uni-arts-chain/uni-arts-common.git", tag = "v3.0.6", default-features = false }
+pallet-names = { git = "https://github.com/uni-arts-chain/uni-arts-common.git", tag = "v3.0.6", default-features = false }
+pallet-nft-multi = { git = "https://github.com/uni-arts-chain/uni-arts-common.git", tag = "v3.0.6", default-features = false }
+pallet-nft-blindbox = { git = "https://github.com/uni-arts-chain/uni-arts-common.git", tag = "v3.0.6", default-features = false }
+pallet-rewards = { git = "https://github.com/uni-arts-chain/uni-arts-common.git", tag = "v3.0.6", default-features = false }
+pallet-staking = { git = "https://github.com/uni-arts-chain/uni-arts-common.git", tag = "v3.0.6", default-features = false }
+pallet-validator-set = { git = "https://github.com/uni-arts-chain/uni-arts-common.git", tag = "v3.0.6", default-features = false }
+pallet-bridge = { git = "https://github.com/uni-arts-chain/uni-arts-common.git", tag = "v3.0.6", default-features = false }
+pallet-assets = { git = "https://github.com/uni-arts-chain/uni-arts-common.git", tag = "v3.0.6" , default-features = false }
+pallet-faucets = { git = "https://github.com/uni-arts-chain/uni-arts-common.git", tag = "v3.0.6" , default-features = false }
 # pallet-lotteries = { path = "../../configs/lotteries", default-features = false }
-uniarts-primitives = { package = "uniarts-primitives", git = "https://github.com/uni-arts-chain/uni-arts-common.git", tag = "v3.0.5", default-features = false }
+uniarts-primitives = { package = "uniarts-primitives", git = "https://github.com/uni-arts-chain/uni-arts-common.git", tag = "v3.0.6", default-features = false }
 
 #EVM
 pallet-ethereum = { version = "0.1.0", default-features = false, path = "../../pallets/ethereum" }

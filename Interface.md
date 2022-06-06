@@ -1,4 +1,4 @@
-# Uni-arts Network 
+# CpaintChain Network 
 
 我们的区块链技术主要是基于substrat的技术框架进行的开发。
 

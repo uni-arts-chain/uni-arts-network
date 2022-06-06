@@ -73,4 +73,8 @@ ItemTransfer(collection_id, item_id, value, sender, recipient)
 
 [php的编码](https://github.com/gmajor-encrypt/php-scale-codec)
 
+[php的rpc](https://github.com/gmajor-encrypt/php-substrate-api)
+
+[链的JSON文件](https://github.com/uni-arts-chain/uni-arts-network/blob/master/runtime/fuxi/types.json)
+
 

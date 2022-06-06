@@ -65,5 +65,12 @@ Log
 ItemTransfer(collection_id, item_id, value, sender, recipient)
 
 
+## 参考文档
+
+ [Substrate Doc](https://docs.substrate.io/v3/getting-started/overview/)
+
+[链的编码](https://docs.substrate.io/v3/advanced/scale-codec/)
+
+[php的编码](https://github.com/gmajor-encrypt/php-scale-codec)
 
 

@@ -71,6 +71,8 @@ ItemTransfer(collection_id, item_id, value, sender, recipient)
 
 [链的编码](https://docs.substrate.io/v3/advanced/scale-codec/)
 
+[推荐使用的官方的rpc框架](https://github.com/polkadot-js/api)
+
 [php的编码](https://github.com/gmajor-encrypt/php-scale-codec)
 
 [php的rpc](https://github.com/gmajor-encrypt/php-substrate-api)

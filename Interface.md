@@ -34,7 +34,7 @@ pallet: nft
 function: add_collection_admin  
 参数:
 |  collection_id   | new_admin_id  |
-|  ----  | ----  | ----  | ----  |
+|  ----  | ----  |
 | u64 | AccountId |
 | collection_id  | 新的admin的id |
 

@@ -303,5 +303,13 @@
     "period": "Option<BlockNumber>",
     "period_limit": "Option<Balance>",
     "drip_limit": "Option<Balance>"
+  },
+  "LockReason": {
+    "_enum": [
+      "InvalidLock",
+      "NftExchange",
+      "SerialNumberExchange",
+      "CooperationExchange"
+    ]
   }
 }

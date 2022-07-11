@@ -3882,7 +3882,7 @@ dependencies = [
 [[package]]
 name = "module-support"
 version = "3.0.0"
-source = "git+https://github.com/uni-arts-chain/uni-arts-common.git?tag=v3.0.6#359e0c926e5b826be2e0355b2af448dd72be0c26"
+source = "git+https://github.com/uni-arts-chain/uni-arts-common.git?tag=v3.0.7#cbb070dc7b98d39188958a5601efb2499b846847"
 dependencies = [
  "frame-support",
  "frame-system",
@@ -4230,7 +4230,7 @@ dependencies = [
 [[package]]
 name = "pallet-assets"
 version = "3.0.0"
-source = "git+https://github.com/uni-arts-chain/uni-arts-common.git?tag=v3.0.6#359e0c926e5b826be2e0355b2af448dd72be0c26"
+source = "git+https://github.com/uni-arts-chain/uni-arts-common.git?tag=v3.0.7#cbb070dc7b98d39188958a5601efb2499b846847"
 dependencies = [
  "frame-benchmarking",
  "frame-support",
@@ -4309,7 +4309,7 @@ dependencies = [
 [[package]]
 name = "pallet-bridge"
 version = "3.0.0"
-source = "git+https://github.com/uni-arts-chain/uni-arts-common.git?tag=v3.0.6#359e0c926e5b826be2e0355b2af448dd72be0c26"
+source = "git+https://github.com/uni-arts-chain/uni-arts-common.git?tag=v3.0.7#cbb070dc7b98d39188958a5601efb2499b846847"
 dependencies = [
  "frame-support",
  "frame-system",
@@ -4516,7 +4516,7 @@ dependencies = [
 [[package]]
 name = "pallet-faucets"
 version = "3.0.0"
-source = "git+https://github.com/uni-arts-chain/uni-arts-common.git?tag=v3.0.6#359e0c926e5b826be2e0355b2af448dd72be0c26"
+source = "git+https://github.com/uni-arts-chain/uni-arts-common.git?tag=v3.0.7#cbb070dc7b98d39188958a5601efb2499b846847"
 dependencies = [
  "frame-support",
  "frame-system",
@@ -4620,7 +4620,7 @@ dependencies = [
 [[package]]
 name = "pallet-names"
 version = "3.0.0"
-source = "git+https://github.com/uni-arts-chain/uni-arts-common.git?tag=v3.0.6#359e0c926e5b826be2e0355b2af448dd72be0c26"
+source = "git+https://github.com/uni-arts-chain/uni-arts-common.git?tag=v3.0.7#cbb070dc7b98d39188958a5601efb2499b846847"
 dependencies = [
  "enumflags2 0.7.1",
  "frame-support",
@@ -4635,7 +4635,7 @@ dependencies = [
 [[package]]
 name = "pallet-nft"
 version = "3.0.0"
-source = "git+https://github.com/uni-arts-chain/uni-arts-common.git?tag=v3.0.6#359e0c926e5b826be2e0355b2af448dd72be0c26"
+source = "git+https://github.com/uni-arts-chain/uni-arts-common.git?tag=v3.0.7#cbb070dc7b98d39188958a5601efb2499b846847"
 dependencies = [
  "frame-support",
  "frame-system",
@@ -4656,7 +4656,7 @@ dependencies = [
 [[package]]
 name = "pallet-nft-blindbox"
 version = "3.0.0"
-source = "git+https://github.com/uni-arts-chain/uni-arts-common.git?tag=v3.0.6#359e0c926e5b826be2e0355b2af448dd72be0c26"
+source = "git+https://github.com/uni-arts-chain/uni-arts-common.git?tag=v3.0.7#cbb070dc7b98d39188958a5601efb2499b846847"
 dependencies = [
  "frame-support",
  "frame-system",
@@ -4678,7 +4678,7 @@ dependencies = [
 [[package]]
 name = "pallet-nft-multi"
 version = "3.0.0"
-source = "git+https://github.com/uni-arts-chain/uni-arts-common.git?tag=v3.0.6#359e0c926e5b826be2e0355b2af448dd72be0c26"
+source = "git+https://github.com/uni-arts-chain/uni-arts-common.git?tag=v3.0.7#cbb070dc7b98d39188958a5601efb2499b846847"
 dependencies = [
  "frame-support",
  "frame-system",
@@ -4763,7 +4763,7 @@ dependencies = [
 [[package]]
 name = "pallet-rewards"
 version = "3.0.0"
-source = "git+https://github.com/uni-arts-chain/uni-arts-common.git?tag=v3.0.6#359e0c926e5b826be2e0355b2af448dd72be0c26"
+source = "git+https://github.com/uni-arts-chain/uni-arts-common.git?tag=v3.0.7#cbb070dc7b98d39188958a5601efb2499b846847"
 dependencies = [
  "frame-benchmarking",
  "frame-support",
@@ -4830,7 +4830,7 @@ dependencies = [
 [[package]]
 name = "pallet-staking"
 version = "3.0.0"
-source = "git+https://github.com/uni-arts-chain/uni-arts-common.git?tag=v3.0.6#359e0c926e5b826be2e0355b2af448dd72be0c26"
+source = "git+https://github.com/uni-arts-chain/uni-arts-common.git?tag=v3.0.7#cbb070dc7b98d39188958a5601efb2499b846847"
 dependencies = [
  "frame-support",
  "frame-system",
@@ -4845,7 +4845,7 @@ dependencies = [
 [[package]]
 name = "pallet-staking-rpc"
 version = "3.0.0"
-source = "git+https://github.com/uni-arts-chain/uni-arts-common.git?tag=v3.0.6#359e0c926e5b826be2e0355b2af448dd72be0c26"
+source = "git+https://github.com/uni-arts-chain/uni-arts-common.git?tag=v3.0.7#cbb070dc7b98d39188958a5601efb2499b846847"
 dependencies = [
  "jsonrpc-core 15.1.0",
  "jsonrpc-core-client 15.1.0",
@@ -4863,7 +4863,7 @@ dependencies = [
 [[package]]
 name = "pallet-staking-rpc-runtime-api"
 version = "3.0.0"
-source = "git+https://github.com/uni-arts-chain/uni-arts-common.git?tag=v3.0.6#359e0c926e5b826be2e0355b2af448dd72be0c26"
+source = "git+https://github.com/uni-arts-chain/uni-arts-common.git?tag=v3.0.7#cbb070dc7b98d39188958a5601efb2499b846847"
 dependencies = [
  "frame-support",
  "parity-scale-codec",
@@ -4989,7 +4989,7 @@ dependencies = [
 [[package]]
 name = "pallet-validator-set"
 version = "3.0.0"
-source = "git+https://github.com/uni-arts-chain/uni-arts-common.git?tag=v3.0.6#359e0c926e5b826be2e0355b2af448dd72be0c26"
+source = "git+https://github.com/uni-arts-chain/uni-arts-common.git?tag=v3.0.7#cbb070dc7b98d39188958a5601efb2499b846847"
 dependencies = [
  "frame-support",
  "frame-system",
@@ -9088,7 +9088,7 @@ dependencies = [
 [[package]]
 name = "uniarts-common"
 version = "3.0.0"
-source = "git+https://github.com/uni-arts-chain/uni-arts-common.git?tag=v3.0.6#359e0c926e5b826be2e0355b2af448dd72be0c26"
+source = "git+https://github.com/uni-arts-chain/uni-arts-common.git?tag=v3.0.7#cbb070dc7b98d39188958a5601efb2499b846847"
 dependencies = [
  "frame-support",
  "frame-system",
@@ -9104,7 +9104,7 @@ dependencies = [
 [[package]]
 name = "uniarts-primitives"
 version = "3.0.0"
-source = "git+https://github.com/uni-arts-chain/uni-arts-common.git?tag=v3.0.6#359e0c926e5b826be2e0355b2af448dd72be0c26"
+source = "git+https://github.com/uni-arts-chain/uni-arts-common.git?tag=v3.0.7#cbb070dc7b98d39188958a5601efb2499b846847"
 dependencies = [
  "parity-scale-codec",
  "serde",

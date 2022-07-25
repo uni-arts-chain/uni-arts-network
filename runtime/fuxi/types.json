@@ -294,7 +294,6 @@
     "period": "BlockNumber",
     "period_limit": "Balance",
     "drip_limit": "Balance",
-
     "next_period_at": "BlockNumber",
     "dripped_in_current_period": "Balance"
   },

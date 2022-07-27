@@ -308,7 +308,8 @@
       "InvalidLock",
       "NftExchange",
       "SerialNumberExchange",
-      "CooperationExchange"
+      "CooperationExchange",
+      "RechargeLock"
     ]
   }
 }
